@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doitly - Bootstrap Integration Demo</title>
+
+    <!-- Bootstrap 5 CSS -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+
+    <!-- Doitly Custom CSS (loads after Bootstrap to override) -->
+    <link rel="stylesheet" href="style.css" />
+
+    <style>
+      /* Demo spacing */
+      body {
+        padding-bottom: 100px;
+      }
+      .navbar-spacer {
+        height: 90px;
+      }
+      .doitly-logo {
+        height: auto;
+        width: auto;
+        max-width: 120px;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- NAVBAR usando classe customizada -->
+    <nav class="doitly-navbar">
+      <img src="../img/logo.png" alt="Logo" class="doitly-logo" />
+      <h2 class="doitly-navbar-brand">Doitly</h2>
+      <div class="d-flex gap-md align-items-center">
+        <a href="#" class="doitly-btn-ghost doitly-btn doitly-btn-sm">Sobre</a>
+        <button class="doitly-btn doitly-btn-sm">Login</button>
+      </div>
+    </nav>
+
+    <div class="navbar-spacer"></div>
+
+    <!-- HERO SECTION usando Bootstrap Grid -->
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+          <section class="doitly-card text-center">
+            <h1 class="mb-3">Bem-vindo ao Doitly</h1>
+            <p class="text-secondary mb-4">
+              O gerenciador de hábitos moderno e minimalista com design
+              Apple-inspired.
+            </p>
+
+            <div class="row g-3">
+              <div class="col-12 col-sm-8">
+                <input
+                  type="text"
+                  class="doitly-input"
+                  placeholder="Digite um novo hábito..."
+                />
+              </div>
+              <div class="col-12 col-sm-4">
+                <button class="doitly-btn w-100">Adicionar</button>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS DASHBOARD usando Bootstrap Grid -->
+    <div class="container mt-5">
+      <div class="row g-4">
+        <div class="col-12 col-sm-6 col-lg-4">
+          <div class="doitly-card stats-card">
+            <h3>Hábitos Ativos</h3>
+            <p class="stats-number">7</p>
+            <span class="stats-label">Total cadastrado</span>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <div class="doitly-card stats-card">
+            <h3>Conclusão Hoje</h3>
+            <p class="stats-number">62%</p>
+            <span class="stats-label">Progresso diário</span>
+          </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-lg-4">
+          <div class="doitly-card stats-card">
+            <h3>Maior Streak</h3>
+            <p class="stats-number">12 dias</p>
+            <span class="stats-label">Sequência seguida</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HABIT LIST usando Bootstrap Grid + Custom Components -->
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-12 col-lg-10 offset-lg-1">
+          <h2 class="mb-4">Seus Hábitos de Hoje</h2>
+
+          <!-- Habit Item 1 -->
+          <div class="habit-item mb-3">
+            <div class="d-flex align-items-center gap-3 flex-grow-1">
+              <span class="doitly-badge doitly-badge-success">Manhã</span>
+              <span>Ler 15 minutos</span>
+            </div>
+            <button class="doitly-btn doitly-btn-sm doitly-btn-success">
+              ✓ Concluir
+            </button>
+          </div>
+
+          <!-- Habit Item 2 -->
+          <div class="habit-item mb-3">
+            <div class="d-flex align-items-center gap-3 flex-grow-1">
+              <span class="doitly-badge doitly-badge-info">Tarde</span>
+              <span>Beber 2 litros de água</span>
+            </div>
+            <button class="doitly-btn doitly-btn-sm">Concluir</button>
+          </div>
+
+          <!-- Habit Item 3 -->
+          <div class="habit-item mb-3">
+            <div class="d-flex align-items-center gap-3 flex-grow-1">
+              <span class="doitly-badge doitly-badge-warning">Noite</span>
+              <span>Estudar 30 minutos</span>
+            </div>
+            <button class="doitly-btn doitly-btn-sm">Concluir</button>
+          </div>
+
+          <!-- Habit Item 4 (completed example) -->
+          <div class="habit-item mb-3" style="opacity: 0.6">
+            <div class="d-flex align-items-center gap-3 flex-grow-1">
+              <span class="doitly-badge doitly-badge-success">Manhã</span>
+              <span style="text-decoration: line-through"
+                >Meditar 10 minutos</span
+              >
+            </div>
+            <span class="text-secondary">✓ Concluído</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUTTON SHOWCASE -->
+    <div class="container mt-5">
+      <div class="row">
+        <div class="col-12">
+          <div class="doitly-card">
+            <h3 class="mb-4">Variantes de Botões</h3>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-6 col-lg-3">
+                <button class="doitly-btn w-100">Primary</button>
+              </div>
+              <div class="col-12 col-md-6 col-lg-3">
+                <button class="doitly-btn doitly-btn-secondary w-100">
+                  Secondary
+                </button>
+              </div>
+              <div class="col-12 col-md-6 col-lg-3">
+                <button class="doitly-btn doitly-btn-outline w-100">
+                  Outline
+                </button>
+              </div>
+              <div class="col-12 col-md-6 col-lg-3">
+                <button class="doitly-btn doitly-btn-ghost w-100">Ghost</button>
+              </div>
+            </div>
+
+            <div class="row g-3 mt-3">
+              <div class="col-12 col-md-6 col-lg-4">
+                <button class="doitly-btn doitly-btn-success w-100">
+                  Success
+                </button>
+              </div>
+              <div class="col-12 col-md-6 col-lg-4">
+                <button class="doitly-btn doitly-btn-danger w-100">
+                  Danger
+                </button>
+              </div>
+              <div class="col-12 col-md-6 col-lg-4">
+                <button class="doitly-btn w-100" disabled>Disabled</button>
+              </div>
+            </div>
+
+            <div class="row g-3 mt-3">
+              <div class="col-12 col-md-4">
+                <button class="doitly-btn doitly-btn-sm w-100">Small</button>
+              </div>
+              <div class="col-12 col-md-4">
+                <button class="doitly-btn w-100">Regular</button>
+              </div>
+              <div class="col-12 col-md-4">
+                <button class="doitly-btn doitly-btn-lg w-100">Large</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FORM EXAMPLE -->
+    <div class="container mt-5">
+      <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+          <div class="doitly-card">
+            <h3 class="mb-4">Criar Novo Hábito</h3>
+
+            <form>
+              <div class="mb-3">
+                <label class="form-label text-secondary">Nome do Hábito</label>
+                <input
+                  type="text"
+                  class="doitly-input"
+                  placeholder="Ex: Fazer exercícios"
+                />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label text-secondary">Descrição</label>
+                <textarea
+                  class="doitly-input doitly-textarea"
+                  placeholder="Descreva seu hábito..."
+                ></textarea>
+              </div>
+
+              <div class="row g-3 mb-4">
+                <div class="col-6">
+                  <label class="form-label text-secondary">Categoria</label>
+                  <select class="doitly-input">
+                    <option>Saúde</option>
+                    <option>Trabalho</option>
+                    <option>Estudo</option>
+                  </select>
+                </div>
+                <div class="col-6">
+                  <label class="form-label text-secondary">Horário</label>
+                  <select class="doitly-input">
+                    <option>Manhã</option>
+                    <option>Tarde</option>
+                    <option>Noite</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="d-flex gap-3">
+                <button
+                  type="button"
+                  class="doitly-btn doitly-btn-secondary flex-grow-1"
+                >
+                  Cancelar
+                </button>
+                <button type="submit" class="doitly-btn flex-grow-1">
+                  Salvar Hábito
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap 5 JS (opcional, apenas se precisar de componentes interativos) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
+</html>

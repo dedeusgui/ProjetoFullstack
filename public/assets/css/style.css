@@ -1,0 +1,844 @@
+/* ===============================================
+   DOITLY DESIGN SYSTEM
+   Modern, Apple-inspired UI with Glassmorphism
+   =============================================== */
+
+/* ===== 1. IMPORTS & FONTS ===== */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400&display=swap");
+
+/* ===== 2. CSS VARIABLES (DESIGN TOKENS) ===== */
+:root {
+  /* Colors */
+  --bg-light: #ffffff;
+  --bg-body: #f5f7fa;
+  --bg-darker: #e6e7e9;
+
+  --text-primary: #222222;
+  --text-secondary: #6c757d;
+  --text-tertiary: #a0a0a0;
+  --text-white: #ffffff;
+
+  --accent-blue: #4a74ff;
+  --accent-blue-hover: #3d63e6;
+  --accent-green: #59d186;
+  --accent-gold: #eed27a;
+  --accent-red: #ff5757;
+
+  /* Glass Effect Variants */
+  --glass-bg-light: rgba(255, 255, 255, 0.08);
+  --glass-bg-medium: rgba(255, 255, 255, 0.12);
+  --glass-bg-strong: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-blur: blur(22px) saturate(180%);
+  --glass-blur-medium: blur(14px) saturate(160%);
+  --glass-blur-light: blur(10px) saturate(140%);
+
+  /* Borders */
+  --border-light: 1.95px solid rgba(0, 0, 0, 0.08);
+  --border-medium: 2px solid rgba(0, 0, 0, 0.12);
+  --glass-border-highlight: 1.95px solid rgba(255, 255, 255, 0.55);
+
+  /* Border Radius */
+  --radius-xl: 32px;
+  --radius-large: 28px;
+  --radius-medium: 20px;
+  --radius-small: 14px;
+  --radius-xs: 10px;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --shadow-strong: 0 8px 28px rgba(0, 0, 0, 0.12);
+  --shadow-inset: 0 -1px 0 rgba(0, 0, 0, 0.04) inset;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition: 0.25s ease;
+  --transition-slow: 0.35s ease;
+
+  /* Spacing Scale */
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Font Weights */
+  --font-light: 200;
+  --font-normal: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Z-Index Layers */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+}
+
+/* ===== 3. RESET & BASE STYLES ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-weight: var(--font-normal);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== 4. TYPOGRAPHY SYSTEM ===== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: var(--font-light);
+  font-style: italic;
+  letter-spacing: -0.5px;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: var(--font-normal);
+}
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+}
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+}
+h4 {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+}
+
+p {
+  margin: 0 0 1rem 0;
+  line-height: 1.7;
+}
+
+/* Typography Utilities */
+.text-primary {
+  color: var(--text-primary);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+.text-white {
+  color: var(--text-white);
+}
+
+.font-light {
+  font-weight: var(--font-light);
+}
+.font-normal {
+  font-weight: var(--font-normal);
+}
+.font-medium {
+  font-weight: var(--font-medium);
+}
+.font-semibold {
+  font-weight: var(--font-semibold);
+}
+
+/* ===== 5. LAYOUT UTILITIES ===== */
+.container-doitly {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container-narrow {
+  max-width: 800px;
+}
+
+.container-wide {
+  max-width: 1400px;
+}
+
+/* ===== 6. BOOTSTRAP 5 OVERRIDES ===== */
+/* Ensure Bootstrap doesn't override our custom components */
+.btn {
+  font-family: "Inter", sans-serif;
+  font-weight: var(--font-medium);
+  border-radius: var(--radius-small);
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    rgba(74, 116, 255, 0.9),
+    rgba(74, 116, 255, 0.75)
+  );
+  border: none;
+  color: var(--text-white);
+}
+
+.btn-primary:hover {
+  background: var(--accent-blue-hover);
+  transform: translateY(-1px);
+}
+
+.form-control {
+  border-radius: var(--radius-medium);
+  border: var(--border-light);
+  font-family: "Inter", sans-serif;
+  transition: var(--transition);
+}
+
+.form-control:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 0.2rem rgba(74, 116, 255, 0.15);
+}
+
+/* ===== 7. GLASS COMPONENTS ===== */
+.glass-light {
+  background: var(--glass-bg-light);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+}
+
+.glass-medium {
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* Main Glass Card Component */
+.doitly-card {
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-light);
+  border-top: var(--glass-border-highlight);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-inset);
+  padding: var(--space-lg);
+  transition: var(--transition);
+}
+
+.doitly-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.doitly-card-flat {
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-light);
+  border-radius: var(--radius-large);
+  padding: var(--space-lg);
+}
+
+/* ===== 8. BUTTONS & FORMS ===== */
+
+/* Primary Button */
+.doitly-btn {
+  padding: 14px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 116, 255, 0.9),
+    rgba(74, 116, 255, 0.75)
+  );
+  color: var(--text-white);
+  border: none;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  font-weight: var(--font-medium);
+  font-size: 15px;
+  font-family: "Inter", sans-serif;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+}
+
+.doitly-btn:hover {
+  background: var(--accent-blue-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.doitly-btn:active {
+  transform: translateY(1px);
+}
+
+.doitly-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Button Variants */
+.doitly-btn-secondary {
+  background: var(--glass-bg-strong);
+  color: var(--text-primary);
+  border: var(--border-light);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+}
+
+.doitly-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.doitly-btn-outline {
+  background: transparent;
+  color: var(--accent-blue);
+  border: 2px solid var(--accent-blue);
+}
+
+.doitly-btn-outline:hover {
+  background: var(--accent-blue);
+  color: var(--text-white);
+}
+
+.doitly-btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: none;
+}
+
+.doitly-btn-ghost:hover {
+  background: var(--glass-bg-light);
+}
+
+.doitly-btn-success {
+  background: linear-gradient(
+    135deg,
+    rgba(89, 209, 134, 0.9),
+    rgba(89, 209, 134, 0.75)
+  );
+}
+
+.doitly-btn-success:hover {
+  background: #4bc177;
+}
+
+.doitly-btn-danger {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 87, 87, 0.9),
+    rgba(255, 87, 87, 0.75)
+  );
+}
+
+.doitly-btn-danger:hover {
+  background: #e64545;
+}
+
+/* Button Sizes */
+.doitly-btn-sm {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.doitly-btn-lg {
+  padding: 16px 28px;
+  font-size: 16px;
+}
+
+/* Input Fields */
+.doitly-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--border-light);
+  border-radius: var(--radius-medium);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: "Inter", sans-serif;
+  transition: var(--transition);
+  outline: none;
+}
+
+.doitly-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.doitly-input:focus {
+  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(74, 116, 255, 0.1);
+}
+
+.doitly-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Textarea */
+.doitly-textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: "Inter", sans-serif;
+}
+
+/* Select */
+.doitly-input[type="select"],
+select.doitly-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23222222' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 12px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+/* Tentativa de arredondar dropdown (suporte limitado em navegadores) */
+select.doitly-input::-webkit-scrollbar {
+  width: 8px;
+}
+
+select.doitly-input::-webkit-scrollbar-track {
+  background: var(--bg-light);
+  border-radius: var(--radius-medium);
+}
+
+select.doitly-input::-webkit-scrollbar-thumb {
+  background: var(--glass-bg-strong);
+  border-radius: var(--radius-pill);
+}
+
+select.doitly-input::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+select.doitly-input:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+select.doitly-input:focus {
+  border-color: var(--accent-blue);
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(74, 116, 255, 0.1);
+}
+
+select.doitly-input option {
+  background: var(--bg-light);
+  color: var(--text-primary);
+  padding: 12px 16px;
+  font-family: "Inter", sans-serif;
+  font-weight: var(--font-normal);
+  font-size: 15px;
+  line-height: 1.5;
+  border-radius: var(--radius-xs);
+  margin: 2px 0;
+}
+
+select.doitly-input option:hover {
+  background: var(--glass-bg-strong);
+  color: var(--text-primary);
+}
+
+select.doitly-input option:checked,
+select.doitly-input option:active {
+  background: linear-gradient(
+    135deg,
+    rgba(74, 116, 255, 0.15),
+    rgba(74, 116, 255, 0.1)
+  );
+  color: var(--accent-blue);
+  font-weight: var(--font-medium);
+}
+
+select.doitly-input option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--text-tertiary);
+}
+
+/* ===== 9. SPECIFIC COMPONENTS ===== */
+
+/* Navbar */
+.doitly-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: var(--border-light);
+  border-radius: 0 0 var(--radius-large) var(--radius-large);
+  padding: 14px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: var(--z-fixed);
+  box-shadow: var(--shadow-subtle);
+}
+
+.doitly-navbar-brand {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: var(--font-semibold);
+  font-size: 1.5rem;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+/* Feature Cards */
+.feature-card {
+  background: var(--glass-bg-strong);
+  border: var(--border-light);
+  border-radius: var(--radius-medium);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+  padding: var(--space-lg);
+  transition: var(--transition);
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Habit Items */
+.habit-item {
+  background: var(--glass-bg-strong);
+  border-radius: var(--radius-medium);
+  border: var(--border-light);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  padding: var(--space-md);
+  transition: var(--transition-fast);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.habit-item:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateX(4px);
+}
+
+/* Badge Component */
+.doitly-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  background: var(--glass-bg-medium);
+  border: var(--border-light);
+  color: var(--text-primary);
+}
+
+.doitly-badge-success {
+  background: rgba(89, 209, 134, 0.15);
+  color: #2d8a4f;
+  border-color: rgba(89, 209, 134, 0.3);
+}
+
+.doitly-badge-warning {
+  background: rgba(238, 210, 122, 0.15);
+  color: #9d7f2a;
+  border-color: rgba(238, 210, 122, 0.3);
+}
+
+.doitly-badge-danger {
+  background: rgba(255, 87, 87, 0.15);
+  color: #c43333;
+  border-color: rgba(255, 87, 87, 0.3);
+}
+
+.doitly-badge-info {
+  background: rgba(74, 116, 255, 0.15);
+  color: #3558cc;
+  border-color: rgba(74, 116, 255, 0.3);
+}
+
+/* Stats Card */
+.stats-card {
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.stats-number {
+  font-size: clamp(2rem, 5vw, 2.5rem);
+  font-weight: var(--font-semibold);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  margin: var(--space-sm) 0;
+  color: var(--text-primary);
+}
+
+.stats-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* ===== 10. ANIMATIONS & TRANSITIONS ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition) ease;
+}
+
+.slide-in-right {
+  animation: slideInRight var(--transition) ease;
+}
+
+/* Loading State */
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ===== 11. RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+  :root {
+    --radius-large: 24px;
+    --radius-medium: 16px;
+    --space-lg: 20px;
+    --space-xl: 28px;
+  }
+
+  .doitly-navbar {
+    padding: 12px 20px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .doitly-card {
+    padding: var(--space-md);
+  }
+
+  .container-doitly {
+    padding: 0 var(--space-md);
+  }
+
+  /* Reduce blur on mobile for performance */
+  .doitly-card,
+  .glass-strong {
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+  }
+
+  .habit-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+  }
+
+  .doitly-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .doitly-navbar-brand {
+    font-size: 1.25rem;
+  }
+
+  .stats-number {
+    font-size: 2rem;
+  }
+}
+
+/* ===== 12. ACCESSIBILITY ===== */
+
+/* Focus Styles */
+*:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+.doitly-btn:focus-visible,
+.doitly-input:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .doitly-card:hover,
+  .doitly-btn:hover,
+  .feature-card:hover,
+  .habit-item:hover {
+    transform: none;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --border-light: 2px solid rgba(0, 0, 0, 0.3);
+    --text-secondary: #555555;
+  }
+}
+
+/* ===== 13. UTILITY CLASSES ===== */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.gap-sm {
+  gap: var(--space-sm);
+}
+
+.gap-md {
+  gap: var(--space-md);
+}
+
+.gap-lg {
+  gap: var(--space-lg);
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.mt-1 {
+  margin-top: var(--space-xs);
+}
+.mt-2 {
+  margin-top: var(--space-sm);
+}
+.mt-3 {
+  margin-top: var(--space-md);
+}
+.mt-4 {
+  margin-top: var(--space-lg);
+}
+
+.mb-1 {
+  margin-bottom: var(--space-xs);
+}
+.mb-2 {
+  margin-bottom: var(--space-sm);
+}
+.mb-3 {
+  margin-bottom: var(--space-md);
+}
+.mb-4 {
+  margin-bottom: var(--space-lg);
+}
+
+.p-1 {
+  padding: var(--space-xs);
+}
+.p-2 {
+  padding: var(--space-sm);
+}
+.p-3 {
+  padding: var(--space-md);
+}
+.p-4 {
+  padding: var(--space-lg);
+}
