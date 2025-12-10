@@ -901,18 +901,6 @@ select.doitly-input option:disabled {
 }
 .p-3 {
   padding: var(--space-md);
-}
-.p-4 {
-  padding: var(--space-lg);
-}
-#login {
-  width: 115px !important;
-}
-
-.doitly-logo {
-  height: 55px;
-}
-.doitly-logo img {
   transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 

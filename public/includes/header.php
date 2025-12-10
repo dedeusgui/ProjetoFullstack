@@ -13,15 +13,30 @@
 
     <!-- Doitly Custom CSS -->
     <link rel="stylesheet" href="assets/css/style.css" />
+    <link rel="stylesheet" href="assets/css/landing-sections.css" />
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- AOS (Animate On Scroll) -->
+    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 </head>
 
 <body>
     <!-- NAVBAR -->
     <nav class="doitly-navbar">
-      <img src="assets/img/logo.png" alt="Logo" class="doitly-logo" />
+      <a href="index.php">
+        <img src="assets/img/logo.png" alt="Logo" class="doitly-logo" />
+      </a>
       <h2 class="doitly-navbar-brand">Doitly</h2>
       <div class="d-flex gap-md align-items-center">
-        <a href="login.php" class="doitly-btn doitly-btn-md">Login</a>
+        <?php if (!isset($hideLoginButton) || !$hideLoginButton): ?>
+          <a href="login.php" class="doitly-btn doitly-btn-md">Login</a>
+        <?php endif; ?>
+        
+        <?php if (isset($showRegisterButton) && $showRegisterButton): ?>
+          <a href="register.php" class="doitly-btn doitly-btn-secondary doitly-btn-md">Cadastrar</a>
+        <?php endif; ?>
       </div>
     </nav>
 
