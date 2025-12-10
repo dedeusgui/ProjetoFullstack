@@ -1,14 +1,14 @@
 # Doitly - Gerenciador de Hábitos Diários
 
 <div align="center">
-  <img src="public/assets/img/logo.png" alt="Doitly Logo" width="120"/>
-  
-  ### Transforme seus objetivos em hábitos consistentes
-  
-  [![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4?style=flat&logo=php&logoColor=white)](https://www.php.net/)
-  [![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/)
-  [![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.2-7952B3?style=flat&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
-  [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
+### Transforme seus objetivos em hábitos consistentes
+
+[![PHP](https://img.shields.io/badge/PHP-8.0+-777BB4?style=flat&logo=php&logoColor=white)](https://www.php.net/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-4479A1?style=flat&logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3.2-7952B3?style=flat&logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 </div>
 
 ---
@@ -462,13 +462,13 @@ _Screenshots serão adicionadas em breve_
 ## 👥 Equipe
 
 - **Guilherme Deus** - [@dedeusgui](https://github.com/dedeusgui) - Frontend & Design
-- **[Nome do Parceiro]** - [@username] - Backend & Database
+- **Ismael Gomes** - [@rex23js](https://github.com/rex23js) - Backend & Database
 
 ---
 
 ## 🎓 Contexto Acadêmico
 
-Este projeto está sendo desenvolvido como trabalho final da disciplina de Desenvolvimento Fullstack, com o objetivo de demonstrar conhecimentos em:
+Este projeto está sendo desenvolvido como trabalho da disciplina de Desenvolvimento Fullstack, com o objetivo de demonstrar conhecimentos em:
 
 ✅ Desenvolvimento Frontend responsivo com HTML/CSS/JavaScript  
 ✅ Design System e UI/UX moderno  
@@ -508,7 +508,6 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ## 🔗 Links Úteis
 
 - [Repositório no GitHub](https://github.com/dedeusgui/ProjetoFullstack)
-- [Wireframes no Excalidraw](link-do-excalidraw)
 - [Deploy (em breve)](#)
 
 ---
@@ -517,8 +516,8 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 Tem alguma dúvida ou sugestão? Entre em contato!
 
-- **Email:** contato@doitly.com _(exemplo)_
 - **GitHub:** [@dedeusgui](https://github.com/dedeusgui)
+- **GitHub:** [@rex23js](https://github.com/rex23js)
 
 ---
 
@@ -530,4 +529,18 @@ Tem alguma dúvida ou sugestão? Entre em contato!
   
   ⭐ Deixe uma estrela se este projeto te interessou!
   
+</div>
+
+<div align="center">
+
+## 👨‍💻 Autores
+
+Este projeto foi desenvolvido com dedicação por:
+
+| [<img src="https://avatars.githubusercontent.com/u/200134059?v=4" width=115><br><sub>Ismael Gomes (Rex)</sub>](https://github.com/rex23js) | [<img src="https://avatars.githubusercontent.com/u/202681712?v=4" width=115><br><sub>Guilherme Deus</sub>](https://github.com/dedeusgui) |
+| :----------------------------------------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------------------------------------: |
+|                                                    [GitHub](https://github.com/rex23js)                                                    |                                                  [GitHub](https://github.com/dedeusgui)                                                  |
+
+---
+
 </div>
