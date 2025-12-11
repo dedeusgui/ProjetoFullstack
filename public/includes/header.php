@@ -25,7 +25,7 @@
 <body>
     <!-- NAVBAR -->
     <nav class="doitly-navbar">
-      <a href="index.php">
+      <a href="index.php" class="doitly-logo-link">
         <img src="assets/img/logo.png" alt="Logo" class="doitly-logo" />
       </a>
       <h2 class="doitly-navbar-brand">Doitly</h2>
