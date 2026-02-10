@@ -1,4 +1,13 @@
 <?php
+// Iniciar sessão
+session_start();
+
+// Se já estiver logado, redirecionar para dashboard
+if (isset($_SESSION['user_id'])) {
+    header('Location: dashboard.php');
+    exit;
+}
+
 // Configurações do navbar para esta página
 $hideLoginButton = true; // Oculta botão de login
 $showRegisterButton = true; // Mostra botão de cadastro
@@ -20,7 +29,7 @@ include_once "includes/header.php";
             </div>
         <?php endif; ?>
 
-        <form action="/actions/login_action.php" method="post">
+        <form action="../actions/login_action.php" method="post">
             <div class="mb-4">
                 <label for="email" class="form-label text-secondary fs-6">Email</label>
                 <div class="input-group">
@@ -40,7 +49,7 @@ include_once "includes/header.php";
                     <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
                     <label class="form-check-label text-secondary" for="rememberMe">Lembrar-me</label>
                 </div>
-                <a href="#" class="text-decoration-none" style="color: var(--accent-blue); font-size: 0.9rem;">Esqueceu a senha?</a>
+                
             </div>
 
             <button type="submit" class="doitly-btn w-100 mb-3">

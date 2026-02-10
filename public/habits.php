@@ -1,124 +1,57 @@
 <?php 
+// Proteger página - requer login
+require_once '../config/conexao.php';
+require_once '../config/auth.php';
+require_once '../config/helpers.php';
+
+requireLogin();
+
+// Configurações da página
 $showRegisterButton = false;
 $hideLoginButton = true;
 
-// TODO: Backend - Substituir por dados reais do banco de dados
-// Dados mockados para demonstração
-$userData = [
-    'name' => 'João Silva',
-    'email' => 'joao.silva@email.com',
-    'initials' => 'JS'
-];
+// Buscar dados do usuário logado
+$userId = getUserId();
+$userData = getCurrentUser($conn);
 
+// Se não encontrou usuário, fazer logout
+if (!$userData) {
+    logout();
+}
+
+// Adicionar iniciais ao userData
+$userData['initials'] = getInitials($userData['name']);
+
+// Estatísticas de hábitos
 $stats = [
-    'total_habits' => 8,
-    'active_habits' => 8,
-    'archived_habits' => 2
+    'total_habits' => getTotalHabits($conn, $userId),
+    'active_habits' => getTotalHabits($conn, $userId),
+    'archived_habits' => 0 // TODO: Implementar hábitos arquivados
 ];
 
-// Lista completa de hábitos
-$habits = [
-    [
-        'id' => 1,
-        'name' => 'Meditar pela manhã',
-        'description' => 'Praticar 10 minutos de meditação guiada',
-        'category' => 'Saúde Mental',
-        'time' => 'Manhã',
-        'color' => '#4a74ff',
-        'streak' => 12,
-        'completed_today' => true,
-        'created_at' => '2024-01-15'
-    ],
-    [
-        'id' => 2,
-        'name' => 'Ler 30 minutos',
-        'description' => 'Leitura de desenvolvimento pessoal ou ficção',
-        'category' => 'Desenvolvimento Pessoal',
-        'time' => 'Manhã',
-        'color' => '#59d186',
-        'streak' => 8,
-        'completed_today' => true,
-        'created_at' => '2024-01-20'
-    ],
-    [
-        'id' => 3,
-        'name' => 'Exercícios físicos',
-        'description' => '30 minutos de atividade física',
-        'category' => 'Saúde Física',
-        'time' => 'Tarde',
-        'color' => '#ff5757',
-        'streak' => 5,
-        'completed_today' => false,
-        'created_at' => '2024-02-01'
-    ],
-    [
-        'id' => 4,
-        'name' => 'Beber 2L de água',
-        'description' => 'Manter hidratação adequada ao longo do dia',
-        'category' => 'Saúde Física',
-        'time' => 'Tarde',
-        'color' => '#4a74ff',
-        'streak' => 15,
-        'completed_today' => true,
-        'created_at' => '2024-01-10'
-    ],
-    [
-        'id' => 5,
-        'name' => 'Estudar programação',
-        'description' => 'Dedicar tempo para aprender novas tecnologias',
-        'category' => 'Estudo',
-        'time' => 'Noite',
-        'color' => '#eed27a',
-        'streak' => 7,
-        'completed_today' => false,
-        'created_at' => '2024-01-25'
-    ],
-    [
-        'id' => 6,
-        'name' => 'Gratidão diária',
-        'description' => 'Escrever 3 coisas pelas quais sou grato',
-        'category' => 'Saúde Mental',
-        'time' => 'Noite',
-        'color' => '#59d186',
-        'streak' => 20,
-        'completed_today' => false,
-        'created_at' => '2024-01-05'
-    ],
-    [
-        'id' => 7,
-        'name' => 'Alongamento',
-        'description' => '15 minutos de alongamento e mobilidade',
-        'category' => 'Saúde Física',
-        'time' => 'Manhã',
-        'color' => '#ff5757',
-        'streak' => 3,
-        'completed_today' => false,
-        'created_at' => '2024-02-05'
-    ],
-    [
-        'id' => 8,
-        'name' => 'Planejamento do dia',
-        'description' => 'Revisar e planejar tarefas do dia',
-        'category' => 'Trabalho',
-        'time' => 'Manhã',
-        'color' => '#4a74ff',
-        'streak' => 10,
-        'completed_today' => true,
-        'created_at' => '2024-01-18'
-    ]
-];
+// Buscar todos os hábitos do usuário
+$habitsRaw = getUserHabits($conn, $userId);
 
-// Categorias disponíveis
-$categories = [
-    'Saúde Mental',
-    'Saúde Física',
-    'Desenvolvimento Pessoal',
-    'Estudo',
-    'Trabalho',
-    'Relacionamentos',
-    'Finanças',
-    'Hobbies'
-];
+// Mapear para formato esperado pelo frontend
+$habits = [];
+foreach ($habitsRaw as $habit) {
+    $habits[] = [
+        'id' => $habit['id'],
+        'name' => $habit['title'],
+        'description' => $habit['description'] ?? '',
+        'category' => $habit['category_name'] ?? 'Sem categoria',
+        'time' => mapTimeOfDayReverse($habit['time_of_day']),
+        'color' => $habit['color'] ?? '#4a74ff',
+        'streak' => $habit['current_streak'],
+        'completed_today' => (bool)$habit['completed_today'],
+        'created_at' => $habit['created_at']
+    ];
+}
+
+
+// Buscar todas as categorias para o modal
+$categories = getAllCategories($conn);
+
 
 include_once "includes/header.php";
 ?>

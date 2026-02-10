@@ -1,98 +1,102 @@
 <?php 
+// Proteger página - requer login
+require_once '../config/conexao.php';
+require_once '../config/auth.php';
+require_once '../config/helpers.php';
+
+requireLogin();
+
+// Configurações da página
 $showRegisterButton = false;
 $hideLoginButton = true;
 
-// TODO: Backend - Substituir por dados reais do banco de dados
-// Dados mockados para demonstração
-$userData = [
-    'name' => 'João Silva',
-    'email' => 'joao.silva@email.com',
-    'initials' => 'JS'
-];
+// Buscar dados do usuário logado
+$userId = getUserId();
+$userData = getCurrentUser($conn);
+
+// Se não encontrou usuário, fazer logout
+if (!$userData) {
+    logout();
+}
+
+// Adicionar iniciais ao userData
+$userData['initials'] = getInitials($userData['name']);
+
+// Buscar estatísticas gerais
+$totalHabits = getTotalHabits($conn, $userId);
+$totalCompletions = getTotalCompletions($conn, $userId);
+$currentStreak = getCurrentStreak($conn, $userId);
+$bestStreak = getBestStreak($conn, $userId);
+$completionRate = getCompletionRate($conn, $userId);
 
 $stats = [
-    'total_habits' => 8,
-    'total_completions' => 156,
-    'current_streak' => 12,
-    'best_streak' => 20,
-    'completion_rate' => 85,
-    'active_days' => 23,
+    'total_habits' => $totalHabits,
+    'total_completions' => $totalCompletions,
+    'current_streak' => $currentStreak,
+    'best_streak' => $bestStreak,
+    'completion_rate' => $completionRate,
+    'active_days' => round(($completionRate / 100) * 30), // Aproximação
     'total_days' => 30
 ];
 
 // Dados para gráfico mensal (últimos 30 dias)
-$monthlyData = [
-    'labels' => ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30'],
-    'completed' => [5, 6, 7, 5, 8, 6, 7, 8, 6, 5, 7, 8, 6, 7, 5, 6, 8, 7, 6, 5, 7, 8, 6, 5, 7, 6, 8, 7, 6, 5],
-    'total' => [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8]
-];
+$monthlyData = getMonthlyData($conn, $userId, 30);
 
 // Dados por categoria
-$categoryStats = [
-    ['category' => 'Saúde Física', 'total' => 45, 'percentage' => 28.8],
-    ['category' => 'Saúde Mental', 'total' => 38, 'percentage' => 24.4],
-    ['category' => 'Desenvolvimento Pessoal', 'total' => 32, 'percentage' => 20.5],
-    ['category' => 'Estudo', 'total' => 25, 'percentage' => 16.0],
-    ['category' => 'Trabalho', 'total' => 16, 'percentage' => 10.3]
-];
+$categoryStats = getCategoryStats($conn, $userId);
 
-// Conquistas
+// Conquistas (mockado por enquanto - TODO: implementar sistema de conquistas)
 $achievements = [
     [
         'id' => 1,
-        'name' => 'Primeira Semana',
-        'description' => 'Complete 7 dias consecutivos',
-        'icon' => 'bi-trophy',
-        'unlocked' => true,
-        'date' => '2024-01-22'
+        'name' => 'Primeiro Passo',
+        'description' => 'Complete seu primeiro hábito',
+        'icon' => 'bi-flag',
+        'unlocked' => $totalCompletions >= 1,
+        'date' => $totalCompletions >= 1 ? 'Desbloqueado' : null,
+        'progress' => min(100, ($totalCompletions / 1) * 100)
     ],
     [
         'id' => 2,
-        'name' => 'Consistência',
-        'description' => 'Mantenha 30 dias de streak',
+        'name' => 'Guerreiro Semanal',
+        'description' => 'Mantenha um streak de 7 dias',
         'icon' => 'bi-fire',
-        'unlocked' => false,
-        'progress' => 40
+        'unlocked' => $bestStreak >= 7,
+        'date' => $bestStreak >= 7 ? 'Desbloqueado' : null,
+        'progress' => min(100, ($currentStreak / 7) * 100)
     ],
     [
         'id' => 3,
-        'name' => 'Centurião',
+        'name' => 'Clube dos 100',
         'description' => 'Complete 100 hábitos',
-        'icon' => 'bi-award',
-        'unlocked' => true,
-        'date' => '2024-02-05'
+        'icon' => 'bi-star',
+        'unlocked' => $totalCompletions >= 100,
+        'date' => $totalCompletions >= 100 ? 'Desbloqueado' : null,
+        'progress' => min(100, ($totalCompletions / 100) * 100)
     ],
     [
         'id' => 4,
-        'name' => 'Perfeccionista',
-        'description' => 'Atinja 100% em um dia',
-        'icon' => 'bi-star',
-        'unlocked' => true,
-        'date' => '2024-01-28'
+        'name' => 'Mestre do Mês',
+        'description' => 'Mantenha um streak de 30 dias',
+        'icon' => 'bi-trophy',
+        'unlocked' => $bestStreak >= 30,
+        'date' => $bestStreak >= 30 ? 'Desbloqueado' : null,
+        'progress' => min(100, ($currentStreak / 30) * 100)
     ],
     [
         'id' => 5,
-        'name' => 'Maratonista',
-        'description' => 'Complete 500 hábitos',
-        'icon' => 'bi-gem',
-        'unlocked' => false,
-        'progress' => 31
+        'name' => 'Imparável',
+        'description' => 'Mantenha um streak de 100 dias',
+        'icon' => 'bi-rocket',
+        'unlocked' => $bestStreak >= 100,
+        'date' => $bestStreak >= 100 ? 'Desbloqueado' : null,
+        'progress' => min(100, ($currentStreak / 100) * 100)
     ]
 ];
 
 // Histórico recente (últimos 10 dias)
-$recentHistory = [
-    ['date' => '2024-02-10', 'completed' => 5, 'total' => 8, 'percentage' => 62.5],
-    ['date' => '2024-02-09', 'completed' => 6, 'total' => 8, 'percentage' => 75.0],
-    ['date' => '2024-02-08', 'completed' => 7, 'total' => 8, 'percentage' => 87.5],
-    ['date' => '2024-02-07', 'completed' => 6, 'total' => 8, 'percentage' => 75.0],
-    ['date' => '2024-02-06', 'completed' => 8, 'total' => 8, 'percentage' => 100.0],
-    ['date' => '2024-02-05', 'completed' => 7, 'total' => 8, 'percentage' => 87.5],
-    ['date' => '2024-02-04', 'completed' => 6, 'total' => 8, 'percentage' => 75.0],
-    ['date' => '2024-02-03', 'completed' => 5, 'total' => 8, 'percentage' => 62.5],
-    ['date' => '2024-02-02', 'completed' => 7, 'total' => 8, 'percentage' => 87.5],
-    ['date' => '2024-02-01', 'completed' => 8, 'total' => 8, 'percentage' => 100.0]
-];
+$recentHistory = getRecentHistory($conn, $userId, 10);
+
 
 include_once "includes/header.php";
 ?>

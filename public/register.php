@@ -1,4 +1,13 @@
 <?php
+// Iniciar sessão
+session_start();
+
+// Se já estiver logado, redirecionar para dashboard
+if (isset($_SESSION['user_id'])) {
+    header('Location: dashboard.php');
+    exit;
+}
+
 // Configurações do navbar para esta página
 $hideLoginButton = false; // Mostra botão de login
 $showRegisterButton = false; // Oculta botão de cadastro
@@ -20,7 +29,7 @@ include_once "includes/header.php";
             </div>
         <?php endif; ?>
 
-        <form action="/actions/register_action.php" method="post">
+        <form action="../actions/register_action.php" method="post">
             <div class="mb-4">
                 <label for="name" class="form-label text-secondary fs-6">Nome</label>
                 <div class="input-group">

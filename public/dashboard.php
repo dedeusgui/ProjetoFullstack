@@ -1,59 +1,52 @@
-<?php 
+<?php
+// Proteger página - requer login
+require_once '../config/conexao.php';
+require_once '../config/auth.php';
+require_once '../config/helpers.php';
+
+requireLogin();
+
+// Configurações da página
 $showRegisterButton = false;
 $hideLoginButton = true;
 
-// TODO: Backend - Substituir por dados reais do banco de dados
-// Dados mockados para demonstração
-$userData = [
-    'name' => 'João Silva',
-    'email' => 'joao.silva@email.com',
-    'initials' => 'JS'
-];
+// Buscar dados do usuário logado
+$userId = getUserId();
+$userData = getCurrentUser($conn);
 
+// Se não encontrou usuário, fazer logout
+if (!$userData) {
+    logout();
+}
+
+// Adicionar iniciais ao userData
+$userData['initials'] = getInitials($userData['name']);
+
+// Buscar estatísticas
 $stats = [
-    'total_habits' => 8,
-    'completed_today' => 5,
-    'completion_rate' => 85,
-    'current_streak' => 12
+    'total_habits' => getTotalHabits($conn, $userId),
+    'completed_today' => getCompletedToday($conn, $userId),
+    'completion_rate' => getCompletionRate($conn, $userId),
+    'current_streak' => getCurrentStreak($conn, $userId)
 ];
 
-$todayHabits = [
-    [
-        'id' => 1,
-        'name' => 'Meditar pela manhã',
-        'category' => 'Saúde Mental',
-        'time' => 'Manhã',
-        'completed' => true
-    ],
-    [
-        'id' => 2,
-        'name' => 'Ler 30 minutos',
-        'category' => 'Desenvolvimento Pessoal',
-        'time' => 'Manhã',
-        'completed' => true
-    ],
-    [
-        'id' => 3,
-        'name' => 'Exercícios físicos',
-        'category' => 'Saúde Física',
-        'time' => 'Tarde',
-        'completed' => false
-    ],
-    [
-        'id' => 4,
-        'name' => 'Beber 2L de água',
-        'category' => 'Saúde Física',
-        'time' => 'Tarde',
-        'completed' => true
-    ],
-    [
-        'id' => 5,
-        'name' => 'Estudar programação',
-        'category' => 'Estudo',
-        'time' => 'Noite',
-        'completed' => false
-    ]
-];
+// Buscar hábitos de hoje
+$todayHabitsRaw = getTodayHabits($conn, $userId);
+
+// Mapear para formato esperado pelo frontend
+$todayHabits = [];
+foreach ($todayHabitsRaw as $habit) {
+    $todayHabits[] = [
+        'id' => $habit['id'],
+        'name' => $habit['title'],
+        'category' => $habit['category_name'] ?? 'Sem categoria',
+        'time' => mapTimeOfDayReverse($habit['time_of_day']),
+        'completed' => (bool)$habit['completed_today']
+    ];
+}
+
+// Dados para o gráfico semanal (últimos 7 dias)
+$weeklyData = getMonthlyData($conn, $userId, 7);
 
 include_once "includes/header.php";
 ?>
