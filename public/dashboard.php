@@ -22,31 +22,31 @@ if (!$userData) {
 // Adicionar iniciais ao userData
 $userData['initials'] = getInitials($userData['name']);
 
-// Buscar estatísticas
-$stats = [
-    'total_habits' => getTotalHabits($conn, $userId),
-    'completed_today' => getCompletedToday($conn, $userId),
-    'completion_rate' => getCompletionRate($conn, $userId),
-    'current_streak' => getCurrentStreak($conn, $userId)
-];
+// Carregar dados centralizados pela API (somente via PHP interno)
+if (!defined('DOITLY_INTERNAL_API_CALL')) {
+    define('DOITLY_INTERNAL_API_CALL', true);
+}
+require_once '../actions/api_get_stats.php';
 
-// Buscar hábitos de hoje
-$todayHabitsRaw = getTodayHabits($conn, $userId);
+$dashboardPayload = buildStatsApiResponse($conn, (int) $userId, 'dashboard');
+$stats = $dashboardPayload['data']['stats'] ?? [];
+$todayHabits = $dashboardPayload['data']['today_habits'] ?? [];
+$weeklyData = $dashboardPayload['data']['weekly_data'] ?? ['labels' => [], 'completed' => [], 'total' => []];
 
-// Mapear para formato esperado pelo frontend
-$todayHabits = [];
-foreach ($todayHabitsRaw as $habit) {
-    $todayHabits[] = [
-        'id' => $habit['id'],
-        'name' => $habit['title'],
-        'category' => $habit['category_name'] ?? 'Sem categoria',
-        'time' => mapTimeOfDayReverse($habit['time_of_day']),
-        'completed' => (bool)$habit['completed_today']
-    ];
+$weeklyChartLabels = $weeklyData['labels'] ?? [];
+$weeklyChartCompleted = $weeklyData['completed'] ?? [];
+
+if (count($weeklyChartLabels) === 0) {
+    $weeklyChartLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    $weeklyChartCompleted = array_fill(0, 7, 0);
 }
 
-// Dados para o gráfico semanal (últimos 7 dias)
-$weeklyData = getMonthlyData($conn, $userId, 7);
+$monthSummary = [
+    'active_days' => (int) round((($stats['completion_rate'] ?? 0) / 100) * 30),
+    'total_days' => 30,
+    'best_streak' => getBestStreak($conn, $userId),
+    'total_completions' => getTotalCompletions($conn, $userId)
+];
 
 include_once "includes/header.php";
 ?>
@@ -120,6 +120,19 @@ include_once "includes/header.php";
 
     <!-- Main Content -->
     <main class="dashboard-content">
+        <!-- Mensagens de Sucesso/Erro -->
+        <?php if (isset($_SESSION['success_message'])): ?>
+            <div class="alert alert-success" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #d4edda; border: 1px solid #c3e6cb; border-radius: var(--radius-medium); color: #155724;">
+                <i class="bi bi-check-circle"></i> <?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #f8d7da; border: 1px solid #f5c6cb; border-radius: var(--radius-medium); color: #721c24;">
+                <i class="bi bi-exclamation-triangle"></i> <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
+            </div>
+        <?php endif; ?>
+
         <!-- Header -->
         <div class="dashboard-header">
             <h1 class="dashboard-title">Bem-vindo de volta, <?php echo explode(' ', $userData['name'])[0]; ?>! 👋</h1>
@@ -240,15 +253,15 @@ include_once "includes/header.php";
                             <div class="d-flex flex-column gap-sm">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span style="font-size: 0.875rem; color: var(--text-secondary);">Dias ativos</span>
-                                    <strong style="color: var(--accent-green);">23/30</strong>
+                                    <strong style="color: var(--accent-green);"><?php echo $monthSummary['active_days']; ?>/<?php echo $monthSummary['total_days']; ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span style="font-size: 0.875rem; color: var(--text-secondary);">Melhor streak</span>
-                                    <strong style="color: var(--accent-blue);">15 dias</strong>
+                                    <strong style="color: var(--accent-blue);"><?php echo $monthSummary['best_streak']; ?> dias</strong>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span style="font-size: 0.875rem; color: var(--text-secondary);">Total concluído</span>
-                                    <strong style="color: var(--accent-gold);">156</strong>
+                                    <strong style="color: var(--accent-gold);"><?php echo $monthSummary['total_completions']; ?></strong>
                                 </div>
                             </div>
                         </div>
@@ -285,9 +298,9 @@ include_once "includes/header.php";
                                         
                                         <div class="flex-grow-1">
                                             <span class="d-block" style="<?php echo $habit['completed'] ? 'text-decoration: line-through;' : ''; ?>">
-                                                <?php echo $habit['name']; ?>
+                                                <?php echo htmlspecialchars($habit['name']); ?>
                                             </span>
-                                            <small class="text-secondary"><?php echo $habit['category']; ?></small>
+                                            <small class="text-secondary"><?php echo htmlspecialchars($habit['category']); ?></small>
                                         </div>
                                     </div>
                                     
@@ -296,9 +309,12 @@ include_once "includes/header.php";
                                             <i class="bi bi-check-circle-fill"></i> Concluído
                                         </button>
                                     <?php else: ?>
-                                        <button class="doitly-btn doitly-btn-sm">
-                                            <i class="bi bi-circle"></i> Marcar
-                                        </button>
+                                        <form method="POST" action="../actions/habit_mark_action.php" style="display: inline;">
+                                            <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
+                                            <button type="submit" class="doitly-btn doitly-btn-sm">
+                                                <i class="bi bi-circle"></i> Marcar
+                                            </button>
+                                        </form>
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
@@ -327,11 +343,10 @@ include_once "includes/header.php";
 <!-- Chart Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // TODO: Backend - Substituir por dados reais da API
     var options = {
         series: [{
             name: 'Hábitos Concluídos',
-            data: [6, 7, 5, 8, 7, 6, 5] // Dados mockados
+            data: <?php echo json_encode($weeklyChartCompleted); ?>
         }],
         chart: {
             type: 'area',
@@ -364,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         xaxis: {
-            categories: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+            categories: <?php echo json_encode($weeklyChartLabels); ?>,
             labels: {
                 style: {
                     colors: '#6c757d',
@@ -428,6 +443,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     var chart = new ApexCharts(document.querySelector("#weeklyProgressChart"), options);
     chart.render();
+
+    // Auto-hide alerts após 5 segundos
+    setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.style.transition = 'opacity 0.5s ease';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        });
+    }, 5000);
 });
 </script>
 

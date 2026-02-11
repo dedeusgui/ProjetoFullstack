@@ -22,81 +22,29 @@ if (!$userData) {
 // Adicionar iniciais ao userData
 $userData['initials'] = getInitials($userData['name']);
 
-// Buscar estatísticas gerais
-$totalHabits = getTotalHabits($conn, $userId);
-$totalCompletions = getTotalCompletions($conn, $userId);
-$currentStreak = getCurrentStreak($conn, $userId);
-$bestStreak = getBestStreak($conn, $userId);
-$completionRate = getCompletionRate($conn, $userId);
+// Carregar dados centralizados pela API (somente via PHP interno)
+if (!defined('DOITLY_INTERNAL_API_CALL')) {
+    define('DOITLY_INTERNAL_API_CALL', true);
+}
+require_once '../actions/api_get_stats.php';
 
-$stats = [
-    'total_habits' => $totalHabits,
-    'total_completions' => $totalCompletions,
-    'current_streak' => $currentStreak,
-    'best_streak' => $bestStreak,
-    'completion_rate' => $completionRate,
-    'active_days' => round(($completionRate / 100) * 30), // Aproximação
-    'total_days' => 30
-];
+$historyPayload = buildStatsApiResponse($conn, (int) $userId, 'history');
+$historyData = $historyPayload['data'] ?? [];
 
-// Dados para gráfico mensal (últimos 30 dias)
-$monthlyData = getMonthlyData($conn, $userId, 30);
+$stats = $historyData['stats'] ?? [];
+$monthlyData = $historyData['monthly_data'] ?? ['labels' => [], 'completed' => [], 'total' => []];
 
-// Dados por categoria
-$categoryStats = getCategoryStats($conn, $userId);
+$completionRateSeries = [];
+$monthlyCompleted = $monthlyData['completed'] ?? [];
+$monthlyTotal = $monthlyData['total'] ?? [];
 
-// Conquistas (mockado por enquanto - TODO: implementar sistema de conquistas)
-$achievements = [
-    [
-        'id' => 1,
-        'name' => 'Primeiro Passo',
-        'description' => 'Complete seu primeiro hábito',
-        'icon' => 'bi-flag',
-        'unlocked' => $totalCompletions >= 1,
-        'date' => $totalCompletions >= 1 ? 'Desbloqueado' : null,
-        'progress' => min(100, ($totalCompletions / 1) * 100)
-    ],
-    [
-        'id' => 2,
-        'name' => 'Guerreiro Semanal',
-        'description' => 'Mantenha um streak de 7 dias',
-        'icon' => 'bi-fire',
-        'unlocked' => $bestStreak >= 7,
-        'date' => $bestStreak >= 7 ? 'Desbloqueado' : null,
-        'progress' => min(100, ($currentStreak / 7) * 100)
-    ],
-    [
-        'id' => 3,
-        'name' => 'Clube dos 100',
-        'description' => 'Complete 100 hábitos',
-        'icon' => 'bi-star',
-        'unlocked' => $totalCompletions >= 100,
-        'date' => $totalCompletions >= 100 ? 'Desbloqueado' : null,
-        'progress' => min(100, ($totalCompletions / 100) * 100)
-    ],
-    [
-        'id' => 4,
-        'name' => 'Mestre do Mês',
-        'description' => 'Mantenha um streak de 30 dias',
-        'icon' => 'bi-trophy',
-        'unlocked' => $bestStreak >= 30,
-        'date' => $bestStreak >= 30 ? 'Desbloqueado' : null,
-        'progress' => min(100, ($currentStreak / 30) * 100)
-    ],
-    [
-        'id' => 5,
-        'name' => 'Imparável',
-        'description' => 'Mantenha um streak de 100 dias',
-        'icon' => 'bi-rocket',
-        'unlocked' => $bestStreak >= 100,
-        'date' => $bestStreak >= 100 ? 'Desbloqueado' : null,
-        'progress' => min(100, ($currentStreak / 100) * 100)
-    ]
-];
-
-// Histórico recente (últimos 10 dias)
-$recentHistory = getRecentHistory($conn, $userId, 10);
-
+foreach ($monthlyCompleted as $index => $completedValue) {
+    $totalValue = $monthlyTotal[$index] ?? 0;
+    $completionRateSeries[] = $totalValue > 0 ? round(($completedValue / $totalValue) * 100, 1) : 0;
+}
+$categoryStats = $historyData['category_stats'] ?? [];
+$achievements = $historyData['achievements'] ?? [];
+$recentHistory = $historyData['recent_history'] ?? [];
 
 include_once "includes/header.php";
 ?>
@@ -445,7 +393,6 @@ include_once "includes/header.php";
 <!-- Charts Scripts -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // TODO: Backend - Substituir por dados reais da API
     
     // Monthly Progress Chart
     var monthlyOptions = {
@@ -474,6 +421,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         colors: ['#4a74ff', '#e6e7e9'],
+        noData: {
+            text: 'Sem dados suficientes para o período'
+        },
         dataLabels: {
             enabled: false
         },
@@ -521,6 +471,9 @@ document.addEventListener('DOMContentLoaded', function() {
             fontFamily: 'Inter, sans-serif'
         },
         labels: <?php echo json_encode(array_column($categoryStats, 'category')); ?>,
+        noData: {
+            text: 'Sem dados de categorias ainda'
+        },
         colors: ['#4a74ff', '#59d186', '#eed27a', '#ff5757', '#a78bfa'],
         legend: {
             position: 'bottom'
@@ -557,7 +510,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var completionRateOptions = {
         series: [{
             name: 'Taxa de Conclusão',
-            data: [62.5, 75, 87.5, 75, 100, 87.5, 75, 62.5, 87.5, 100, 75, 87.5, 62.5, 75, 100, 87.5, 75, 62.5, 87.5, 100, 75, 87.5, 75, 62.5, 87.5, 75, 100, 87.5, 75, 62.5]
+            data: <?php echo json_encode($completionRateSeries); ?>
         }],
         chart: {
             type: 'area',
@@ -568,6 +521,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         colors: ['#59d186'],
+        noData: {
+            text: 'Sem dados suficientes para o período'
+        },
         dataLabels: {
             enabled: false
         },
