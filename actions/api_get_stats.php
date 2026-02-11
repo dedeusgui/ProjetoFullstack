@@ -34,55 +34,9 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
         $totalCompletions = getTotalCompletions($conn, $userId);
         $bestStreak = getBestStreak($conn, $userId);
 
-        $achievements = [
-            [
-                'id' => 1,
-                'name' => 'Primeiro Passo',
-                'description' => 'Complete seu primeiro hábito',
-                'icon' => 'bi-flag',
-                'unlocked' => $totalCompletions >= 1,
-                'date' => $totalCompletions >= 1 ? 'Desbloqueado' : null,
-                'progress' => min(100, ($totalCompletions / 1) * 100)
-            ],
-            [
-                'id' => 2,
-                'name' => 'Guerreiro Semanal',
-                'description' => 'Mantenha um streak de 7 dias',
-                'icon' => 'bi-fire',
-                'unlocked' => $bestStreak >= 7,
-                'date' => $bestStreak >= 7 ? 'Desbloqueado' : null,
-                'progress' => min(100, ($currentStreak / 7) * 100)
-            ],
-            [
-                'id' => 3,
-                'name' => 'Clube dos 100',
-                'description' => 'Complete 100 hábitos',
-                'icon' => 'bi-star',
-                'unlocked' => $totalCompletions >= 100,
-                'date' => $totalCompletions >= 100 ? 'Desbloqueado' : null,
-                'progress' => min(100, ($totalCompletions / 100) * 100)
-            ],
-            [
-                'id' => 4,
-                'name' => 'Mestre do Mês',
-                'description' => 'Mantenha um streak de 30 dias',
-                'icon' => 'bi-trophy',
-                'unlocked' => $bestStreak >= 30,
-                'date' => $bestStreak >= 30 ? 'Desbloqueado' : null,
-                'progress' => min(100, ($currentStreak / 30) * 100)
-            ],
-            [
-                'id' => 5,
-                'name' => 'Imparável',
-                'description' => 'Mantenha um streak de 100 dias',
-                'icon' => 'bi-rocket',
-                'unlocked' => $bestStreak >= 100,
-                'date' => $bestStreak >= 100 ? 'Desbloqueado' : null,
-                'progress' => min(100, ($currentStreak / 100) * 100)
-            ]
-        ];
+        $achievements = getUserAchievements($conn, $userId);
 
-        $historyData = [
+    $historyData = [
             'stats' => [
                 'total_habits' => $totalHabits,
                 'total_completions' => $totalCompletions,

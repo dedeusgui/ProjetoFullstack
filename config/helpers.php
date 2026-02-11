@@ -331,3 +331,144 @@ function getAllCategories($conn) {
     
     return $categories;
 }
+
+// Mapear ícone salvo no banco para classe Bootstrap Icons
+function mapAchievementIconToBootstrap(string $icon): string {
+    $map = [
+        'flag' => 'bi-flag',
+        'fire' => 'bi-fire',
+        'trophy' => 'bi-trophy',
+        'star' => 'bi-star',
+        'award' => 'bi-award',
+        'collection' => 'bi-collection',
+        'rocket' => 'bi-rocket',
+        'gem' => 'bi-gem'
+    ];
+
+    return $map[$icon] ?? 'bi-patch-check';
+}
+
+// Buscar total de hábitos concluídos por data
+function getDailyCompletionsMap($conn, $userId, $days = 365) {
+    $stmt = $conn->prepare("\n        SELECT completion_date, COUNT(DISTINCT habit_id) as completed\n        FROM habit_completions\n        WHERE user_id = ?\n          AND completion_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)\n        GROUP BY completion_date\n    ");
+    $stmt->bind_param("ii", $userId, $days);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $map = [];
+    while ($row = $result->fetch_assoc()) {
+        $map[$row['completion_date']] = (int) $row['completed'];
+    }
+
+    return $map;
+}
+
+// Maior sequência de dias com todos os hábitos ativos concluídos
+function getPerfectDaysStreak($conn, $userId, $days = 365) {
+    $totalHabits = getTotalHabits($conn, $userId);
+    if ($totalHabits <= 0) {
+        return 0;
+    }
+
+    $dailyMap = getDailyCompletionsMap($conn, $userId, $days);
+
+    $maxStreak = 0;
+    $currentStreak = 0;
+
+    for ($i = $days - 1; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-$i days"));
+        $completed = $dailyMap[$date] ?? 0;
+
+        if ($completed >= $totalHabits) {
+            $currentStreak++;
+            $maxStreak = max($maxStreak, $currentStreak);
+        } else {
+            $currentStreak = 0;
+        }
+    }
+
+    return $maxStreak;
+}
+
+// Carregar e sincronizar conquistas do usuário com base na tabela achievements
+function getUserAchievements($conn, $userId) {
+    $totalHabits = getTotalHabits($conn, $userId);
+    $totalCompletions = getTotalCompletions($conn, $userId);
+    $bestStreak = getBestStreak($conn, $userId);
+
+    $perfectStreak = getPerfectDaysStreak($conn, $userId, 730);
+
+    $metrics = [
+        'streak' => $bestStreak,
+        'total_completions' => $totalCompletions,
+        'habits_count' => $totalHabits,
+        'perfect_week' => $perfectStreak,
+        'perfect_month' => $perfectStreak
+    ];
+
+    // Conquistas já desbloqueadas
+    $unlockedMap = [];
+    $unlockedStmt = $conn->prepare("\n        SELECT achievement_id, unlocked_at\n        FROM user_achievements\n        WHERE user_id = ?\n    ");
+    $unlockedStmt->bind_param("i", $userId);
+    $unlockedStmt->execute();
+    $unlockedResult = $unlockedStmt->get_result();
+    while ($row = $unlockedResult->fetch_assoc()) {
+        $unlockedMap[(int) $row['achievement_id']] = $row['unlocked_at'];
+    }
+
+    // Todas as conquistas ativas
+    $achievementsStmt = $conn->prepare("\n        SELECT id, slug, name, description, icon, badge_color, criteria_type, criteria_value, points, rarity\n        FROM achievements\n        WHERE is_active = 1\n        ORDER BY criteria_value ASC, id ASC\n    ");
+    $achievementsStmt->execute();
+    $achievementsResult = $achievementsStmt->get_result();
+
+    $achievements = [];
+
+    while ($achievement = $achievementsResult->fetch_assoc()) {
+        $achievementId = (int) $achievement['id'];
+        $criteriaType = $achievement['criteria_type'];
+        $criteriaValue = (int) $achievement['criteria_value'];
+        $criteriaValue = $criteriaValue > 0 ? $criteriaValue : 1;
+
+        $metricValue = (int) ($metrics[$criteriaType] ?? 0);
+
+        if ($criteriaType === 'perfect_week') {
+            $targetDays = 7 * $criteriaValue;
+            $progress = min(100, round(($metricValue / $targetDays) * 100));
+            $isUnlocked = $metricValue >= $targetDays;
+        } elseif ($criteriaType === 'perfect_month') {
+            $targetDays = 30 * $criteriaValue;
+            $progress = min(100, round(($metricValue / $targetDays) * 100));
+            $isUnlocked = $metricValue >= $targetDays;
+        } else {
+            $progress = min(100, round(($metricValue / $criteriaValue) * 100));
+            $isUnlocked = $metricValue >= $criteriaValue;
+        }
+
+        // Sincronizar desbloqueio em user_achievements
+        if ($isUnlocked && !isset($unlockedMap[$achievementId])) {
+            $insertStmt = $conn->prepare("\n                INSERT INTO user_achievements (user_id, achievement_id, progress)\n                VALUES (?, ?, ?)\n            ");
+            $insertStmt->bind_param("iii", $userId, $achievementId, $progress);
+            $insertStmt->execute();
+
+            $unlockedMap[$achievementId] = date('Y-m-d H:i:s');
+        }
+
+        $achievements[] = [
+            'id' => $achievementId,
+            'slug' => $achievement['slug'],
+            'name' => $achievement['name'],
+            'description' => $achievement['description'],
+            'icon' => mapAchievementIconToBootstrap($achievement['icon'] ?? ''),
+            'badge_color' => $achievement['badge_color'] ?? '#4a74ff',
+            'criteria_type' => $criteriaType,
+            'criteria_value' => $criteriaValue,
+            'points' => (int) $achievement['points'],
+            'rarity' => $achievement['rarity'],
+            'progress' => $progress,
+            'unlocked' => isset($unlockedMap[$achievementId]) || $isUnlocked,
+            'date' => $unlockedMap[$achievementId] ?? null
+        ];
+    }
+
+    return $achievements;
+}
