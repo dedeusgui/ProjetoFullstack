@@ -108,7 +108,7 @@ include_once "includes/header.php";
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="index.php" class="nav-link">
+                       <a href="../actions/logout_action.php" class="nav-link">
                             <i class="bi bi-box-arrow-right"></i>
                             <span>Sair</span>
                         </a>
