@@ -22,31 +22,24 @@ if (!$userData) {
 // Adicionar iniciais ao userData
 $userData['initials'] = getInitials($userData['name']);
 
-// Buscar estatísticas
-$stats = [
-    'total_habits' => getTotalHabits($conn, $userId),
-    'completed_today' => getCompletedToday($conn, $userId),
-    'completion_rate' => getCompletionRate($conn, $userId),
-    'current_streak' => getCurrentStreak($conn, $userId)
-];
-
-// Buscar hábitos de hoje
-$todayHabitsRaw = getTodayHabits($conn, $userId);
-
-// Mapear para formato esperado pelo frontend
-$todayHabits = [];
-foreach ($todayHabitsRaw as $habit) {
-    $todayHabits[] = [
-        'id' => $habit['id'],
-        'name' => $habit['title'],
-        'category' => $habit['category_name'] ?? 'Sem categoria',
-        'time' => mapTimeOfDayReverse($habit['time_of_day']),
-        'completed' => (bool)$habit['completed_today']
-    ];
+// Carregar dados centralizados pela API (somente via PHP interno)
+if (!defined('DOITLY_INTERNAL_API_CALL')) {
+    define('DOITLY_INTERNAL_API_CALL', true);
 }
+require_once '../actions/api_get_stats.php';
 
-// Dados para o gráfico semanal (últimos 7 dias)
-$weeklyData = getMonthlyData($conn, $userId, 7);
+$dashboardPayload = buildStatsApiResponse($conn, (int) $userId, 'dashboard');
+$stats = $dashboardPayload['data']['stats'] ?? [];
+$todayHabits = $dashboardPayload['data']['today_habits'] ?? [];
+$weeklyData = $dashboardPayload['data']['weekly_data'] ?? ['labels' => [], 'completed' => [], 'total' => []];
+
+$weeklyChartLabels = $weeklyData['labels'] ?? [];
+$weeklyChartCompleted = $weeklyData['completed'] ?? [];
+
+if (count($weeklyChartLabels) === 0) {
+    $weeklyChartLabels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+    $weeklyChartCompleted = array_fill(0, 7, 0);
+}
 
 include_once "includes/header.php";
 ?>
@@ -327,11 +320,10 @@ include_once "includes/header.php";
 <!-- Chart Script -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // TODO: Backend - Substituir por dados reais da API
     var options = {
         series: [{
             name: 'Hábitos Concluídos',
-            data: [6, 7, 5, 8, 7, 6, 5] // Dados mockados
+            data: <?php echo json_encode($weeklyChartCompleted); ?>
         }],
         chart: {
             type: 'area',
@@ -364,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         xaxis: {
-            categories: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
+            categories: <?php echo json_encode($weeklyChartLabels); ?>,
             labels: {
                 style: {
                     colors: '#6c757d',
