@@ -66,7 +66,7 @@ include_once "includes/header.php";
             <div class="sidebar-user">
                 <div class="user-avatar">
                     <?php if (!empty($userData['avatar_url'])): ?>
-                        <img src="<?php echo htmlspecialchars($userData['avatar_url'], ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar de <?php echo htmlspecialchars($userData['name'], ENT_QUOTES, 'UTF-8'); ?>">
+                        <img src="<?php echo htmlspecialchars($userData['avatar_url'], ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar de <?php echo htmlspecialchars($userData['name'], ENT_QUOTES, 'UTF-8'); ?>" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">
                     <?php else: ?>
                         <?php echo htmlspecialchars($userData['initials'], ENT_QUOTES, 'UTF-8'); ?>
                     <?php endif; ?>
