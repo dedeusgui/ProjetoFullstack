@@ -60,7 +60,11 @@ include_once "includes/header.php";
         <div class="sidebar-header">
             <div class="sidebar-user">
                 <div class="user-avatar">
-                    <?php echo $userData['initials']; ?>
+                    <?php if (!empty($userData['avatar_url'])): ?>
+                        <img src="<?php echo htmlspecialchars($userData['avatar_url'], ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar de <?php echo htmlspecialchars($userData['name'], ENT_QUOTES, 'UTF-8'); ?>">
+                    <?php else: ?>
+                        <?php echo htmlspecialchars($userData['initials'], ENT_QUOTES, 'UTF-8'); ?>
+                    <?php endif; ?>
                 </div>
                 <div class="user-info">
                     <h4 class="user-name"><?php echo $userData['name']; ?></h4>
@@ -100,7 +104,7 @@ include_once "includes/header.php";
                 <h5 class="nav-section-title">Conta</h5>
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="#" class="nav-link" data-open-settings-modal aria-controls="settingsModalOverlay" aria-haspopup="dialog">
                             <i class="bi bi-gear"></i>
                             <span>Configurações</span>
                         </a>
@@ -389,6 +393,8 @@ include_once "includes/header.php";
         </div>
     </main>
 </div>
+
+<?php include_once "includes/settings_modal.php"; ?>
 
 <!-- Charts Scripts -->
 <script>
