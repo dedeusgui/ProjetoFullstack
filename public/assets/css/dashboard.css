@@ -42,7 +42,7 @@
 }
 
 .dashboard-sidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--scrollbar-thumb);
 }
 
 /* Sidebar Header */
@@ -582,7 +582,7 @@
 .settings-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: var(--overlay-backdrop);
   display: none;
   align-items: center;
   justify-content: center;
@@ -598,7 +598,7 @@
   width: min(560px, 100%);
   max-height: 90vh;
   overflow-y: auto;
-  background: #fff;
+  background: var(--surface-elevated);
   border-radius: var(--radius-medium);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   padding: var(--space-lg);
@@ -632,7 +632,7 @@
 
 .settings-input {
   width: 100%;
-  border: 1px solid rgba(15, 23, 42, 0.15);
+  border: var(--border-light);
   border-radius: var(--radius-small);
   padding: 0.65rem 0.75rem;
 }

@@ -1,5 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('settingsModalOverlay');
+  const themeToggle = document.querySelector('[data-theme-toggle]');
+  const root = document.documentElement;
+  const THEME_KEY = 'doitly-theme';
+
+  const applyTheme = (theme) => {
+    if (theme === 'dark') {
+      root.setAttribute('data-theme', 'dark');
+      themeToggle && (themeToggle.checked = true);
+    } else {
+      root.removeAttribute('data-theme');
+      themeToggle && (themeToggle.checked = false);
+    }
+    window.dispatchEvent(new CustomEvent('doitly:theme-change', { detail: { theme } }));
+  };
+
+  const getPreferredTheme = () => {
+    const persisted = localStorage.getItem(THEME_KEY);
+    if (persisted === 'dark' || persisted === 'light') return persisted;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  };
+
+  applyTheme(getPreferredTheme());
+
+  themeToggle?.addEventListener('change', (event) => {
+    const theme = event.target.checked ? 'dark' : 'light';
+    localStorage.setItem(THEME_KEY, theme);
+    applyTheme(theme);
+  });
+
   if (!overlay) return;
 
   const openButtons = document.querySelectorAll('[data-open-settings-modal]');

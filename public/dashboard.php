@@ -129,8 +129,8 @@ include_once "includes/header.php";
     <main class="dashboard-content">
         <!-- Mensagens de Sucesso/Erro -->
         <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success"
-                style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #d4edda; border: 1px solid #c3e6cb; border-radius: var(--radius-medium); color: #155724;">
+            <div class="alert alert-success alert-success-theme"
+                style="margin-bottom: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-medium);">
                 <i class="bi bi-check-circle"></i>
                 <?php echo $_SESSION['success_message'];
                 unset($_SESSION['success_message']); ?>
@@ -138,8 +138,8 @@ include_once "includes/header.php";
         <?php endif; ?>
 
         <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-danger"
-                style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #f8d7da; border: 1px solid #f5c6cb; border-radius: var(--radius-medium); color: #721c24;">
+            <div class="alert alert-danger alert-danger-theme"
+                style="margin-bottom: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-medium);">
                 <i class="bi bi-exclamation-triangle"></i>
                 <?php echo $_SESSION['error_message'];
                 unset($_SESSION['error_message']); ?>
@@ -368,7 +368,21 @@ include_once "includes/header.php";
 <!-- Chart Script -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var options = {
+        const getThemeChartOptions = () => {
+            const styles = getComputedStyle(document.documentElement);
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            return {
+                accentBlue: styles.getPropertyValue('--accent-blue').trim() || '#4a74ff',
+                textSecondary: styles.getPropertyValue('--text-secondary').trim() || '#6c757d',
+                border: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0, 0, 0, 0.08)',
+                markerStroke: isDark ? '#161b22' : '#fff',
+                tooltipTheme: isDark ? 'dark' : 'light'
+            };
+        };
+
+        const buildOptions = () => {
+            const theme = getThemeChartOptions();
+            return {
             series: [{
                 name: 'Hábitos Concluídos',
                 data: <?php echo json_encode($weeklyChartCompleted); ?>
@@ -386,7 +400,7 @@ include_once "includes/header.php";
                     speed: 800
                 }
             },
-            colors: ['#4a74ff'],
+            colors: [theme.accentBlue],
             dataLabels: {
                 enabled: false
             },
@@ -407,7 +421,7 @@ include_once "includes/header.php";
                 categories: <?php echo json_encode($weeklyChartLabels); ?>,
                 labels: {
                     style: {
-                        colors: '#6c757d',
+                        colors: theme.textSecondary,
                         fontSize: '13px'
                     }
                 },
@@ -422,20 +436,20 @@ include_once "includes/header.php";
                 title: {
                     text: 'Hábitos',
                     style: {
-                        color: '#6c757d',
+                        color: theme.textSecondary,
                         fontSize: '13px',
                         fontWeight: 500
                     }
                 },
                 labels: {
                     style: {
-                        colors: '#6c757d',
+                        colors: theme.textSecondary,
                         fontSize: '13px'
                     }
                 }
             },
             grid: {
-                borderColor: 'rgba(0, 0, 0, 0.08)',
+                borderColor: theme.border,
                 strokeDashArray: 4,
                 xaxis: {
                     lines: {
@@ -444,7 +458,7 @@ include_once "includes/header.php";
                 }
             },
             tooltip: {
-                theme: 'light',
+                theme: theme.tooltipTheme,
                 y: {
                     formatter: function (value) {
                         return value + ' hábitos'
@@ -457,17 +471,24 @@ include_once "includes/header.php";
             },
             markers: {
                 size: 5,
-                colors: ['#4a74ff'],
-                strokeColors: '#fff',
+                colors: [theme.accentBlue],
+                strokeColors: theme.markerStroke,
                 strokeWidth: 2,
                 hover: {
                     size: 7
                 }
             }
         };
+        };
 
-        var chart = new ApexCharts(document.querySelector("#weeklyProgressChart"), options);
+        let chart = new ApexCharts(document.querySelector("#weeklyProgressChart"), buildOptions());
         chart.render();
+
+        window.addEventListener('doitly:theme-change', () => {
+            chart.destroy();
+            chart = new ApexCharts(document.querySelector("#weeklyProgressChart"), buildOptions());
+            chart.render();
+        });
 
         // Auto-hide alerts após 5 segundos
         setTimeout(() => {

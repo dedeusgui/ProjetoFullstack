@@ -428,9 +428,26 @@ include_once "includes/header.php";
 <!-- Charts Scripts -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const getThemeChartOptions = () => {
+            const styles = getComputedStyle(document.documentElement);
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            return {
+                accentBlue: styles.getPropertyValue('--accent-blue').trim() || '#4a74ff',
+                accentGreen: styles.getPropertyValue('--accent-green').trim() || '#59d186',
+                accentGold: styles.getPropertyValue('--accent-gold').trim() || '#eed27a',
+                accentRed: styles.getPropertyValue('--accent-red').trim() || '#ff5757',
+                accentPurple: styles.getPropertyValue('--accent-purple').trim() || '#a78bfa',
+                bgDarker: styles.getPropertyValue('--bg-darker').trim() || '#e6e7e9',
+                textPrimary: styles.getPropertyValue('--text-primary').trim() || '#222222',
+                textSecondary: styles.getPropertyValue('--text-secondary').trim() || '#6c757d',
+                border: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0, 0, 0, 0.08)',
+                tooltipTheme: isDark ? 'dark' : 'light'
+            };
+        };
 
-        // Monthly Progress Chart
-        var monthlyOptions = {
+        const buildMonthlyOptions = () => {
+            const theme = getThemeChartOptions();
+            return {
             series: [{
                 name: 'Concluídos',
                 data: <?php echo json_encode($monthlyData['completed']); ?>
@@ -455,7 +472,7 @@ include_once "includes/header.php";
                     }
                 }
             },
-            colors: ['#4a74ff', '#e6e7e9'],
+            colors: [theme.accentBlue, theme.bgDarker],
             noData: {
                 text: 'Sem dados suficientes para o período'
             },
@@ -470,7 +487,7 @@ include_once "includes/header.php";
                 categories: <?php echo json_encode($monthlyData['labels']); ?>,
                 labels: {
                     style: {
-                        colors: '#6c757d',
+                        colors: theme.textSecondary,
                         fontSize: '12px'
                     }
                 }
@@ -479,7 +496,7 @@ include_once "includes/header.php";
                 title: {
                     text: 'Hábitos',
                     style: {
-                        color: '#6c757d',
+                        color: theme.textSecondary,
                         fontSize: '13px'
                     }
                 }
@@ -489,16 +506,15 @@ include_once "includes/header.php";
                 horizontalAlign: 'right'
             },
             grid: {
-                borderColor: 'rgba(0, 0, 0, 0.08)',
+                borderColor: theme.border,
                 strokeDashArray: 4
             }
         };
+        };
 
-        var monthlyChart = new ApexCharts(document.querySelector("#monthlyChart"), monthlyOptions);
-        monthlyChart.render();
-
-        // Category Distribution Chart
-        var categoryOptions = {
+        const buildCategoryOptions = () => {
+            const theme = getThemeChartOptions();
+            return {
             series: <?php echo json_encode(array_column($categoryStats, 'total')); ?>,
             chart: {
                 type: 'donut',
@@ -509,7 +525,7 @@ include_once "includes/header.php";
             noData: {
                 text: 'Sem dados de categorias ainda'
             },
-            colors: ['#4a74ff', '#59d186', '#eed27a', '#ff5757', '#a78bfa'],
+            colors: [theme.accentBlue, theme.accentGreen, theme.accentGold, theme.accentRed, theme.accentPurple],
             legend: {
                 position: 'bottom'
             },
@@ -530,19 +546,21 @@ include_once "includes/header.php";
                                 label: 'Total',
                                 fontSize: '16px',
                                 fontWeight: 600,
-                                color: '#222222'
+                                color: theme.textPrimary
                             }
                         }
                     }
                 }
+            },
+            tooltip: {
+                theme: theme.tooltipTheme
             }
         };
+        };
 
-        var categoryChart = new ApexCharts(document.querySelector("#categoryChart"), categoryOptions);
-        categoryChart.render();
-
-        // Completion Rate Chart
-        var completionRateOptions = {
+        const buildCompletionRateOptions = () => {
+            const theme = getThemeChartOptions();
+            return {
             series: [{
                 name: 'Taxa de Conclusão',
                 data: <?php echo json_encode($completionRateSeries); ?>
@@ -555,7 +573,7 @@ include_once "includes/header.php";
                     show: false
                 }
             },
-            colors: ['#59d186'],
+            colors: [theme.accentGreen],
             noData: {
                 text: 'Sem dados suficientes para o período'
             },
@@ -578,7 +596,7 @@ include_once "includes/header.php";
                 categories: <?php echo json_encode($monthlyData['labels']); ?>,
                 labels: {
                     style: {
-                        colors: '#6c757d',
+                        colors: theme.textSecondary,
                         fontSize: '12px'
                     }
                 }
@@ -587,7 +605,7 @@ include_once "includes/header.php";
                 title: {
                     text: 'Porcentagem (%)',
                     style: {
-                        color: '#6c757d',
+                        color: theme.textSecondary,
                         fontSize: '13px'
                     }
                 },
@@ -595,10 +613,11 @@ include_once "includes/header.php";
                 max: 100
             },
             grid: {
-                borderColor: 'rgba(0, 0, 0, 0.08)',
+                borderColor: theme.border,
                 strokeDashArray: 4
             },
             tooltip: {
+                theme: theme.tooltipTheme,
                 y: {
                     formatter: function (value) {
                         return value.toFixed(1) + '%';
@@ -606,9 +625,30 @@ include_once "includes/header.php";
                 }
             }
         };
+        };
 
-        var completionRateChart = new ApexCharts(document.querySelector("#completionRateChart"), completionRateOptions);
+        let monthlyChart = new ApexCharts(document.querySelector("#monthlyChart"), buildMonthlyOptions());
+        monthlyChart.render();
+
+        let categoryChart = new ApexCharts(document.querySelector("#categoryChart"), buildCategoryOptions());
+        categoryChart.render();
+
+        let completionRateChart = new ApexCharts(document.querySelector("#completionRateChart"), buildCompletionRateOptions());
         completionRateChart.render();
+
+        window.addEventListener('doitly:theme-change', () => {
+            monthlyChart.destroy();
+            categoryChart.destroy();
+            completionRateChart.destroy();
+
+            monthlyChart = new ApexCharts(document.querySelector("#monthlyChart"), buildMonthlyOptions());
+            categoryChart = new ApexCharts(document.querySelector("#categoryChart"), buildCategoryOptions());
+            completionRateChart = new ApexCharts(document.querySelector("#completionRateChart"), buildCompletionRateOptions());
+
+            monthlyChart.render();
+            categoryChart.render();
+            completionRateChart.render();
+        });
     });
 
     function exportData() {
