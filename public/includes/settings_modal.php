@@ -4,7 +4,7 @@ $avatarUrl = trim($userData['avatar_url'] ?? '');
 ?>
 
 <div id="settingsModalOverlay" aria-hidden="true"
-    style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; padding: var(--space-lg); overflow-y: auto;">
+    style="display: none; position: fixed; inset: 0; background: var(--overlay-backdrop); backdrop-filter: blur(4px); z-index: 1000; padding: var(--space-lg); overflow-y: auto;">
     <div
         style="max-width: 620px; margin: 40px auto; background: var(--bg-light); border-radius: var(--radius-large); padding: var(--space-xl); box-shadow: var(--shadow-strong); border: var(--border-light);">
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--space-lg);">
@@ -50,6 +50,21 @@ $avatarUrl = trim($userData['avatar_url'] ?? '');
                     <input type="url" id="settingsAvatarUrl" name="avatar_url" placeholder="https://..."
                         value="<?php echo htmlspecialchars($avatarUrl, ENT_QUOTES, 'UTF-8'); ?>" class="form-control"
                         data-avatar-input>
+                </div>
+            </div>
+
+
+            <div style="margin-top: var(--space-sm);">
+                <p style="margin: 0 0 var(--space-xs); font-size: 0.875rem; color: var(--text-secondary);">Aparência</p>
+                <div class="theme-toggle">
+                    <div>
+                        <strong style="display:block; font-size: 0.95rem;">Modo escuro</strong>
+                        <small style="color: var(--text-secondary);">Ative para reduzir brilho e melhorar o contraste à noite.</small>
+                    </div>
+                    <label class="theme-toggle-switch" for="themeToggleInput">
+                        <input type="checkbox" id="themeToggleInput" data-theme-toggle aria-label="Alternar tema escuro">
+                        <span class="theme-toggle-slider"></span>
+                    </label>
                 </div>
             </div>
 

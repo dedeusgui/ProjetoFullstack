@@ -498,8 +498,21 @@ include_once "includes/header.php";
 <!-- Script do Gráfico -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Configuração do gráfico de progresso
-    var options = {
+    const getThemeChartOptions = () => {
+        const styles = getComputedStyle(document.documentElement);
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return {
+            accentBlue: styles.getPropertyValue('--accent-blue').trim() || '#4a74ff',
+            textSecondary: styles.getPropertyValue('--text-secondary').trim() || '#6c757d',
+            border: isDark ? 'rgba(255,255,255,0.18)' : 'rgba(0, 0, 0, 0.08)',
+            markerStroke: isDark ? '#161b22' : '#fff',
+            tooltipTheme: isDark ? 'dark' : 'light'
+        };
+    };
+
+    const buildOptions = () => {
+        const theme = getThemeChartOptions();
+        return {
         series: [{
             name: 'Hábitos Concluídos',
             data: [4, 6, 5, 7, 8, 6, 9]
@@ -521,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         },
-        colors: ['#4a74ff'],
+        colors: [theme.accentBlue],
         dataLabels: {
             enabled: false
         },
@@ -542,7 +555,7 @@ document.addEventListener('DOMContentLoaded', function() {
             categories: ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'],
             labels: {
                 style: {
-                    colors: '#6c757d',
+                    colors: theme.textSecondary,
                     fontSize: '13px'
                 }
             },
@@ -557,20 +570,20 @@ document.addEventListener('DOMContentLoaded', function() {
             title: {
                 text: 'Hábitos',
                 style: {
-                    color: '#6c757d',
+                    color: theme.textSecondary,
                     fontSize: '13px',
                     fontWeight: 500
                 }
             },
             labels: {
                 style: {
-                    colors: '#6c757d',
+                    colors: theme.textSecondary,
                     fontSize: '13px'
                 }
             }
         },
         grid: {
-            borderColor: 'rgba(0, 0, 0, 0.08)',
+            borderColor: theme.border,
             strokeDashArray: 4,
             xaxis: {
                 lines: {
@@ -579,7 +592,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         },
         tooltip: {
-            theme: 'light',
+            theme: theme.tooltipTheme,
             y: {
                 formatter: function(value) {
                     return value + ' hábitos'
@@ -592,17 +605,24 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         markers: {
             size: 5,
-            colors: ['#4a74ff'],
-            strokeColors: '#fff',
+            colors: [theme.accentBlue],
+            strokeColors: theme.markerStroke,
             strokeWidth: 2,
             hover: {
                 size: 7
             }
         }
     };
+    }
 
-    var chart = new ApexCharts(document.querySelector("#progressChart"), options);
+    let chart = new ApexCharts(document.querySelector("#progressChart"), buildOptions());
     chart.render();
+
+    window.addEventListener('doitly:theme-change', () => {
+        chart.destroy();
+        chart = new ApexCharts(document.querySelector("#progressChart"), buildOptions());
+        chart.render();
+    });
 });
 </script>
 

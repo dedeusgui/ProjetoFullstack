@@ -266,7 +266,7 @@ section {
 }
 
 .testimonial-rating {
-  color: #fbbf24;
+  color: var(--rating-star);
   font-size: 1.25rem;
 }
 

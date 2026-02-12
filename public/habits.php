@@ -129,13 +129,13 @@ include_once "includes/header.php";
     <main class="dashboard-content">
         <!-- Mensagens de Sucesso/Erro -->
         <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #d4edda; border: 1px solid #c3e6cb; border-radius: var(--radius-medium); color: #155724;">
+            <div class="alert alert-success alert-success-theme" style="margin-bottom: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-medium);">
                 <i class="bi bi-check-circle"></i> <?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>
             </div>
         <?php endif; ?>
         
         <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-danger" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #f8d7da; border: 1px solid #f5c6cb; border-radius: var(--radius-medium); color: #721c24;">
+            <div class="alert alert-danger alert-danger-theme" style="margin-bottom: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-medium);">
                 <i class="bi bi-exclamation-triangle"></i> <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
             </div>
         <?php endif; ?>
@@ -355,7 +355,7 @@ include_once "includes/header.php";
 <?php include_once "includes/settings_modal.php"; ?>
 
 <!-- Modal: Criar/Editar Hábito -->
-<div id="habitModal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 1000; padding: var(--space-lg); overflow-y: auto;">
+<div id="habitModal" style="display: none; position: fixed; inset: 0; background: var(--overlay-backdrop); backdrop-filter: blur(4px); z-index: 1000; padding: var(--space-lg); overflow-y: auto;">
     <div style="max-width: 600px; margin: 40px auto; background: var(--bg-light); border-radius: var(--radius-large); padding: var(--space-xl); box-shadow: var(--shadow-strong);">
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--space-lg);">
             <h2 style="margin: 0; font-size: 1.5rem;" id="modalTitle">
