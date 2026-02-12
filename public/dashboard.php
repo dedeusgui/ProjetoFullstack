@@ -62,7 +62,13 @@ include_once "includes/header.php";
         <div class="sidebar-header">
             <div class="sidebar-user">
                 <div class="user-avatar">
-                    <?php echo $userData['initials']; ?>
+                    <?php if (!empty($userData['avatar_url'])): ?>
+                        <img src="<?php echo htmlspecialchars($userData['avatar_url'], ENT_QUOTES, 'UTF-8'); ?>"
+                            alt="Avatar de <?php echo htmlspecialchars($userData['name'], ENT_QUOTES, 'UTF-8'); ?>"
+                            style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;">
+                    <?php else: ?>
+                        <?php echo htmlspecialchars($userData['initials'], ENT_QUOTES, 'UTF-8'); ?>
+                    <?php endif; ?>
                 </div>
                 <div class="user-info">
                     <h4 class="user-name"><?php echo $userData['name']; ?></h4>
@@ -102,13 +108,14 @@ include_once "includes/header.php";
                 <h5 class="nav-section-title">Conta</h5>
                 <ul class="nav-menu">
                     <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <a href="#" class="nav-link" data-open-settings-modal aria-controls="settingsModalOverlay"
+                            aria-haspopup="dialog">
                             <i class="bi bi-gear"></i>
                             <span>Configurações</span>
                         </a>
                     </li>
                     <li class="nav-item">
-                       <a href="../actions/logout_action.php" class="nav-link">
+                        <a href="../actions/logout_action.php" class="nav-link">
                             <i class="bi bi-box-arrow-right"></i>
                             <span>Sair</span>
                         </a>
@@ -122,14 +129,20 @@ include_once "includes/header.php";
     <main class="dashboard-content">
         <!-- Mensagens de Sucesso/Erro -->
         <?php if (isset($_SESSION['success_message'])): ?>
-            <div class="alert alert-success" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #d4edda; border: 1px solid #c3e6cb; border-radius: var(--radius-medium); color: #155724;">
-                <i class="bi bi-check-circle"></i> <?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>
+            <div class="alert alert-success"
+                style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #d4edda; border: 1px solid #c3e6cb; border-radius: var(--radius-medium); color: #155724;">
+                <i class="bi bi-check-circle"></i>
+                <?php echo $_SESSION['success_message'];
+                unset($_SESSION['success_message']); ?>
             </div>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-danger" style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #f8d7da; border: 1px solid #f5c6cb; border-radius: var(--radius-medium); color: #721c24;">
-                <i class="bi bi-exclamation-triangle"></i> <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
+            <div class="alert alert-danger"
+                style="margin-bottom: var(--space-lg); padding: var(--space-md); background: #f8d7da; border: 1px solid #f5c6cb; border-radius: var(--radius-medium); color: #721c24;">
+                <i class="bi bi-exclamation-triangle"></i>
+                <?php echo $_SESSION['error_message'];
+                unset($_SESSION['error_message']); ?>
             </div>
         <?php endif; ?>
 
@@ -246,22 +259,30 @@ include_once "includes/header.php";
                         </div>
 
                         <!-- Mini Stats -->
-                        <div style="margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: var(--border-light);">
-                            <h4 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: var(--space-md);">
+                        <div
+                            style="margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: var(--border-light);">
+                            <h4
+                                style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: var(--space-md);">
                                 Resumo do Mês
                             </h4>
                             <div class="d-flex flex-column gap-sm">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span style="font-size: 0.875rem; color: var(--text-secondary);">Dias ativos</span>
-                                    <strong style="color: var(--accent-green);"><?php echo $monthSummary['active_days']; ?>/<?php echo $monthSummary['total_days']; ?></strong>
+                                    <strong
+                                        style="color: var(--accent-green);"><?php echo $monthSummary['active_days']; ?>/<?php echo $monthSummary['total_days']; ?></strong>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Melhor streak</span>
-                                    <strong style="color: var(--accent-blue);"><?php echo $monthSummary['best_streak']; ?> dias</strong>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Melhor
+                                        streak</span>
+                                    <strong
+                                        style="color: var(--accent-blue);"><?php echo $monthSummary['best_streak']; ?>
+                                        dias</strong>
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Total concluído</span>
-                                    <strong style="color: var(--accent-gold);"><?php echo $monthSummary['total_completions']; ?></strong>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Total
+                                        concluído</span>
+                                    <strong
+                                        style="color: var(--accent-gold);"><?php echo $monthSummary['total_completions']; ?></strong>
                                 </div>
                             </div>
                         </div>
@@ -295,15 +316,17 @@ include_once "includes/header.php";
                                         <?php else: ?>
                                             <span class="doitly-badge doitly-badge-warning">🌙 Noite</span>
                                         <?php endif; ?>
-                                        
+
                                         <div class="flex-grow-1">
-                                            <span class="d-block" style="<?php echo $habit['completed'] ? 'text-decoration: line-through;' : ''; ?>">
+                                            <span class="d-block"
+                                                style="<?php echo $habit['completed'] ? 'text-decoration: line-through;' : ''; ?>">
                                                 <?php echo htmlspecialchars($habit['name']); ?>
                                             </span>
-                                            <small class="text-secondary"><?php echo htmlspecialchars($habit['category']); ?></small>
+                                            <small
+                                                class="text-secondary"><?php echo htmlspecialchars($habit['category']); ?></small>
                                         </div>
                                     </div>
-                                    
+
                                     <?php if ($habit['completed']): ?>
                                         <button class="doitly-btn doitly-btn-sm doitly-btn-success" disabled>
                                             <i class="bi bi-check-circle-fill"></i> Concluído
@@ -340,120 +363,122 @@ include_once "includes/header.php";
     </main>
 </div>
 
+<?php include_once "includes/settings_modal.php"; ?>
+
 <!-- Chart Script -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var options = {
-        series: [{
-            name: 'Hábitos Concluídos',
-            data: <?php echo json_encode($weeklyChartCompleted); ?>
-        }],
-        chart: {
-            type: 'area',
-            height: 320,
-            fontFamily: 'Inter, sans-serif',
-            toolbar: {
-                show: false
-            },
-            animations: {
-                enabled: true,
-                easing: 'easeinout',
-                speed: 800
-            }
-        },
-        colors: ['#4a74ff'],
-        dataLabels: {
-            enabled: false
-        },
-        stroke: {
-            curve: 'smooth',
-            width: 3
-        },
-        fill: {
-            type: 'gradient',
-            gradient: {
-                shadeIntensity: 1,
-                opacityFrom: 0.4,
-                opacityTo: 0.1,
-                stops: [0, 90, 100]
-            }
-        },
-        xaxis: {
-            categories: <?php echo json_encode($weeklyChartLabels); ?>,
-            labels: {
-                style: {
-                    colors: '#6c757d',
-                    fontSize: '13px'
+    document.addEventListener('DOMContentLoaded', function () {
+        var options = {
+            series: [{
+                name: 'Hábitos Concluídos',
+                data: <?php echo json_encode($weeklyChartCompleted); ?>
+            }],
+            chart: {
+                type: 'area',
+                height: 320,
+                fontFamily: 'Inter, sans-serif',
+                toolbar: {
+                    show: false
+                },
+                animations: {
+                    enabled: true,
+                    easing: 'easeinout',
+                    speed: 800
                 }
             },
-            axisBorder: {
-                show: false
+            colors: ['#4a74ff'],
+            dataLabels: {
+                enabled: false
             },
-            axisTicks: {
-                show: false
-            }
-        },
-        yaxis: {
-            title: {
-                text: 'Hábitos',
-                style: {
-                    color: '#6c757d',
-                    fontSize: '13px',
-                    fontWeight: 500
+            stroke: {
+                curve: 'smooth',
+                width: 3
+            },
+            fill: {
+                type: 'gradient',
+                gradient: {
+                    shadeIntensity: 1,
+                    opacityFrom: 0.4,
+                    opacityTo: 0.1,
+                    stops: [0, 90, 100]
                 }
             },
-            labels: {
-                style: {
-                    colors: '#6c757d',
-                    fontSize: '13px'
-                }
-            }
-        },
-        grid: {
-            borderColor: 'rgba(0, 0, 0, 0.08)',
-            strokeDashArray: 4,
             xaxis: {
-                lines: {
+                categories: <?php echo json_encode($weeklyChartLabels); ?>,
+                labels: {
+                    style: {
+                        colors: '#6c757d',
+                        fontSize: '13px'
+                    }
+                },
+                axisBorder: {
+                    show: false
+                },
+                axisTicks: {
                     show: false
                 }
-            }
-        },
-        tooltip: {
-            theme: 'light',
-            y: {
-                formatter: function(value) {
-                    return value + ' hábitos'
+            },
+            yaxis: {
+                title: {
+                    text: 'Hábitos',
+                    style: {
+                        color: '#6c757d',
+                        fontSize: '13px',
+                        fontWeight: 500
+                    }
+                },
+                labels: {
+                    style: {
+                        colors: '#6c757d',
+                        fontSize: '13px'
+                    }
                 }
             },
-            style: {
-                fontSize: '13px',
-                fontFamily: 'Inter, sans-serif'
+            grid: {
+                borderColor: 'rgba(0, 0, 0, 0.08)',
+                strokeDashArray: 4,
+                xaxis: {
+                    lines: {
+                        show: false
+                    }
+                }
+            },
+            tooltip: {
+                theme: 'light',
+                y: {
+                    formatter: function (value) {
+                        return value + ' hábitos'
+                    }
+                },
+                style: {
+                    fontSize: '13px',
+                    fontFamily: 'Inter, sans-serif'
+                }
+            },
+            markers: {
+                size: 5,
+                colors: ['#4a74ff'],
+                strokeColors: '#fff',
+                strokeWidth: 2,
+                hover: {
+                    size: 7
+                }
             }
-        },
-        markers: {
-            size: 5,
-            colors: ['#4a74ff'],
-            strokeColors: '#fff',
-            strokeWidth: 2,
-            hover: {
-                size: 7
-            }
-        }
-    };
+        };
 
-    var chart = new ApexCharts(document.querySelector("#weeklyProgressChart"), options);
-    chart.render();
+        var chart = new ApexCharts(document.querySelector("#weeklyProgressChart"), options);
+        chart.render();
 
-    // Auto-hide alerts após 5 segundos
-    setTimeout(() => {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
-            alert.style.transition = 'opacity 0.5s ease';
-            alert.style.opacity = '0';
-            setTimeout(() => alert.remove(), 500);
-        });
-    }, 5000);
-});
+        // Auto-hide alerts após 5 segundos
+        setTimeout(() => {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                alert.style.transition = 'opacity 0.5s ease';
+                alert.style.opacity = '0';
+                setTimeout(() => alert.remove(), 500);
+            });
+        }, 5000);
+    });
 </script>
 
 <?php include_once "includes/footer.php"; ?>
