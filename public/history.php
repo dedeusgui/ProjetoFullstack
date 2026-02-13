@@ -133,10 +133,10 @@ include_once "includes/header.php";
                     <h1 class="dashboard-title">Histórico e Estatísticas 📊</h1>
                     <p class="dashboard-subtitle">Acompanhe sua evolução e conquistas</p>
                 </div>
-                <button class="doitly-btn doitly-btn-secondary" onclick="exportData()">
+                <a href="../actions/export_user_data_csv.php" class="doitly-btn doitly-btn-secondary">
                     <i class="bi bi-download"></i>
                     Exportar Dados
-                </button>
+                </a>
             </div>
         </div>
 
@@ -651,10 +651,6 @@ include_once "includes/header.php";
         });
     });
 
-    function exportData() {
-        // TODO: Backend - Implementar exportação real (CSV/PDF)
-        alert('📥 Exportando dados...\n\n(TODO: Backend - Implementar exportação em CSV ou PDF)');
-    }
 </script>
 
 <style>

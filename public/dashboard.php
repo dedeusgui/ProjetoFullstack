@@ -222,9 +222,9 @@ include_once "includes/header.php";
                             Progresso Semanal
                         </h3>
                         <div class="card-actions">
-                            <button class="doitly-btn doitly-btn-sm doitly-btn-ghost">
+                            <a href="../actions/export_user_data_csv.php" class="doitly-btn doitly-btn-sm doitly-btn-ghost" title="Exportar resumo em CSV">
                                 <i class="bi bi-download"></i>
-                            </button>
+                            </a>
                         </div>
                     </div>
                     <div class="card-body">
@@ -252,10 +252,10 @@ include_once "includes/header.php";
                                 <i class="bi bi-graph-up"></i>
                                 Ver Estatísticas
                             </a>
-                            <button class="doitly-btn doitly-btn-outline w-100">
+                            <a href="../actions/export_user_data_csv.php" class="doitly-btn doitly-btn-outline w-100">
                                 <i class="bi bi-download"></i>
                                 Exportar Dados
-                            </button>
+                            </a>
                         </div>
 
                         <!-- Mini Stats -->

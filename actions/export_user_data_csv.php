@@ -36,6 +36,18 @@ $unlockedAchievements = array_values(array_filter($achievements, function ($achi
     return !empty($achievement['unlocked']);
 }));
 
+$habitsDoneToday = 0;
+$activeHabitsCount = 0;
+foreach ($habits as $habit) {
+    if ((int) $habit['completed_today'] === 1) {
+        $habitsDoneToday++;
+    }
+
+    if ((int) $habit['is_active'] === 1) {
+        $activeHabitsCount++;
+    }
+}
+
 $filename = 'resumo_dados_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', strtolower($userData['name'])) . '_' . date('Ymd_His') . '.csv';
 
 header('Content-Type: text/csv; charset=UTF-8');
@@ -49,6 +61,17 @@ fwrite($output, "\xEF\xBB\xBF");
 fputcsv($output, ['Resumo de dados do usuário']);
 fputcsv($output, ['Nome', 'E-mail', 'Data de exportação']);
 fputcsv($output, [$userData['name'], $userData['email'], date('d/m/Y H:i:s')]);
+fputcsv($output, []);
+
+fputcsv($output, ['Resumo geral']);
+fputcsv($output, ['Hábitos cadastrados', 'Hábitos ativos', 'Fez hoje', 'Não fez hoje', 'Conquistas desbloqueadas']);
+fputcsv($output, [
+    count($habits),
+    $activeHabitsCount,
+    $habitsDoneToday,
+    max(0, count($habits) - $habitsDoneToday),
+    count($unlockedAchievements)
+]);
 fputcsv($output, []);
 
 fputcsv($output, ['Resumo dos hábitos']);
