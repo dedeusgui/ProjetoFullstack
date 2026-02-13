@@ -6,13 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const accentColorInput = document.querySelector('[data-accent-color-input]');
   const textScaleInput = document.querySelector('[data-text-scale-input]');
   const textScaleValue = document.getElementById('settingsTextScaleValue');
-  const resetAppearanceButton = document.querySelector('[data-reset-appearance]');
   const THEME_KEY = 'doitly-theme';
-  const DEFAULT_THEME = 'light';
-  const DEFAULT_PRIMARY_COLOR = '#4a74ff';
-  const DEFAULT_PRIMARY_HOVER_COLOR = '#3d63e6';
-  const DEFAULT_ACCENT_COLOR = '#59d186';
-  const DEFAULT_TEXT_SCALE = 1.0;
   const root = document.documentElement;
 
   const applyTheme = (theme) => {
@@ -34,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const applyVisualPreferences = ({ primaryColor, accentColor, textScale }) => {
     if (primaryColor) {
       root.style.setProperty('--accent-blue', primaryColor);
-      root.style.setProperty('--accent-blue-hover', DEFAULT_PRIMARY_HOVER_COLOR);
+      root.style.setProperty('--accent-blue-hover', '#3d63e6');
     }
 
     if (accentColor) {
@@ -81,46 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
     applyVisualPreferences({ textScale: event.target.value });
   });
 
-  resetAppearanceButton?.addEventListener('click', () => {
-    if (themeToggle) {
-      themeToggle.checked = false;
-    }
-    if (themeInput) {
-      themeInput.value = DEFAULT_THEME;
-    }
-    if (primaryColorInput) {
-      primaryColorInput.value = DEFAULT_PRIMARY_COLOR;
-    }
-    if (accentColorInput) {
-      accentColorInput.value = DEFAULT_ACCENT_COLOR;
-    }
-    if (textScaleInput) {
-      textScaleInput.value = DEFAULT_TEXT_SCALE.toFixed(2);
-    }
-
-    applyTheme(DEFAULT_THEME);
-    localStorage.setItem(THEME_KEY, DEFAULT_THEME);
-    applyVisualPreferences({
-      primaryColor: DEFAULT_PRIMARY_COLOR,
-      accentColor: DEFAULT_ACCENT_COLOR,
-      textScale: DEFAULT_TEXT_SCALE
-    });
-
-    if (overlay) {
-      overlay.style.display = 'none';
-      overlay.setAttribute('aria-hidden', 'true');
-    }
-    document.body.style.overflow = '';
-
-    const settingsForm = overlay?.querySelector('form');
-    if (settingsForm) {
-      if (typeof settingsForm.requestSubmit === 'function') {
-        settingsForm.requestSubmit();
-      } else {
-        settingsForm.submit();
-      }
-    }
-  });
 
   if (!overlay) return;
 

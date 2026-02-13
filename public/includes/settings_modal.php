@@ -111,7 +111,7 @@ $textScale = isset($userData['text_scale']) ? (float) $userData['text_scale'] : 
                 </div>
 
                 <div style="margin-top: var(--space-sm); display:flex; justify-content:flex-end;">
-                    <button type="button" class="doitly-btn doitly-btn-outline doitly-btn-sm" data-reset-appearance>
+                    <button type="submit" form="resetAppearanceForm" class="doitly-btn doitly-btn-outline doitly-btn-sm" onclick="localStorage.setItem('doitly-theme','light');">
                         <i class="bi bi-arrow-counterclockwise"></i>
                         Retornar ao padrão
                     </button>
@@ -183,6 +183,11 @@ $textScale = isset($userData['text_scale']) ? (float) $userData['text_scale'] : 
                     </button>
                 </div>
             </div>
+        </form>
+
+        <form id="resetAppearanceForm" method="POST" action="../actions/reset_appearance_action.php" style="display:none;">
+            <input type="hidden" name="return_to"
+                value="<?php echo htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8'); ?>">
         </form>
     </div>
 </div>
