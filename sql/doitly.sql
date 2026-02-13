@@ -193,7 +193,11 @@ INSERT INTO `achievements` (`id`, `slug`, `name`, `description`, `icon`, `badge_
 (5, 'perfect-week', 'Semana Perfeita', 'Complete todos os hábitos por 7 dias seguidos', 'award', '#4a74ff', 'perfect_week', 1, 100, 'epic', 1, '2026-02-10 17:49:42'),
 (6, 'habit-collector', 'Colecionador de Hábitos', 'Crie 10 hábitos diferentes', 'collection', '#e67e22', 'habits_count', 10, 75, 'rare', 1, '2026-02-10 17:49:42'),
 (7, 'unstoppable', 'Imparável', 'Mantenha um streak de 100 dias', 'rocket', '#ff5757', 'streak', 100, 500, 'legendary', 1, '2026-02-10 17:49:42'),
-(8, 'dedication', 'Dedicação Total', 'Complete 1000 hábitos', 'gem', '#3498db', 'total_completions', 1000, 1000, 'legendary', 1, '2026-02-10 17:49:42');
+(8, 'dedication', 'Dedicação Total', 'Complete 1000 hábitos', 'gem', '#3498db', 'total_completions', 1000, 1000, 'legendary', 1, '2026-02-10 17:49:42'),
+(9, 'focus-architect', 'Arquiteto do Foco', 'Alcance uma sequência de 14 dias consistentes', 'lightning', '#00bcd4', 'streak', 14, 90, 'rare', 1, '2026-02-13 12:00:00'),
+(10, 'momentum-engine', 'Motor de Momentum', 'Conclua 250 hábitos no total', 'target', '#6c5ce7', 'total_completions', 250, 280, 'epic', 1, '2026-02-13 12:00:00'),
+(11, 'habit-alchemist', 'Alquimista de Hábitos', 'Mantenha 15 hábitos ativos ao mesmo tempo', 'bezier2', '#ff7f50', 'habits_count', 15, 220, 'epic', 1, '2026-02-13 12:00:00'),
+(12, 'legend-cycle', 'Ciclo Lendário', 'Complete todos os hábitos por 30 dias seguidos', 'infinity', '#f1c40f', 'perfect_month', 1, 700, 'legendary', 1, '2026-02-13 12:00:00');
 
 -- --------------------------------------------------------
 

@@ -342,7 +342,11 @@ function mapAchievementIconToBootstrap(string $icon): string {
         'award' => 'bi-award',
         'collection' => 'bi-collection',
         'rocket' => 'bi-rocket',
-        'gem' => 'bi-gem'
+        'gem' => 'bi-gem',
+        'lightning' => 'bi-lightning-charge',
+        'target' => 'bi-bullseye',
+        'bezier2' => 'bi-bezier2',
+        'infinity' => 'bi-infinity'
     ];
 
     return $map[$icon] ?? 'bi-patch-check';

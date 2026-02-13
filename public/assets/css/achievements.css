@@ -1,0 +1,198 @@
+.achievements-header {
+    margin-bottom: var(--space-lg);
+}
+
+.achievements-stats {
+    margin-bottom: var(--space-lg);
+}
+
+.achievements-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    align-items: end;
+}
+
+.filter-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.875rem;
+    font-weight: var(--font-semibold);
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: var(--space-lg);
+}
+
+.achievement-card {
+    position: relative;
+    padding: var(--space-lg);
+    border-radius: var(--radius-large);
+    border: var(--border-light);
+    background: var(--glass-bg-medium);
+    transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+}
+
+.achievement-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-heavy);
+}
+
+.achievement-card.is-unlocked {
+    box-shadow: 0 0 0 1px rgba(89, 209, 134, 0.35), var(--shadow-medium);
+}
+
+.achievement-card.is-locked {
+    opacity: 0.72;
+    filter: grayscale(0.2);
+}
+
+.achievement-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-md);
+}
+
+.achievement-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1.375rem;
+    box-shadow: var(--shadow-light);
+}
+
+.achievement-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.rarity-badge,
+.points-badge,
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: var(--font-semibold);
+}
+
+.rarity-common { background: #8192a6; color: #fff; }
+.rarity-rare { background: #2e8fff; color: #fff; }
+.rarity-epic { background: #9b59b6; color: #fff; }
+.rarity-legendary { background: #f39c12; color: #1f1f1f; }
+
+.points-badge {
+    background: rgba(255, 255, 255, 0.14);
+    border: var(--border-light);
+}
+
+.achievement-title {
+    margin: 0 0 6px;
+    font-size: 1.1rem;
+}
+
+.achievement-description {
+    margin: 0 0 var(--space-md);
+    color: var(--text-muted);
+    font-size: 0.92rem;
+}
+
+.progress-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.progress-bar-track {
+    position: relative;
+    flex: 1;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--glass-bg-light);
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent-green), var(--accent-blue));
+    animation: fillProgress 0.8s ease forwards;
+}
+
+.progress-text {
+    font-size: 0.8rem;
+    font-weight: var(--font-semibold);
+}
+
+.achievement-footer {
+    margin-top: var(--space-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.status-unlocked {
+    background: rgba(89, 209, 134, 0.2);
+    color: #59d186;
+}
+
+.status-locked {
+    background: rgba(255, 87, 87, 0.16);
+    color: #ff7f7f;
+}
+
+.unlock-date {
+    color: var(--text-muted);
+}
+
+.empty-state {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.empty-state i {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: var(--space-sm);
+}
+
+.achievement-card[data-tooltip]:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 12px);
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    font-size: 0.8rem;
+    padding: 8px 10px;
+    border-radius: var(--radius-medium);
+    width: min(250px, 90%);
+    z-index: 5;
+    text-align: center;
+}
+
+@keyframes fillProgress {
+    from { width: 0; }
+    to { width: var(--progress-width); }
+}
+
+@media (max-width: 768px) {
+    .achievements-filters > div {
+        width: 100%;
+    }
+}

@@ -99,6 +99,12 @@ include_once "includes/header.php";
                             <span>Histórico</span>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="achievements.php" class="nav-link">
+                            <i class="bi bi-award"></i>
+                            <span>Conquistas</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
 
