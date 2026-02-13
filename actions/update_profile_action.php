@@ -136,8 +136,17 @@ try {
         throw new Exception('Falha ao atualizar dados básicos do usuário.');
     }
 
-    $settingsStmt = $conn->prepare('UPDATE user_settings SET theme = ?, primary_color = ?, accent_color = ?, text_scale = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?');
-    $settingsStmt->bind_param('sssdi', $theme, $primaryColor, $accentColor, $textScale, $userId);
+    $settingsStmt = $conn->prepare(
+        'INSERT INTO user_settings (user_id, theme, primary_color, accent_color, text_scale)
+         VALUES (?, ?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE
+            theme = VALUES(theme),
+            primary_color = VALUES(primary_color),
+            accent_color = VALUES(accent_color),
+            text_scale = VALUES(text_scale),
+            updated_at = CURRENT_TIMESTAMP'
+    );
+    $settingsStmt->bind_param('isssd', $userId, $theme, $primaryColor, $accentColor, $textScale);
 
     if (!$settingsStmt->execute()) {
         throw new Exception('Falha ao atualizar preferências visuais do usuário.');
