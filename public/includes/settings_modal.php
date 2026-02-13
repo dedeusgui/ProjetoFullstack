@@ -101,12 +101,9 @@ $textScale = isset($userData['text_scale']) ? (float) $userData['text_scale'] : 
                     </label>
                     <input type="range" id="settingsTextScale" name="text_scale" min="0.9" max="1.2" step="0.05"
                         value="<?php echo htmlspecialchars(number_format($textScale, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" class="form-range" data-text-scale-input>
-                    <small style="display:block; margin-top: 6px; color: var(--text-tertiary);">Ajuste de 90% até 120% (100% é o padrão).</small>
+                    <small style="display:block; margin-top: 6px; color: var(--text-tertiary);"></small>
                     <div style="display:flex; justify-content:space-between; margin-top:6px; font-size:0.75rem; color: var(--text-tertiary);">
-                        <span>90% (menor)</span>
-                        <span>100% (padrão)</span>
-                        <span>110% (confortável)</span>
-                        <span>120% (maior)</span>
+                        
                     </div>
                 </div>
 
