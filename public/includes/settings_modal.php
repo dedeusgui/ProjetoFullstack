@@ -119,12 +119,19 @@ $avatarUrl = trim($userData['avatar_url'] ?? '');
                 </div>
             </div>
 
-            <div class="d-flex justify-content-end" style="gap: var(--space-sm); margin-top: var(--space-md);">
-                <button type="button" class="doitly-btn doitly-btn-outline" data-close-settings-modal>Cancelar</button>
-                <button type="submit" class="doitly-btn">
-                    <i class="bi bi-check2-circle"></i>
-                    Salvar alterações
-                </button>
+            <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: var(--space-sm); margin-top: var(--space-md);">
+                <a href="../actions/export_user_data_csv.php" class="doitly-btn doitly-btn-outline">
+                    <i class="bi bi-download"></i>
+                    Exportar resumo (CSV)
+                </a>
+
+                <div class="d-flex justify-content-end" style="gap: var(--space-sm);">
+                    <button type="button" class="doitly-btn doitly-btn-outline" data-close-settings-modal>Cancelar</button>
+                    <button type="submit" class="doitly-btn">
+                        <i class="bi bi-check2-circle"></i>
+                        Salvar alterações
+                    </button>
+                </div>
             </div>
         </form>
     </div>
