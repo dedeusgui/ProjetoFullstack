@@ -21,7 +21,21 @@ function getCurrentUser($conn) {
     }
     
     $userId = getUserId();
-    $stmt = $conn->prepare("SELECT id, name, email, avatar_url FROM users WHERE id = ? AND is_active = 1");
+    $stmt = $conn->prepare("
+        SELECT
+            u.id,
+            u.name,
+            u.email,
+            u.avatar_url,
+            us.theme,
+            us.primary_color,
+            us.accent_color,
+            us.text_scale
+        FROM users u
+        LEFT JOIN user_settings us ON us.user_id = u.id
+        WHERE u.id = ? AND u.is_active = 1
+        LIMIT 1
+    ");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $result = $stmt->get_result();
