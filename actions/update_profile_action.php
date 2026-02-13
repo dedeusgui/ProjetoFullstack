@@ -27,6 +27,10 @@ $avatarUrl = trim($_POST['avatar_url'] ?? '');
 $newPassword = trim($_POST['new_password'] ?? '');
 $confirmPassword = trim($_POST['confirm_password'] ?? '');
 $currentPassword = trim($_POST['current_password'] ?? '');
+$theme = ($_POST['theme'] ?? 'light') === 'dark' ? 'dark' : 'light';
+$primaryColor = strtoupper(trim($_POST['primary_color'] ?? '#4A74FF'));
+$accentColor = strtoupper(trim($_POST['accent_color'] ?? '#59D186'));
+$textScale = (float) ($_POST['text_scale'] ?? 1.00);
 
 if ($email === '') {
     $_SESSION['error_message'] = 'O e-mail é obrigatório.';
@@ -42,6 +46,24 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 if ($avatarUrl !== '' && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
     $_SESSION['error_message'] = 'A URL da imagem de perfil é inválida.';
+    header('Location: ' . $redirectPath);
+    exit;
+}
+
+if (!preg_match('/^#[0-9A-F]{6}$/', $primaryColor)) {
+    $_SESSION['error_message'] = 'A cor principal é inválida.';
+    header('Location: ' . $redirectPath);
+    exit;
+}
+
+if (!preg_match('/^#[0-9A-F]{6}$/', $accentColor)) {
+    $_SESSION['error_message'] = 'A cor de destaque é inválida.';
+    header('Location: ' . $redirectPath);
+    exit;
+}
+
+if ($textScale < 0.9 || $textScale > 1.2) {
+    $_SESSION['error_message'] = 'O ajuste de tamanho de texto está fora do limite permitido.';
     header('Location: ' . $redirectPath);
     exit;
 }
@@ -107,12 +129,28 @@ if ($shouldUpdatePassword) {
     $updateStmt->bind_param('ssi', $email, $avatarUrl, $userId);
 }
 
-if ($updateStmt->execute()) {
+$conn->begin_transaction();
+
+try {
+    if (!$updateStmt->execute()) {
+        throw new Exception('Falha ao atualizar dados básicos do usuário.');
+    }
+
+    $settingsStmt = $conn->prepare('UPDATE user_settings SET theme = ?, primary_color = ?, accent_color = ?, text_scale = ?, updated_at = CURRENT_TIMESTAMP WHERE user_id = ?');
+    $settingsStmt->bind_param('sssdi', $theme, $primaryColor, $accentColor, $textScale, $userId);
+
+    if (!$settingsStmt->execute()) {
+        throw new Exception('Falha ao atualizar preferências visuais do usuário.');
+    }
+
+    $conn->commit();
+
     $_SESSION['user_email'] = $email;
     $_SESSION['success_message'] = $shouldUpdatePassword
         ? 'Configurações atualizadas com sucesso! E sua senha foi alterada.'
         : 'Configurações atualizadas com sucesso!';
-} else {
+} catch (Throwable $exception) {
+    $conn->rollback();
     $_SESSION['error_message'] = 'Não foi possível salvar as configurações. Tente novamente.';
 }
 

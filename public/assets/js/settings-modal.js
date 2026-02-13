@@ -1,32 +1,70 @@
 document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('settingsModalOverlay');
   const themeToggle = document.querySelector('[data-theme-toggle]');
+  const themeInput = document.getElementById('settingsThemeInput');
+  const primaryColorInput = document.querySelector('[data-primary-color-input]');
+  const accentColorInput = document.querySelector('[data-accent-color-input]');
+  const textScaleInput = document.querySelector('[data-text-scale-input]');
+  const textScaleValue = document.getElementById('settingsTextScaleValue');
   const root = document.documentElement;
-  const THEME_KEY = 'doitly-theme';
 
   const applyTheme = (theme) => {
     if (theme === 'dark') {
       root.setAttribute('data-theme', 'dark');
-      themeToggle && (themeToggle.checked = true);
+      if (themeToggle) themeToggle.checked = true;
     } else {
       root.removeAttribute('data-theme');
-      themeToggle && (themeToggle.checked = false);
+      if (themeToggle) themeToggle.checked = false;
     }
+
+    if (themeInput) {
+      themeInput.value = theme;
+    }
+
     window.dispatchEvent(new CustomEvent('doitly:theme-change', { detail: { theme } }));
   };
 
-  const getPreferredTheme = () => {
-    const persisted = localStorage.getItem(THEME_KEY);
-    if (persisted === 'dark' || persisted === 'light') return persisted;
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  const applyVisualPreferences = ({ primaryColor, accentColor, textScale }) => {
+    if (primaryColor) {
+      root.style.setProperty('--accent-blue', primaryColor);
+      root.style.setProperty('--accent-blue-hover', primaryColor);
+    }
+
+    if (accentColor) {
+      root.style.setProperty('--accent-green', accentColor);
+    }
+
+    if (textScale) {
+      root.style.fontSize = `${Number(textScale).toFixed(2)}rem`;
+      if (textScaleValue) {
+        textScaleValue.textContent = `${Math.round(Number(textScale) * 100)}%`;
+      }
+    }
   };
 
-  applyTheme(getPreferredTheme());
+  const initialTheme = overlay?.dataset.theme === 'dark' ? 'dark' : 'light';
+  applyTheme(initialTheme);
+  applyVisualPreferences({
+    primaryColor: overlay?.dataset.primaryColor,
+    accentColor: overlay?.dataset.accentColor,
+    textScale: overlay?.dataset.textScale || '1.00'
+  });
 
   themeToggle?.addEventListener('change', (event) => {
     const theme = event.target.checked ? 'dark' : 'light';
-    localStorage.setItem(THEME_KEY, theme);
     applyTheme(theme);
+  });
+
+  primaryColorInput?.addEventListener('input', (event) => {
+    applyVisualPreferences({ primaryColor: event.target.value });
+  });
+
+  accentColorInput?.addEventListener('input', (event) => {
+    applyVisualPreferences({ accentColor: event.target.value });
+  });
+
+  textScaleInput?.addEventListener('input', (event) => {
+    applyVisualPreferences({ textScale: event.target.value });
   });
 
   if (!overlay) return;

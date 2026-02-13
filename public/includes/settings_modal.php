@@ -1,10 +1,18 @@
 <?php
 $currentPage = basename($_SERVER['PHP_SELF'] ?? 'dashboard.php');
 $avatarUrl = trim($userData['avatar_url'] ?? '');
+$currentTheme = ($userData['theme'] ?? 'light') === 'dark' ? 'dark' : 'light';
+$primaryColor = $userData['primary_color'] ?? '#4a74ff';
+$accentColor = $userData['accent_color'] ?? '#59d186';
+$textScale = isset($userData['text_scale']) ? (float) $userData['text_scale'] : 1.00;
 ?>
 
 <div id="settingsModalOverlay" aria-hidden="true"
-    style="display: none; position: fixed; inset: 0; background: var(--overlay-backdrop); backdrop-filter: blur(4px); z-index: 1000; padding: var(--space-lg); overflow-y: auto;">
+    style="display: none; position: fixed; inset: 0; background: var(--overlay-backdrop); backdrop-filter: blur(4px); z-index: 1000; padding: var(--space-lg); overflow-y: auto;"
+    data-theme="<?php echo htmlspecialchars($currentTheme, ENT_QUOTES, 'UTF-8'); ?>"
+    data-primary-color="<?php echo htmlspecialchars($primaryColor, ENT_QUOTES, 'UTF-8'); ?>"
+    data-accent-color="<?php echo htmlspecialchars($accentColor, ENT_QUOTES, 'UTF-8'); ?>"
+    data-text-scale="<?php echo htmlspecialchars(number_format($textScale, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>">
     <div
         style="max-width: 620px; margin: 40px auto; background: var(--bg-light); border-radius: var(--radius-large); padding: var(--space-xl); box-shadow: var(--shadow-strong); border: var(--border-light);">
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--space-lg);">
@@ -20,6 +28,8 @@ $avatarUrl = trim($userData['avatar_url'] ?? '');
         <form method="POST" action="../actions/update_profile_action.php" class="d-flex flex-column gap-md">
             <input type="hidden" name="return_to"
                 value="<?php echo htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="theme" id="settingsThemeInput"
+                value="<?php echo htmlspecialchars($currentTheme, ENT_QUOTES, 'UTF-8'); ?>">
 
             <div class="d-flex flex-column align-items-center" style="gap: 8px; margin-bottom: var(--space-sm);">
                 <div class="user-avatar" id="settingsAvatarPreview" style="overflow: hidden;">
@@ -62,9 +72,34 @@ $avatarUrl = trim($userData['avatar_url'] ?? '');
                         <small style="color: var(--text-secondary);">Ative para reduzir brilho e melhorar o contraste à noite.</small>
                     </div>
                     <label class="theme-toggle-switch" for="themeToggleInput">
-                        <input type="checkbox" id="themeToggleInput" data-theme-toggle aria-label="Alternar tema escuro">
+                        <input type="checkbox" id="themeToggleInput" data-theme-toggle aria-label="Alternar tema escuro"
+                            <?php echo $currentTheme === 'dark' ? 'checked' : ''; ?>>
                         <span class="theme-toggle-slider"></span>
                     </label>
+                </div>
+
+                <div class="d-grid" style="grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-top: var(--space-md);">
+                    <div>
+                        <label for="settingsPrimaryColor"
+                            style="display:block; margin-bottom: 6px; font-size: 0.875rem; color: var(--text-secondary);">Cor principal</label>
+                        <input type="color" id="settingsPrimaryColor" name="primary_color"
+                            value="<?php echo htmlspecialchars($primaryColor, ENT_QUOTES, 'UTF-8'); ?>" class="form-control form-control-color" data-primary-color-input>
+                    </div>
+                    <div>
+                        <label for="settingsAccentColor"
+                            style="display:block; margin-bottom: 6px; font-size: 0.875rem; color: var(--text-secondary);">Cor de destaque</label>
+                        <input type="color" id="settingsAccentColor" name="accent_color"
+                            value="<?php echo htmlspecialchars($accentColor, ENT_QUOTES, 'UTF-8'); ?>" class="form-control form-control-color" data-accent-color-input>
+                    </div>
+                </div>
+
+                <div style="margin-top: var(--space-md);">
+                    <label for="settingsTextScale"
+                        style="display:block; margin-bottom: 6px; font-size: 0.875rem; color: var(--text-secondary);">
+                        Escala de texto <span id="settingsTextScaleValue"><?php echo number_format($textScale * 100, 0); ?>%</span>
+                    </label>
+                    <input type="range" id="settingsTextScale" name="text_scale" min="0.9" max="1.2" step="0.05"
+                        value="<?php echo htmlspecialchars(number_format($textScale, 2, '.', ''), ENT_QUOTES, 'UTF-8'); ?>" class="form-range" data-text-scale-input>
                 </div>
             </div>
 
