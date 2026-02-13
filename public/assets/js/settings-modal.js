@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const textScaleValue = document.getElementById('settingsTextScaleValue');
   const textScaleDelta = document.getElementById('settingsTextScaleDelta');
   const resetAppearanceButton = document.querySelector('[data-reset-appearance]');
+  const THEME_KEY = 'doitly-theme';
   const DEFAULT_THEME = 'light';
   const DEFAULT_PRIMARY_COLOR = '#4a74ff';
   const DEFAULT_PRIMARY_HOVER_COLOR = '#3d63e6';
@@ -61,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const initialTheme = overlay?.dataset.theme === 'dark' ? 'dark' : 'light';
+  const initialTheme = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   applyTheme(initialTheme);
   applyVisualPreferences({
     primaryColor: overlay?.dataset.primaryColor,
@@ -71,7 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   themeToggle?.addEventListener('change', (event) => {
     const theme = event.target.checked ? 'dark' : 'light';
+    localStorage.setItem(THEME_KEY, theme);
     applyTheme(theme);
+  });
+
+  textScaleInput?.addEventListener('change', (event) => {
+    applyVisualPreferences({ textScale: event.target.value });
   });
 
   primaryColorInput?.addEventListener('input', (event) => {
@@ -104,6 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     applyTheme(DEFAULT_THEME);
+    localStorage.setItem(THEME_KEY, DEFAULT_THEME);
     applyVisualPreferences({
       primaryColor: DEFAULT_PRIMARY_COLOR,
       accentColor: DEFAULT_ACCENT_COLOR,
