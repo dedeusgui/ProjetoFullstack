@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const accentColorInput = document.querySelector('[data-accent-color-input]');
   const textScaleInput = document.querySelector('[data-text-scale-input]');
   const textScaleValue = document.getElementById('settingsTextScaleValue');
-  const textScaleDelta = document.getElementById('settingsTextScaleDelta');
   const resetAppearanceButton = document.querySelector('[data-reset-appearance]');
   const THEME_KEY = 'doitly-theme';
   const DEFAULT_THEME = 'light';
@@ -48,16 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
       root.style.fontSize = `${Math.round(numericScale * 100)}%`;
       if (textScaleValue) {
         textScaleValue.textContent = `${Math.round(numericScale * 100)}%`;
-      }
-      if (textScaleDelta) {
-        const delta = Math.round((numericScale - 1) * 100);
-        if (delta > 0) {
-          textScaleDelta.textContent = `(+${delta}% maior)`;
-        } else if (delta < 0) {
-          textScaleDelta.textContent = `(${Math.abs(delta)}% menor)`;
-        } else {
-          textScaleDelta.textContent = '(padrão)';
-        }
       }
     }
   };
@@ -116,6 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
       accentColor: DEFAULT_ACCENT_COLOR,
       textScale: DEFAULT_TEXT_SCALE
     });
+
+    if (overlay) {
+      overlay.style.display = 'none';
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    document.body.style.overflow = '';
+
+    const settingsForm = overlay?.querySelector('form');
+    if (settingsForm) {
+      if (typeof settingsForm.requestSubmit === 'function') {
+        settingsForm.requestSubmit();
+      } else {
+        settingsForm.submit();
+      }
+    }
   });
 
   if (!overlay) return;
