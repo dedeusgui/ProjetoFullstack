@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const resetAppearanceButton = document.querySelector('[data-reset-appearance]');
   const DEFAULT_THEME = 'light';
   const DEFAULT_PRIMARY_COLOR = '#4a74ff';
+  const DEFAULT_PRIMARY_HOVER_COLOR = '#3d63e6';
   const DEFAULT_ACCENT_COLOR = '#59d186';
   const DEFAULT_TEXT_SCALE = 1.0;
   const root = document.documentElement;
@@ -33,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const applyVisualPreferences = ({ primaryColor, accentColor, textScale }) => {
     if (primaryColor) {
       root.style.setProperty('--accent-blue', primaryColor);
-      root.style.setProperty('--accent-blue-hover', primaryColor);
+      root.style.setProperty('--accent-blue-hover', DEFAULT_PRIMARY_HOVER_COLOR);
     }
 
     if (accentColor) {
@@ -42,7 +43,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (textScale) {
       const numericScale = Number(textScale);
-      root.style.fontSize = `${numericScale.toFixed(2)}rem`;
+      if (Number.isNaN(numericScale)) return;
+      root.style.fontSize = `${Math.round(numericScale * 100)}%`;
       if (textScaleValue) {
         textScaleValue.textContent = `${Math.round(numericScale * 100)}%`;
       }
