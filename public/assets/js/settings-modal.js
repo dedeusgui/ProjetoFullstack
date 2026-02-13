@@ -6,6 +6,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const accentColorInput = document.querySelector('[data-accent-color-input]');
   const textScaleInput = document.querySelector('[data-text-scale-input]');
   const textScaleValue = document.getElementById('settingsTextScaleValue');
+  const textScaleDelta = document.getElementById('settingsTextScaleDelta');
+  const resetAppearanceButton = document.querySelector('[data-reset-appearance]');
+  const DEFAULT_THEME = 'light';
+  const DEFAULT_PRIMARY_COLOR = '#4a74ff';
+  const DEFAULT_ACCENT_COLOR = '#59d186';
+  const DEFAULT_TEXT_SCALE = 1.0;
   const root = document.documentElement;
 
   const applyTheme = (theme) => {
@@ -35,9 +41,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (textScale) {
-      root.style.fontSize = `${Number(textScale).toFixed(2)}rem`;
+      const numericScale = Number(textScale);
+      root.style.fontSize = `${numericScale.toFixed(2)}rem`;
       if (textScaleValue) {
-        textScaleValue.textContent = `${Math.round(Number(textScale) * 100)}%`;
+        textScaleValue.textContent = `${Math.round(numericScale * 100)}%`;
+      }
+      if (textScaleDelta) {
+        const delta = Math.round((numericScale - 1) * 100);
+        if (delta > 0) {
+          textScaleDelta.textContent = `(+${delta}% maior)`;
+        } else if (delta < 0) {
+          textScaleDelta.textContent = `(${Math.abs(delta)}% menor)`;
+        } else {
+          textScaleDelta.textContent = '(padrão)';
+        }
       }
     }
   };
@@ -65,6 +82,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
   textScaleInput?.addEventListener('input', (event) => {
     applyVisualPreferences({ textScale: event.target.value });
+  });
+
+  resetAppearanceButton?.addEventListener('click', () => {
+    if (themeToggle) {
+      themeToggle.checked = false;
+    }
+    if (themeInput) {
+      themeInput.value = DEFAULT_THEME;
+    }
+    if (primaryColorInput) {
+      primaryColorInput.value = DEFAULT_PRIMARY_COLOR;
+    }
+    if (accentColorInput) {
+      accentColorInput.value = DEFAULT_ACCENT_COLOR;
+    }
+    if (textScaleInput) {
+      textScaleInput.value = DEFAULT_TEXT_SCALE.toFixed(2);
+    }
+
+    applyTheme(DEFAULT_THEME);
+    applyVisualPreferences({
+      primaryColor: DEFAULT_PRIMARY_COLOR,
+      accentColor: DEFAULT_ACCENT_COLOR,
+      textScale: DEFAULT_TEXT_SCALE
+    });
   });
 
   if (!overlay) return;
