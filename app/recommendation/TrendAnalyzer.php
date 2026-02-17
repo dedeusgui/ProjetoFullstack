@@ -7,6 +7,15 @@ class TrendAnalyzer
         $avg7 = (float) ($behaviorData['avg_daily_7'] ?? 0);
         $avg30 = (float) ($behaviorData['avg_daily_30'] ?? 0);
         $delta = round($avg7 - $avg30, 2);
+        $totalHabits = (int) ($behaviorData['total_habits'] ?? 0);
+        $consecutiveFailures = (int) ($behaviorData['consecutive_failures'] ?? 0);
+        $dailySeries = $behaviorData['daily_series_30'] ?? [];
+
+        $todayCompleted = 0;
+        if (!empty($dailySeries)) {
+            $lastDay = end($dailySeries);
+            $todayCompleted = (int) ($lastDay['completed'] ?? 0);
+        }
 
         if ($delta > 0.1) {
             $trend = 'positive';
@@ -16,8 +25,11 @@ class TrendAnalyzer
             $trend = 'neutral';
         }
 
-        $series = $behaviorData['daily_series_30'] ?? [];
-        $consistency = self::calculateConsistency($series);
+        if ($trend === 'positive' && $totalHabits > 0 && $todayCompleted === 0 && $consecutiveFailures > 0) {
+            $trend = 'neutral';
+        }
+
+        $consistency = self::calculateConsistency($dailySeries);
 
         return [
             'trend' => $trend,
