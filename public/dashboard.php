@@ -33,6 +33,77 @@ $stats = $dashboardPayload['data']['stats'] ?? [];
 $todayHabits = $dashboardPayload['data']['today_habits'] ?? [];
 $weeklyData = $dashboardPayload['data']['weekly_data'] ?? ['labels' => [], 'completed' => [], 'total' => []];
 
+$adaptiveRecommendation = $dashboardPayload['data']['adaptive_recommendation'] ?? [];
+$recommendationMeta = $adaptiveRecommendation['recommendation'] ?? [];
+$recommendationActions = $recommendationMeta['actions'] ?? [];
+$recommendationRisk = $adaptiveRecommendation['risk_level'] ?? 'stable';
+$recommendationTrend = $adaptiveRecommendation['trend'] ?? 'neutral';
+
+$recommendationProfiles = [
+    'high_performer' => [
+        'level' => 'Fase de evolução',
+        'focus' => 'Você já tem constância. O foco agora é ampliar resultado sem perder consistência.',
+        'next_24h' => 'Escolha um único ajuste de dificuldade para testar hoje.',
+        'next_week' => 'Aumente gradualmente a meta de 1 hábito e acompanhe por 7 dias.',
+        'metrics' => [
+            'Indicador principal' => 'Expansão sustentável',
+            'Carga recomendada' => 'Leve aumento de desafio',
+            'Ritmo sugerido' => 'Progressivo'
+        ]
+    ],
+    'stable' => [
+        'level' => 'Fase de consolidação',
+        'focus' => 'Seu ritmo está bom. O próximo passo é reduzir fricções para ganhar previsibilidade.',
+        'next_24h' => 'Mantenha os horários dos hábitos mais concluídos e ajuste apenas 1 hábito oscilante.',
+        'next_week' => 'Revise a rotina no fim da semana para remover tarefas que geram atrito.',
+        'metrics' => [
+            'Indicador principal' => 'Consistência',
+            'Carga recomendada' => 'Manutenção com pequenos ajustes',
+            'Ritmo sugerido' => 'Estável'
+        ]
+    ],
+    'attention' => [
+        'level' => 'Fase de recuperação',
+        'focus' => 'Houve oscilação recente. Simplificar a execução agora aumenta a chance de retomada.',
+        'next_24h' => 'Transforme o hábito principal em uma versão mínima que leve até 2 minutos.',
+        'next_week' => 'Priorize completar menos hábitos, mas sem quebrar a sequência diária.',
+        'metrics' => [
+            'Indicador principal' => 'Retomada do ritmo',
+            'Carga recomendada' => 'Redução temporária',
+            'Ritmo sugerido' => 'Constância antes de intensidade'
+        ]
+    ],
+    'at_risk' => [
+        'level' => 'Fase de proteção de rotina',
+        'focus' => 'O objetivo agora é evitar abandono e reconstruir confiança com metas mínimas.',
+        'next_24h' => 'Escolha apenas o hábito mais importante e conclua a versão mais simples possível.',
+        'next_week' => 'Use metas reduzidas por 5 a 7 dias até recuperar regularidade.',
+        'metrics' => [
+            'Indicador principal' => 'Adesão mínima diária',
+            'Carga recomendada' => 'Mínima e viável',
+            'Ritmo sugerido' => 'Recomeço assistido'
+        ]
+    ]
+];
+
+$recommendationProfile = $recommendationProfiles[$recommendationRisk] ?? $recommendationProfiles['stable'];
+
+$riskConfig = [
+    'high_performer' => ['label' => 'Alto desempenho', 'class' => 'risk-high', 'icon' => 'bi-rocket-takeoff'],
+    'stable' => ['label' => 'Estável', 'class' => 'risk-stable', 'icon' => 'bi-check2-circle'],
+    'attention' => ['label' => 'Atenção', 'class' => 'risk-attention', 'icon' => 'bi-exclamation-circle'],
+    'at_risk' => ['label' => 'Risco de abandono', 'class' => 'risk-danger', 'icon' => 'bi-exclamation-triangle']
+];
+
+$trendConfig = [
+    'positive' => ['label' => 'Tendência positiva', 'icon' => 'bi-graph-up-arrow'],
+    'neutral' => ['label' => 'Tendência estável', 'icon' => 'bi-dash-circle'],
+    'negative' => ['label' => 'Tendência negativa', 'icon' => 'bi-graph-down-arrow']
+];
+
+$riskView = $riskConfig[$recommendationRisk] ?? $riskConfig['stable'];
+$trendView = $trendConfig[$recommendationTrend] ?? $trendConfig['neutral'];
+
 $weeklyChartLabels = $weeklyData['labels'] ?? [];
 $weeklyChartCompleted = $weeklyData['completed'] ?? [];
 
@@ -285,6 +356,75 @@ include_once "includes/header.php";
                                         style="color: var(--accent-gold);"><?php echo $monthSummary['total_completions']; ?></strong>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="grid-col-12">
+                <div class="dashboard-card recommendation-card <?php echo $riskView['class']; ?>">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="bi bi-cpu"></i>
+                            Análise Inteligente
+                        </h3>
+                        <div class="card-actions recommendation-header-badges">
+                            <span class="doitly-badge recommendation-badge">
+                                <i class="bi <?php echo $riskView['icon']; ?>"></i>
+                                <?php echo $riskView['label']; ?>
+                            </span>
+                            <span class="doitly-badge recommendation-badge recommendation-badge-secondary">
+                                <i class="bi <?php echo $trendView['icon']; ?>"></i>
+                                <?php echo $trendView['label']; ?>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="recommendation-insight">
+                            <?php echo htmlspecialchars($recommendationMeta['insight_text'] ?? 'Ainda não há dados suficientes. Continue concluindo hábitos para gerar recomendações personalizadas.', ENT_QUOTES, 'UTF-8'); ?>
+                        </p>
+
+                        <div class="recommendation-context">
+                            <div class="recommendation-context-header">
+                                <h4><?php echo htmlspecialchars($recommendationProfile['level'], ENT_QUOTES, 'UTF-8'); ?></h4>
+                                <p><?php echo htmlspecialchars($recommendationProfile['focus'], ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                            <div class="recommendation-context-grid">
+                                <article>
+                                    <h5>Próximas 24h</h5>
+                                    <p><?php echo htmlspecialchars($recommendationProfile['next_24h'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                </article>
+                                <article>
+                                    <h5>Plano para 7 dias</h5>
+                                    <p><?php echo htmlspecialchars($recommendationProfile['next_week'], ENT_QUOTES, 'UTF-8'); ?></p>
+                                </article>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($recommendationActions)): ?>
+                            <h4 class="recommendation-section-title">Recomendações práticas</h4>
+                            <ul class="recommendation-actions">
+                                <?php foreach ($recommendationActions as $action): ?>
+                                    <li>
+                                        <i class="bi bi-check2"></i>
+                                        <span><?php echo htmlspecialchars((string) $action, ENT_QUOTES, 'UTF-8'); ?></span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        <?php endif; ?>
+
+                        <div class="recommendation-footer">
+                            <div class="recommendation-metrics">
+                                <?php foreach ($recommendationProfile['metrics'] as $label => $value): ?>
+                                    <span><strong><?php echo htmlspecialchars((string) $label, ENT_QUOTES, 'UTF-8'); ?>:</strong> <?php echo htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8'); ?></span>
+                                <?php endforeach; ?>
+                            </div>
+                            <a href="habits.php" class="doitly-btn doitly-btn-sm">
+                                <i class="bi bi-magic"></i>
+                                Ajustar meus hábitos
+                            </a>
                         </div>
                     </div>
                 </div>

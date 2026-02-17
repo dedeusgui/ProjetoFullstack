@@ -22,6 +22,11 @@ function mapTimeOfDayReverse($timeEN) {
     return $map[$timeEN] ?? 'Qualquer';
 }
 
+
+function getAppToday(): string {
+    return date('Y-m-d');
+}
+
 // Buscar ID da categoria pelo nome
 function getCategoryIdByName($conn, $categoryName) {
     $stmt = $conn->prepare("SELECT id FROM categories WHERE name = ?");
@@ -42,7 +47,8 @@ function getUserHabits($conn, $userId) {
             EXISTS(
                 SELECT 1 FROM habit_completions 
                 WHERE habit_id = h.id 
-                AND completion_date = CURDATE()
+                AND completion_date = ?
+                AND user_id = h.user_id
             ) as completed_today
         FROM habits h
         LEFT JOIN categories c ON h.category_id = c.id
@@ -51,7 +57,8 @@ function getUserHabits($conn, $userId) {
     ";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $userId);
+    $today = getAppToday();
+    $stmt->bind_param("si", $today, $userId);
     $stmt->execute();
     $result = $stmt->get_result();
     
@@ -72,7 +79,8 @@ function getTodayHabits($conn, $userId) {
             EXISTS(
                 SELECT 1 FROM habit_completions 
                 WHERE habit_id = h.id 
-                AND completion_date = CURDATE()
+                AND completion_date = ?
+                AND user_id = h.user_id
             ) as completed_today
         FROM habits h
         LEFT JOIN categories c ON h.category_id = c.id
@@ -81,7 +89,8 @@ function getTodayHabits($conn, $userId) {
     ";
     
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $userId);
+    $today = getAppToday();
+    $stmt->bind_param("si", $today, $userId);
     $stmt->execute();
     $result = $stmt->get_result();
     
@@ -110,10 +119,11 @@ function getCompletedToday($conn, $userId) {
         FROM habit_completions hc
         INNER JOIN habits h ON hc.habit_id = h.id
         WHERE hc.user_id = ? 
-        AND hc.completion_date = CURDATE()
+        AND hc.completion_date = ?
         AND h.is_active = 1
     ");
-    $stmt->bind_param("i", $userId);
+    $today = getAppToday();
+    $stmt->bind_param("is", $userId, $today);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
