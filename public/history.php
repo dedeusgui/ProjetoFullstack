@@ -78,6 +78,8 @@ $unlockedCount = (int) ($profileSummary['unlocked_achievements_count'] ?? count(
 
 $totalXp = (int) ($profileSummary['total_xp'] ?? 0);
 $currentLevel = (int) ($profileSummary['level'] ?? 1);
+$xpIntoCurrentLevel = (int) ($profileSummary['xp_into_level'] ?? 0);
+$xpNeededForLevel = (int) ($profileSummary['xp_needed_for_level'] ?? 1);
 $xpToNextLevel = (int) ($profileSummary['xp_to_next_level'] ?? 0);
 $xpLevelProgress = (int) ($profileSummary['xp_progress_percent'] ?? 0);
 
