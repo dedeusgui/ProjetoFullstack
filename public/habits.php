@@ -50,7 +50,8 @@ foreach ($habitsRaw as $habit) {
         'target_days' => normalizeTargetDays($habit['target_days'] ?? null),
         'goal_type' => $habit['goal_type'] ?? 'completion',
         'goal_value' => (int)($habit['goal_value'] ?? 1),
-        'goal_unit' => $habit['goal_unit'] ?? ''
+        'goal_unit' => $habit['goal_unit'] ?? '',
+        'next_due_date' => getNextHabitDueDate($habit)
     ];
 }
 
@@ -62,6 +63,42 @@ foreach ($archivedHabitsRaw as $habit) {
         'category' => $habit['category_name'] ?? 'Sem categoria',
         'archived_at' => $habit['archived_at']
     ];
+}
+
+
+$weekDaysMeta = [
+    1 => 'Segunda',
+    2 => 'Terça',
+    3 => 'Quarta',
+    4 => 'Quinta',
+    5 => 'Sexta',
+    6 => 'Sábado',
+    0 => 'Domingo'
+];
+
+$habitsByWeekDay = [];
+foreach ($weekDaysMeta as $weekDayIndex => $weekDayLabel) {
+    $habitsByWeekDay[$weekDayIndex] = [
+        'label' => $weekDayLabel,
+        'habits' => []
+    ];
+}
+
+foreach ($habits as $habit) {
+    $frequency = $habit['frequency'] ?? 'daily';
+    if ($frequency === 'daily') {
+        foreach (array_keys($habitsByWeekDay) as $weekDayIndex) {
+            $habitsByWeekDay[$weekDayIndex]['habits'][] = $habit;
+        }
+        continue;
+    }
+
+    $targetDays = $habit['target_days'] ?? [];
+    foreach ($targetDays as $weekDayIndex) {
+        if (isset($habitsByWeekDay[$weekDayIndex])) {
+            $habitsByWeekDay[$weekDayIndex]['habits'][] = $habit;
+        }
+    }
 }
 
 // Buscar todas as categorias para o modal
@@ -340,6 +377,9 @@ include_once "includes/header.php";
                                             <small style="color: var(--accent-gold); font-weight: var(--font-medium);">
                                                 <i class="bi bi-fire"></i> <?php echo $habit['streak']; ?> dias
                                             </small>
+                                            <small class="text-secondary">
+                                                <i class="bi bi-calendar-event"></i> Próxima: <?php echo formatDateBr($habit['next_due_date'] ?? null); ?>
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
@@ -403,6 +443,39 @@ include_once "includes/header.php";
                     </div>
                     <h4 class="empty-title">Nenhum hábito encontrado</h4>
                     <p class="empty-text">Tente ajustar os filtros ou criar um novo hábito</p>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="dashboard-card" style="margin-top: var(--space-lg);">
+            <div class="card-header">
+                <h3 class="card-title"><i class="bi bi-calendar-week"></i> Hábitos por Dia da Semana</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-column gap-md">
+                    <?php foreach ($habitsByWeekDay as $weekDayData): ?>
+                        <div class="habit-item" style="align-items: flex-start;">
+                            <div style="min-width: 140px;">
+                                <strong><?php echo $weekDayData['label']; ?></strong>
+                                <small class="text-secondary d-block"><?php echo count($weekDayData['habits']); ?> hábitos</small>
+                            </div>
+                            <div class="d-flex gap-sm" style="flex-wrap: wrap;">
+                                <?php if (count($weekDayData['habits']) === 0): ?>
+                                    <span class="text-secondary">Nenhum hábito programado</span>
+                                <?php else: ?>
+                                    <?php foreach ($weekDayData['habits'] as $dayHabit): ?>
+                                        <span class="doitly-badge doitly-badge-info" style="font-size: 0.75rem;">
+                                            <?php echo htmlspecialchars($dayHabit['name']); ?>
+                                            <?php if (($dayHabit['frequency'] ?? 'daily') === 'daily'): ?>
+                                                <strong>(Diário)</strong>
+                                            <?php endif; ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

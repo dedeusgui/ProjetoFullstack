@@ -41,6 +41,38 @@ function normalizeTargetDays(?string $targetDays): array {
     return array_values(array_filter($days, static fn($day) => $day >= 0 && $day <= 6));
 }
 
+
+function getNextHabitDueDate(array $habit, ?string $fromDate = null): ?string {
+    $baseDate = $fromDate ?? getAppToday();
+    $date = DateTime::createFromFormat('Y-m-d', $baseDate);
+    if (!$date) {
+        return null;
+    }
+
+    for ($i = 0; $i < 366; $i++) {
+        $candidate = $date->format('Y-m-d');
+        if (isHabitScheduledForDate($habit, $candidate)) {
+            return $candidate;
+        }
+        $date->modify('+1 day');
+    }
+
+    return null;
+}
+
+function formatDateBr(?string $date): string {
+    if (empty($date)) {
+        return 'Sem data';
+    }
+
+    $parsed = DateTime::createFromFormat('Y-m-d', $date);
+    if (!$parsed) {
+        return $date;
+    }
+
+    return $parsed->format('d/m/Y');
+}
+
 function isHabitScheduledForDate(array $habit, string $date): bool {
     $targetDate = DateTime::createFromFormat('Y-m-d', $date);
     if (!$targetDate) {
