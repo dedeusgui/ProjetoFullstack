@@ -21,6 +21,19 @@ function getCurrentUser($conn) {
     }
     
     $userId = getUserId();
+    static $hasLevelColumn = null;
+    static $hasXpColumn = null;
+
+    if ($hasLevelColumn === null) {
+        $levelCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'level'");
+        $xpCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'experience_points'");
+        $hasLevelColumn = $levelCheck && $levelCheck->num_rows > 0;
+        $hasXpColumn = $xpCheck && $xpCheck->num_rows > 0;
+    }
+
+    $levelSelect = $hasLevelColumn ? 'u.level' : '1';
+    $xpSelect = $hasXpColumn ? 'u.experience_points' : '0';
+
     $stmt = $conn->prepare("
         SELECT
             u.id,
@@ -28,6 +41,8 @@ function getCurrentUser($conn) {
             u.email,
             u.avatar_url,
             u.created_at,
+            {$levelSelect} AS level,
+            {$xpSelect} AS experience_points,
             us.theme,
             us.primary_color,
             us.accent_color,

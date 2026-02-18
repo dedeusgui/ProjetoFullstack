@@ -741,3 +741,72 @@ function getUserAchievements($conn, $userId) {
 
     return $achievements;
 }
+
+function calculateLevelFromXp(int $totalXp): int {
+    return max(1, (int) floor(sqrt(max(0, $totalXp) / 120)) + 1);
+}
+
+function persistUserProgress($conn, int $userId, int $level, int $experiencePoints): void {
+    static $hasLevelColumn = null;
+    static $hasXpColumn = null;
+
+    if ($hasLevelColumn === null) {
+        $levelCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'level'");
+        $xpCheck = $conn->query("SHOW COLUMNS FROM users LIKE 'experience_points'");
+        $hasLevelColumn = $levelCheck && $levelCheck->num_rows > 0;
+        $hasXpColumn = $xpCheck && $xpCheck->num_rows > 0;
+    }
+
+    if (!$hasLevelColumn && !$hasXpColumn) {
+        return;
+    }
+
+    if ($hasLevelColumn && $hasXpColumn) {
+        $stmt = $conn->prepare("\n            UPDATE users\n            SET level = ?, experience_points = ?\n            WHERE id = ?\n        ");
+        $stmt->bind_param('iii', $level, $experiencePoints, $userId);
+        $stmt->execute();
+        return;
+    }
+
+    if ($hasLevelColumn) {
+        $stmt = $conn->prepare("UPDATE users SET level = ? WHERE id = ?");
+        $stmt->bind_param('ii', $level, $userId);
+        $stmt->execute();
+        return;
+    }
+
+    $stmt = $conn->prepare("UPDATE users SET experience_points = ? WHERE id = ?");
+    $stmt->bind_param('ii', $experiencePoints, $userId);
+    $stmt->execute();
+}
+
+function getUserProgressSummary($conn, int $userId, ?array $achievements = null): array {
+    $achievementList = $achievements ?? getUserAchievements($conn, $userId);
+    $unlockedAchievements = array_values(array_filter($achievementList, static function (array $achievement): bool {
+        return !empty($achievement['unlocked']);
+    }));
+
+    $totalXp = array_sum(array_map(static function (array $achievement): int {
+        return (int) ($achievement['points'] ?? 0);
+    }, $unlockedAchievements));
+
+    $currentLevel = calculateLevelFromXp($totalXp);
+    $xpLevelStart = (($currentLevel - 1) ** 2) * 120;
+    $xpLevelEnd = ($currentLevel ** 2) * 120;
+    $xpIntoCurrentLevel = max(0, $totalXp - $xpLevelStart);
+    $xpNeededForLevel = max(1, $xpLevelEnd - $xpLevelStart);
+
+    persistUserProgress($conn, $userId, $currentLevel, $totalXp);
+
+    return [
+        'level' => $currentLevel,
+        'total_xp' => $totalXp,
+        'xp_into_level' => $xpIntoCurrentLevel,
+        'xp_needed_for_level' => $xpNeededForLevel,
+        'xp_to_next_level' => max(0, $xpLevelEnd - $totalXp),
+        'xp_progress_percent' => min(100, (int) round(($xpIntoCurrentLevel / $xpNeededForLevel) * 100)),
+        'unlocked_achievements' => $unlockedAchievements,
+        'unlocked_achievements_count' => count($unlockedAchievements),
+        'achievements_count' => count($achievementList)
+    ];
+}

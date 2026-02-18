@@ -106,6 +106,29 @@
   text-overflow: ellipsis;
 }
 
+
+.sidebar-user-button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebar-user-button:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+.user-level-badge {
+  font-size: 0.75rem;
+  font-weight: var(--font-semibold);
+  color: var(--text-white);
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+  border-radius: var(--radius-pill);
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
+}
+
 /* Sidebar Navigation */
 .sidebar-nav {
   padding: 0 var(--space-md);
@@ -672,6 +695,98 @@
   justify-content: flex-end;
   gap: var(--space-sm);
   margin-top: var(--space-md);
+}
+
+
+.profile-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-backdrop);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-md);
+  z-index: 9999;
+}
+
+.profile-modal-overlay.is-open {
+  display: flex;
+}
+
+.profile-modal {
+  width: min(560px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--surface-elevated);
+  border-radius: var(--radius-medium);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  padding: var(--space-lg);
+}
+
+.profile-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
+.profile-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.profile-summary h4 {
+  margin: 0;
+}
+
+.profile-section-title {
+  font-size: 0.95rem;
+  margin-bottom: var(--space-sm);
+}
+
+.profile-achievements-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.profile-achievement-item {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: flex-start;
+  border: var(--border-light);
+  border-radius: var(--radius-small);
+  padding: var(--space-sm);
+  background: var(--glass-bg-light);
+}
+
+.profile-achievement-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(74, 116, 255, 0.12);
+  color: var(--accent-blue);
+  flex-shrink: 0;
+}
+
+.profile-achievement-item p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.profile-empty-state {
+  margin: 0;
+  color: var(--text-secondary);
 }
 
 /* Recommendation Card */
