@@ -16,7 +16,12 @@ function buildHabitsApiResponse(mysqli $conn, int $userId, string $scope = 'all'
             'color' => $habit['color'] ?? '#4a74ff',
             'streak' => (int) ($habit['current_streak'] ?? 0),
             'completed_today' => (bool) ($habit['completed_today'] ?? false),
-            'created_at' => $habit['created_at'] ?? null
+            'created_at' => $habit['created_at'] ?? null,
+            'frequency' => $habit['frequency'] ?? 'daily',
+            'goal_type' => $habit['goal_type'] ?? 'completion',
+            'goal_value' => (int) ($habit['goal_value'] ?? 1),
+            'goal_unit' => $habit['goal_unit'] ?? '',
+            'target_days' => normalizeTargetDays($habit['target_days'] ?? null)
         ];
     };
 
@@ -27,7 +32,7 @@ function buildHabitsApiResponse(mysqli $conn, int $userId, string $scope = 'all'
     ];
 
     if ($scope === 'today') {
-        $todayHabitsRaw = getTodayHabits($conn, $userId);
+        $todayHabitsRaw = getTodayHabits($conn, $userId, getUserTodayDate($conn, $userId));
         $todayHabits = array_map($mapHabit, $todayHabitsRaw);
 
         $response['data'] = [

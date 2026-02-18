@@ -13,6 +13,7 @@ $hideLoginButton = true;
 // Buscar dados do usuário logado
 $userId = getUserId();
 $userData = getCurrentUser($conn);
+$todayDate = getUserTodayDate($conn, $userId);
 
 // Se não encontrou usuário, fazer logout
 if (!$userData) {
@@ -26,11 +27,13 @@ $userData['initials'] = getInitials($userData['name']);
 $stats = [
     'total_habits' => getTotalHabits($conn, $userId),
     'active_habits' => getTotalHabits($conn, $userId),
-    'archived_habits' => 0 // TODO: Implementar hábitos arquivados
+    'archived_habits' => getArchivedHabitsCount($conn, $userId)
 ];
 
-// Buscar todos os hábitos do usuário
-$habitsRaw = getUserHabits($conn, $userId);
+// Buscar hábitos ativos do usuário, hábitos de hoje e arquivados
+$allActiveHabitsRaw = getUserHabits($conn, $userId);
+$habitsRaw = getTodayHabits($conn, $userId, $todayDate);
+$archivedHabitsRaw = getArchivedHabits($conn, $userId);
 
 // Mapear para formato esperado pelo frontend
 $habits = [];
@@ -44,8 +47,67 @@ foreach ($habitsRaw as $habit) {
         'color' => $habit['color'] ?? '#4a74ff',
         'streak' => $habit['current_streak'],
         'completed_today' => (bool)$habit['completed_today'],
-        'created_at' => $habit['created_at']
+        'created_at' => $habit['created_at'],
+        'frequency' => $habit['frequency'] ?? 'daily',
+        'target_days' => normalizeTargetDays($habit['target_days'] ?? null),
+        'goal_type' => $habit['goal_type'] ?? 'completion',
+        'goal_value' => (int)($habit['goal_value'] ?? 1),
+        'goal_unit' => $habit['goal_unit'] ?? '',
+        'can_complete_today' => isHabitScheduledForDate($habit, $todayDate) && !(bool)$habit['completed_today'],
+        'next_due_date' => getNextHabitDueDate($habit, (bool)$habit['completed_today'] ? date('Y-m-d', strtotime($todayDate . ' +1 day')) : $todayDate)
     ];
+}
+
+$archivedHabits = [];
+foreach ($archivedHabitsRaw as $habit) {
+    $archivedHabits[] = [
+        'id' => $habit['id'],
+        'name' => $habit['title'],
+        'category' => $habit['category_name'] ?? 'Sem categoria',
+        'archived_at' => $habit['archived_at']
+    ];
+}
+
+
+$weekDaysMeta = [
+    1 => 'Segunda',
+    2 => 'Terça',
+    3 => 'Quarta',
+    4 => 'Quinta',
+    5 => 'Sexta',
+    6 => 'Sábado',
+    0 => 'Domingo'
+];
+
+$habitsByWeekDay = [];
+foreach ($weekDaysMeta as $weekDayIndex => $weekDayLabel) {
+    $habitsByWeekDay[$weekDayIndex] = [
+        'label' => $weekDayLabel,
+        'habits' => []
+    ];
+}
+
+foreach ($allActiveHabitsRaw as $habitRaw) {
+    $habit = [
+        'id' => $habitRaw['id'],
+        'name' => $habitRaw['title'],
+        'frequency' => $habitRaw['frequency'] ?? 'daily',
+        'target_days' => normalizeTargetDays($habitRaw['target_days'] ?? null)
+    ];
+    $frequency = $habit['frequency'] ?? 'daily';
+    if ($frequency === 'daily') {
+        foreach (array_keys($habitsByWeekDay) as $weekDayIndex) {
+            $habitsByWeekDay[$weekDayIndex]['habits'][] = $habit;
+        }
+        continue;
+    }
+
+    $targetDays = $habit['target_days'] ?? [];
+    foreach ($targetDays as $weekDayIndex) {
+        if (isset($habitsByWeekDay[$weekDayIndex])) {
+            $habitsByWeekDay[$weekDayIndex]['habits'][] = $habit;
+        }
+    }
 }
 
 // Buscar todas as categorias para o modal
@@ -93,7 +155,7 @@ include_once "includes/header.php";
                         <a href="habits.php" class="nav-link active">
                             <i class="bi bi-list-check"></i>
                             <span>Meus Hábitos</span>
-                            <span class="nav-badge"><?php echo $stats['total_habits']; ?></span>
+                            <span class="nav-badge"><?php echo $stats['active_habits']; ?></span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -145,7 +207,7 @@ include_once "includes/header.php";
             <div class="d-flex justify-content-between align-items-center" style="flex-wrap: wrap; gap: var(--space-md);">
                 <div>
                     <h1 class="dashboard-title">Meus Hábitos 📝</h1>
-                    <p class="dashboard-subtitle">Gerencie e acompanhe seus hábitos diários</p>
+                    <p class="dashboard-subtitle">Você está vendo apenas os hábitos programados para hoje.</p>
                 </div>
                 <button class="doitly-btn" onclick="openHabitModal('create')">
                     <i class="bi bi-plus-circle"></i>
@@ -166,7 +228,7 @@ include_once "includes/header.php";
                 <h2 class="stat-value"><?php echo $stats['total_habits']; ?></h2>
                 <div class="stat-change neutral">
                     <i class="bi bi-dash"></i>
-                    <span>Ativos</span>
+                    <span>Ativos agora</span>
                 </div>
             </div>
 
@@ -180,7 +242,22 @@ include_once "includes/header.php";
                 <h2 class="stat-value"><?php echo count(array_filter($habits, fn($h) => $h['completed_today'])); ?></h2>
                 <div class="stat-change positive">
                     <i class="bi bi-arrow-up"></i>
-                    <span>de <?php echo count($habits); ?> hábitos</span>
+                    <span>de <?php echo count($habits); ?> devidos hoje</span>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Arquivados</span>
+                    <div class="stat-icon">
+                        <i class="bi bi-archive"></i>
+                    </div>
+                </div>
+                <h2 class="stat-value"><?php echo $stats['archived_habits']; ?></h2>
+                <div class="stat-change neutral">
+                    <i class="bi bi-clock-history"></i>
+                    <span>histórico preservado</span>
                 </div>
             </div>
 
@@ -241,7 +318,7 @@ include_once "includes/header.php";
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="bi bi-list-check"></i>
-                    Lista de Hábitos
+                    Hábitos de Hoje
                 </h3>
                 <div class="card-actions">
                     <span class="doitly-badge doitly-badge-info" id="habitCount">
@@ -279,6 +356,13 @@ include_once "includes/header.php";
                                             <?php else: ?>
                                                 <span class="doitly-badge doitly-badge-warning" style="font-size: 0.75rem;">🌙 Noite</span>
                                             <?php endif; ?>
+                                            <?php if ($habit['frequency'] === 'daily'): ?>
+                                                <span class="doitly-badge doitly-badge-info" style="font-size: 0.75rem;">Diário</span>
+                                            <?php elseif ($habit['frequency'] === 'weekly'): ?>
+                                                <span class="doitly-badge doitly-badge-warning" style="font-size: 0.75rem;">Semanal</span>
+                                            <?php else: ?>
+                                                <span class="doitly-badge doitly-badge-success" style="font-size: 0.75rem;">Custom</span>
+                                            <?php endif; ?>
                                         </div>
                                         
                                         <?php if (!empty($habit['description'])): ?>
@@ -291,8 +375,19 @@ include_once "includes/header.php";
                                             <small class="text-secondary">
                                                 <i class="bi bi-tag"></i> <?php echo htmlspecialchars($habit['category']); ?>
                                             </small>
+                                            <small class="text-secondary">
+                                                <i class="bi bi-bullseye"></i>
+                                                <?php if (($habit['goal_type'] ?? 'completion') === 'completion'): ?>
+                                                    Meta: concluir
+                                                <?php else: ?>
+                                                    Meta: <?php echo (int)$habit['goal_value']; ?> <?php echo htmlspecialchars($habit['goal_unit'] ?: 'unidades'); ?>
+                                                <?php endif; ?>
+                                            </small>
                                             <small style="color: var(--accent-gold); font-weight: var(--font-medium);">
                                                 <i class="bi bi-fire"></i> <?php echo $habit['streak']; ?> dias
+                                            </small>
+                                            <small class="text-secondary">
+                                                <i class="bi bi-calendar-event"></i> Próxima: <?php echo formatDateBr($habit['next_due_date'] ?? null); ?>
                                             </small>
                                         </div>
                                     </div>
@@ -300,9 +395,12 @@ include_once "includes/header.php";
                                 
                                 <!-- Right Side: Actions -->
                                 <div class="d-flex align-items-center gap-sm" style="flex-shrink: 0;">
-                                    <form method="POST" action="../actions/habit_mark_action.php" style="display: inline;">
+                                    <form method="POST" action="../actions/habit_mark_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
                                         <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
-                                        <input type="hidden" name="completion_date" value="<?php echo date('Y-m-d'); ?>">
+                                        <input type="hidden" name="completion_date" value="<?php echo $todayDate; ?>">
+                                        <?php if (($habit['goal_type'] ?? 'completion') !== 'completion' && !$habit['completed_today']): ?>
+                                            <input type="number" step="0.01" min="0" name="value_achieved" class="doitly-input" style="width: 100px; padding: 6px 8px;" placeholder="valor" required>
+                                        <?php endif; ?>
                                         <?php if ($habit['completed_today']): ?>
                                             <button type="submit" class="doitly-btn doitly-btn-sm doitly-btn-success">
                                                 <i class="bi bi-check-circle-fill"></i> Feito
@@ -317,6 +415,14 @@ include_once "includes/header.php";
                                     <button class="doitly-btn doitly-btn-sm doitly-btn-ghost" onclick="openEditModal(<?php echo $habit['id']; ?>)" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
+
+                                    <form method="POST" action="../actions/habit_archive_action.php" style="display: inline;">
+                                        <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
+                                        <input type="hidden" name="operation" value="archive">
+                                        <button type="submit" class="doitly-btn doitly-btn-sm doitly-btn-ghost" title="Arquivar">
+                                            <i class="bi bi-archive"></i>
+                                        </button>
+                                    </form>
                                     
                                     <button class="doitly-btn doitly-btn-sm doitly-btn-ghost" onclick="confirmDelete(<?php echo $habit['id']; ?>, '<?php echo htmlspecialchars($habit['name'], ENT_QUOTES); ?>')" title="Excluir">
                                         <i class="bi bi-trash"></i>
@@ -329,8 +435,8 @@ include_once "includes/header.php";
                             <div class="empty-icon">
                                 <i class="bi bi-inbox"></i>
                             </div>
-                            <h4 class="empty-title">Nenhum hábito cadastrado</h4>
-                            <p class="empty-text">Comece criando seu primeiro hábito!</p>
+                            <h4 class="empty-title">Nenhum hábito para hoje</h4>
+                            <p class="empty-text">Hoje não há hábitos programados. Veja a seção semanal abaixo.</p>
                             <button class="doitly-btn" onclick="openHabitModal('create')">
                                 <i class="bi bi-plus-circle"></i>
                                 Criar Primeiro Hábito
@@ -347,6 +453,68 @@ include_once "includes/header.php";
                     <h4 class="empty-title">Nenhum hábito encontrado</h4>
                     <p class="empty-text">Tente ajustar os filtros ou criar um novo hábito</p>
                 </div>
+            </div>
+        </div>
+
+
+        <div class="dashboard-card" style="margin-top: var(--space-lg);">
+            <div class="card-header">
+                <h3 class="card-title"><i class="bi bi-calendar-week"></i> Hábitos por Dia da Semana</h3>
+            </div>
+            <div class="card-body">
+                <div class="d-flex flex-column gap-md">
+                    <?php foreach ($habitsByWeekDay as $weekDayData): ?>
+                        <div class="habit-item" style="align-items: flex-start;">
+                            <div style="min-width: 140px;">
+                                <strong><?php echo $weekDayData['label']; ?></strong>
+                                <small class="text-secondary d-block"><?php echo count($weekDayData['habits']); ?> hábitos</small>
+                            </div>
+                            <div class="d-flex gap-sm" style="flex-wrap: wrap;">
+                                <?php if (count($weekDayData['habits']) === 0): ?>
+                                    <span class="text-secondary">Nenhum hábito programado</span>
+                                <?php else: ?>
+                                    <?php foreach ($weekDayData['habits'] as $dayHabit): ?>
+                                        <span class="doitly-badge doitly-badge-info" style="font-size: 0.75rem;">
+                                            <?php echo htmlspecialchars($dayHabit['name']); ?>
+                                            <?php if (($dayHabit['frequency'] ?? 'daily') === 'daily'): ?>
+                                                <strong>(Diário)</strong>
+                                            <?php endif; ?>
+                                        </span>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card" style="margin-top: var(--space-lg);">
+            <div class="card-header">
+                <h3 class="card-title"><i class="bi bi-archive"></i> Hábitos Arquivados</h3>
+            </div>
+            <div class="card-body">
+                <?php if (count($archivedHabits) === 0): ?>
+                    <p class="text-secondary" style="margin: 0;">Nenhum hábito arquivado.</p>
+                <?php else: ?>
+                    <div class="d-flex flex-column gap-sm">
+                        <?php foreach ($archivedHabits as $archivedHabit): ?>
+                            <div class="habit-item" style="opacity: .85;">
+                                <div>
+                                    <strong><?php echo htmlspecialchars($archivedHabit['name']); ?></strong>
+                                    <small class="text-secondary d-block"><?php echo htmlspecialchars($archivedHabit['category']); ?></small>
+                                </div>
+                                <form method="POST" action="../actions/habit_archive_action.php" style="display: inline;">
+                                    <input type="hidden" name="habit_id" value="<?php echo $archivedHabit['id']; ?>">
+                                    <input type="hidden" name="operation" value="restore">
+                                    <button type="submit" class="doitly-btn doitly-btn-sm doitly-btn-secondary">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Restaurar
+                                    </button>
+                                </form>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </main>
@@ -421,31 +589,69 @@ include_once "includes/header.php";
                 </div>
             </div>
 
+
+            <div class="row g-3" style="margin-bottom: var(--space-md);">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">
+                        Frequência
+                    </label>
+                    <select name="frequency" class="doitly-input" id="habitFrequency" onchange="toggleTargetDays()">
+                        <option value="daily">Diário</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="custom">Customizado</option>
+                    </select>
+                </div>
+                <div class="col-md-6" id="targetDaysWrapper" style="display: none;">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">
+                        Dias da Semana
+                    </label>
+                    <small class="text-secondary" style="display:block; margin-bottom:8px;">Selecione em quais dias este hábito deve aparecer.</small>
+                    <div class="weekday-grid">
+                        <?php $dayLabels = [0 => 'Dom', 1 => 'Seg', 2 => 'Ter', 3 => 'Qua', 4 => 'Qui', 5 => 'Sex', 6 => 'Sáb']; ?>
+                        <?php for ($day = 0; $day <= 6; $day++): ?>
+                            <label class="weekday-chip">
+                                <input type="checkbox" name="target_days[]" value="<?php echo $day; ?>" class="target-day-option">
+                                <span><?php echo $dayLabels[$day]; ?></span>
+                            </label>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3" style="margin-bottom: var(--space-md);">
+                <div class="col-md-4">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">Tipo de Meta</label>
+                    <select name="goal_type" class="doitly-input" id="habitGoalType" onchange="toggleGoalFields()">
+                        <option value="completion">Concluir</option>
+                        <option value="quantity">Quantidade</option>
+                        <option value="duration">Duração</option>
+                    </select>
+                </div>
+                <div class="col-md-4" id="goalValueWrapper" style="display:none;">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">Valor</label>
+                    <input type="number" min="1" name="goal_value" id="habitGoalValue" class="doitly-input" value="1">
+                </div>
+                <div class="col-md-4" id="goalUnitWrapper" style="display:none;">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">Unidade</label>
+                    <input type="text" name="goal_unit" id="habitGoalUnit" class="doitly-input" placeholder="min, litros, reps...">
+                </div>
+            </div>
             <div style="margin-bottom: var(--space-lg);">
                 <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">
                     Cor do Hábito
                 </label>
-                <div class="d-flex gap-sm" style="flex-wrap: wrap;">
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#4a74ff" checked style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #4a74ff; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#59d186" style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #59d186; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#ff5757" style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #ff5757; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#eed27a" style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #eed27a; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#a78bfa" style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #a78bfa; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
+                <input type="hidden" name="color" id="habitColor" value="#4a74ff">
+                <div class="color-palette" id="presetColors">
+                    <button type="button" class="color-option active" data-color="#4a74ff" style="background:#4a74ff;" title="Azul"></button>
+                    <button type="button" class="color-option" data-color="#59d186" style="background:#59d186;" title="Verde"></button>
+                    <button type="button" class="color-option" data-color="#ff5757" style="background:#ff5757;" title="Vermelho"></button>
+                    <button type="button" class="color-option" data-color="#eed27a" style="background:#eed27a;" title="Dourado"></button>
+                    <button type="button" class="color-option" data-color="#a78bfa" style="background:#a78bfa;" title="Roxo"></button>
+                </div>
+                <div class="d-flex align-items-center gap-sm" style="margin-top: 10px;">
+                    <label for="customColorPicker" class="text-secondary" style="font-size: 0.85rem;">Cor personalizada:</label>
+                    <input type="color" id="customColorPicker" value="#4a74ff" class="custom-color-picker">
+                    <span class="text-secondary" id="customColorHex" style="font-size: 0.85rem;">#4a74ff</span>
                 </div>
             </div>
 
@@ -471,17 +677,73 @@ include_once "includes/header.php";
     transition: all 0.3s ease;
 }
 
+.weekday-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.weekday-chip {
+    border: 1px solid var(--border-color, rgba(255,255,255,.15));
+    border-radius: 12px;
+    padding: 8px 10px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(255,255,255,.03);
+    transition: all .2s ease;
+}
+
+.weekday-chip input {
+    display: none;
+}
+
+.weekday-chip span {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.weekday-chip.active {
+    border-color: var(--primary-color, #4a74ff);
+    box-shadow: 0 0 0 2px rgba(74,116,255,.25);
+    background: rgba(74,116,255,.12);
+}
+
+.weekday-chip.active span {
+    color: var(--text-primary);
+}
+
+.color-palette {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .color-option {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 2px solid transparent;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .color-option:hover {
-    transform: scale(1.1);
+    transform: translateY(-2px);
 }
 
-input[type="radio"]:checked + .color-option {
-    border-color: var(--text-primary) !important;
-    transform: scale(1.15);
+.color-option.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(74,116,255,.45);
+}
+
+.custom-color-picker {
+    width: 44px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--border-color, rgba(255,255,255,.2));
+    border-radius: 8px;
+    background: transparent;
 }
 
 @media (max-width: 768px) {
@@ -501,6 +763,75 @@ input[type="radio"]:checked + .color-option {
 // Dados dos hábitos em JSON para JavaScript
 const habitsData = <?php echo json_encode($habits); ?>;
 
+function toggleTargetDays() {
+    const frequency = document.getElementById('habitFrequency')?.value;
+    const wrapper = document.getElementById('targetDaysWrapper');
+    if (!wrapper) return;
+    wrapper.style.display = (frequency === 'weekly' || frequency === 'custom') ? 'block' : 'none';
+}
+
+function toggleGoalFields() {
+    const goalType = document.getElementById('habitGoalType')?.value;
+    const valueWrapper = document.getElementById('goalValueWrapper');
+    const unitWrapper = document.getElementById('goalUnitWrapper');
+    const goalValue = document.getElementById('habitGoalValue');
+
+    const show = goalType !== 'completion';
+    valueWrapper.style.display = show ? 'block' : 'none';
+    unitWrapper.style.display = show ? 'block' : 'none';
+
+    if (goalValue) {
+        goalValue.required = show;
+    }
+}
+
+
+
+function setHabitColor(color) {
+    const hiddenColor = document.getElementById('habitColor');
+    const picker = document.getElementById('customColorPicker');
+    const hexLabel = document.getElementById('customColorHex');
+
+    if (hiddenColor) hiddenColor.value = color;
+    if (picker) picker.value = color;
+    if (hexLabel) hexLabel.textContent = color.toLowerCase();
+
+    const options = document.querySelectorAll('#presetColors .color-option');
+    options.forEach((option) => {
+        option.classList.toggle('active', option.dataset.color?.toLowerCase() === color.toLowerCase());
+    });
+}
+
+function initHabitColorPicker() {
+    const options = document.querySelectorAll('#presetColors .color-option');
+    options.forEach((option) => {
+        option.addEventListener('click', () => {
+            setHabitColor(option.dataset.color || '#4a74ff');
+        });
+    });
+
+    const picker = document.getElementById('customColorPicker');
+    picker?.addEventListener('input', (event) => {
+        setHabitColor(event.target.value || '#4a74ff');
+    });
+}
+
+
+function refreshWeekdayChips() {
+    const dayCheckboxes = document.querySelectorAll('.target-day-option');
+    dayCheckboxes.forEach((checkbox) => {
+        checkbox.closest('.weekday-chip')?.classList.toggle('active', checkbox.checked);
+    });
+}
+
+function initWeekdayChips() {
+    const dayCheckboxes = document.querySelectorAll('.target-day-option');
+    dayCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', refreshWeekdayChips);
+    });
+    refreshWeekdayChips();
+}
+
 function openHabitModal(mode = 'create') {
     document.getElementById('habitModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -510,6 +841,12 @@ function openHabitModal(mode = 'create') {
         document.getElementById('habitForm').action = '../actions/habit_create_action.php';
         document.getElementById('habitForm').reset();
         document.getElementById('habitId').value = '';
+        document.getElementById('habitFrequency').value = 'daily';
+        document.getElementById('habitGoalType').value = 'completion';
+        toggleTargetDays();
+        toggleGoalFields();
+        setHabitColor('#4a74ff');
+        refreshWeekdayChips();
     }
 }
 
@@ -530,14 +867,22 @@ function openEditModal(habitId) {
     document.getElementById('habitDescription').value = habit.description || '';
     document.getElementById('habitCategory').value = habit.category;
     document.getElementById('habitTime').value = habit.time;
+    document.getElementById('habitFrequency').value = habit.frequency || 'daily';
+    document.getElementById('habitGoalType').value = habit.goal_type || 'completion';
+    document.getElementById('habitGoalValue').value = habit.goal_value || 1;
+    document.getElementById('habitGoalUnit').value = habit.goal_unit || '';
+
+    const dayCheckboxes = document.querySelectorAll('.target-day-option');
+    dayCheckboxes.forEach((checkbox) => {
+        checkbox.checked = Array.isArray(habit.target_days) && habit.target_days.includes(Number(checkbox.value));
+    });
+
+    toggleTargetDays();
+    toggleGoalFields();
+    refreshWeekdayChips();
     
     // Selecionar cor
-    const colorRadios = document.querySelectorAll('input[name="color"]');
-    colorRadios.forEach(radio => {
-        if (radio.value === habit.color) {
-            radio.checked = true;
-        }
-    });
+    setHabitColor(habit.color || '#4a74ff');
     
     // Abrir modal
     openHabitModal('edit');
@@ -547,6 +892,10 @@ function closeHabitModal() {
     document.getElementById('habitModal').style.display = 'none';
     document.body.style.overflow = 'auto';
     document.getElementById('habitForm').reset();
+    toggleTargetDays();
+    toggleGoalFields();
+    setHabitColor('#4a74ff');
+    refreshWeekdayChips();
 }
 
 function confirmDelete(habitId, habitName) {
@@ -610,6 +959,12 @@ document.getElementById('habitModal')?.addEventListener('click', function(e) {
         closeHabitModal();
     }
 });
+
+toggleTargetDays();
+toggleGoalFields();
+initHabitColorPicker();
+initWeekdayChips();
+setHabitColor('#4a74ff');
 
 // Auto-hide alerts após 5 segundos
 setTimeout(() => {

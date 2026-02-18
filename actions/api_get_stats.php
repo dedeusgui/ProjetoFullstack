@@ -119,7 +119,7 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
                 'time' => mapTimeOfDayReverse($habit['time_of_day'] ?? 'anytime'),
                 'completed' => (bool) ($habit['completed_today'] ?? false)
             ];
-        }, getTodayHabits($conn, $userId)),
+        }, getTodayHabits($conn, $userId, getUserTodayDate($conn, $userId))),
         'weekly_data' => getMonthlyData($conn, $userId, 7),
         'adaptive_recommendation' => buildAdaptiveRecommendation($conn, $userId)
     ];
