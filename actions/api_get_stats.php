@@ -130,7 +130,9 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
 
         $achievements = getUserAchievements($conn, $userId);
 
-    $historyData = [
+        $userCreatedAt = getUserCreatedAt($conn, $userId);
+
+        $historyData = [
             'stats' => [
                 'total_habits' => $totalHabits,
                 'total_completions' => $totalCompletions,
@@ -142,7 +144,7 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
             ],
             'monthly_data' => getMonthlyData($conn, $userId, 30),
             'category_stats' => getCategoryStats($conn, $userId),
-            'recent_history' => getRecentHistory($conn, $userId, 10),
+            'recent_history' => getRecentHistory($conn, $userId, 10, $userCreatedAt),
             'achievements' => $achievements,
             'adaptive_recommendation' => buildAdaptiveRecommendation($conn, $userId)
         ];

@@ -347,12 +347,12 @@ include_once "includes/header.php";
             </div>
 
             <!-- Achievements -->
-            <div class="grid-col-6">
+            <div class="grid-col-12">
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="bi bi-award"></i>
-                            Conquistas
+                            Conquistas (Hub Principal)
                         </h3>
                         <div class="card-actions" style="display:flex; align-items:center; gap: var(--space-sm);">
                             <span class="doitly-badge doitly-badge-success">
@@ -360,7 +360,7 @@ include_once "includes/header.php";
                             </span>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="max-height: 70vh; overflow-y: auto;">
                         <div class="d-flex flex-column gap-md">
                             <?php foreach ($groupedAchievements as $category => $categoryAchievements): ?>
                                 <div>
@@ -424,16 +424,16 @@ include_once "includes/header.php";
             </div>
 
             <!-- Recent History -->
-            <div class="grid-col-6">
+            <div class="grid-col-12">
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="bi bi-clock-history"></i>
-                            Histórico Recente
+                            Histórico Recente (até 10 dias)
                         </h3>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex flex-column gap-sm">
+                        <div class="d-flex flex-column gap-sm" style="max-height: 260px; overflow-y: auto;">
                             <?php foreach ($recentHistory as $day): ?>
                                 <div
                                     style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-sm) var(--space-md); background: var(--glass-bg-light); border-radius: var(--radius-small); border-left: 4px solid <?php echo $day['percentage'] >= 80 ? 'var(--accent-green)' : ($day['percentage'] >= 50 ? 'var(--accent-gold)' : 'var(--accent-red)'); ?>;">

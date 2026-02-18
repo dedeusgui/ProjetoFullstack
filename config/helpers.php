@@ -451,11 +451,34 @@ function getCategoryStats($conn, $userId) {
 }
 
 // Histórico recente
-function getRecentHistory($conn, $userId, $days = 10) {
+function getUserCreatedAt($conn, $userId): ?string {
+    $stmt = $conn->prepare("SELECT created_at FROM users WHERE id = ? LIMIT 1");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    return $row['created_at'] ?? null;
+}
+
+// Histórico recente
+function getRecentHistory($conn, $userId, $days = 10, ?string $userCreatedAt = null) {
     $history = [];
     $totalHabits = getTotalHabits($conn, $userId);
+
+    $maxDays = max(1, (int) $days);
+
+    if (!empty($userCreatedAt)) {
+        $createdDate = date('Y-m-d', strtotime($userCreatedAt));
+        $todayDate = date('Y-m-d');
+        $diffSeconds = strtotime($todayDate) - strtotime($createdDate);
+        if ($diffSeconds >= 0) {
+            $daysSinceCreation = (int) floor($diffSeconds / 86400) + 1;
+            $maxDays = min($maxDays, max(1, $daysSinceCreation));
+        }
+    }
     
-    for ($i = 0; $i < $days; $i++) {
+    for ($i = 0; $i < $maxDays; $i++) {
         $date = date('Y-m-d', strtotime("-$i days"));
         
         $stmt = $conn->prepare("
