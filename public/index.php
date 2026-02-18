@@ -1,9 +1,64 @@
-<?php 
+<?php
+require_once '../config/auth.php';
+
+$isLayoutUserLoggedIn = isLoggedIn();
+$initialLayoutOrder = [];
+
+if ($isLayoutUserLoggedIn) {
+    try {
+        require '../config/conexao.php';
+
+        $layoutTableSql = "
+            CREATE TABLE IF NOT EXISTS user_page_layouts (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
+                page_key VARCHAR(80) NOT NULL,
+                layout_json LONGTEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                UNIQUE KEY uniq_user_page_layout (user_id, page_key),
+                CONSTRAINT fk_user_page_layouts_user
+                    FOREIGN KEY (user_id) REFERENCES users(id)
+                    ON DELETE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        ";
+        $conn->query($layoutTableSql);
+
+        $layoutStmt = $conn->prepare('SELECT layout_json FROM user_page_layouts WHERE user_id = ? AND page_key = ? LIMIT 1');
+        if ($layoutStmt) {
+            $userId = (int) getUserId();
+            $pageKey = 'landing';
+            $layoutStmt->bind_param('is', $userId, $pageKey);
+            if ($layoutStmt->execute()) {
+                $layoutResult = $layoutStmt->get_result();
+                $layoutRow = $layoutResult ? $layoutResult->fetch_assoc() : null;
+                if ($layoutRow && isset($layoutRow['layout_json'])) {
+                    $decodedLayout = json_decode($layoutRow['layout_json'], true);
+                    if (json_last_error() === JSON_ERROR_NONE && isset($decodedLayout['order']) && is_array($decodedLayout['order'])) {
+                        $initialLayoutOrder = array_values(array_filter($decodedLayout['order'], 'is_string'));
+                    }
+                }
+            }
+        }
+    } catch (Throwable $exception) {
+        $isLayoutUserLoggedIn = false;
+    }
+}
+
 // Mostra Login e Cadastrar lado a lado
 $showRegisterButton = true;
 
 include_once "includes/header.php";
 ?>
+
+<script>
+window.PAGE_LAYOUT_CONFIG = {
+    pageKey: 'landing',
+    isLoggedIn: <?php echo $isLayoutUserLoggedIn ? 'true' : 'false'; ?>,
+    initialOrder: <?php echo json_encode($initialLayoutOrder, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+    saveEndpoint: '../actions/page_layout_action.php'
+};
+</script>
 
 <!-- ========== HERO SECTION ========== -->
 <section class="hero-section">
@@ -982,6 +1037,9 @@ document.addEventListener('DOMContentLoaded', function() {
     counters.forEach(counter => observer.observe(counter));
 });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="assets/js/page-layout-editor.js"></script>
 
 <?php 
 include_once "includes/footer.php";
