@@ -529,23 +529,37 @@ function getAllCategories($conn) {
     return $categories;
 }
 
-// Mapear ícone salvo no banco para classe Bootstrap Icons
-function mapAchievementIconToBootstrap(string $icon): string {
+// Mapear ícone salvo no banco para nome de ícone Iconify
+function mapAchievementIconToIconify(string $icon): string {
     $normalized = trim(strtolower($icon));
 
     if ($normalized === '') {
-        return 'bi bi-patch-check';
+        return 'mdi:shield-check';
     }
 
-    if (str_starts_with($normalized, 'bi bi-')) {
+    $map = [
+        'flag' => 'mdi:flag',
+        'fire' => 'mdi:fire',
+        'trophy' => 'mdi:trophy',
+        'star' => 'mdi:star',
+        'award' => 'mdi:medal',
+        'collection' => 'mdi:bookshelf',
+        'rocket' => 'mdi:rocket-launch',
+        'gem' => 'mdi:diamond-stone',
+        'patch-check' => 'mdi:shield-check',
+        'check' => 'mdi:check-circle'
+    ];
+
+    if (isset($map[$normalized])) {
+        return $map[$normalized];
+    }
+
+    // Permite salvar já no formato Iconify no banco (ex: mdi:target)
+    if (str_contains($normalized, ':')) {
         return $normalized;
     }
 
-    if (str_starts_with($normalized, 'bi-')) {
-        return 'bi ' . $normalized;
-    }
-
-    return 'bi bi-' . preg_replace('/[^a-z0-9\-]/', '', $normalized);
+    return 'mdi:shield-check';
 }
 
 // Buscar total de hábitos concluídos por data
@@ -700,7 +714,7 @@ function getUserAchievements($conn, $userId) {
             'slug' => $slug,
             'name' => $achievement['name'],
             'description' => $achievement['description'],
-            'icon' => mapAchievementIconToBootstrap($achievement['icon'] ?? ''),
+            'icon' => mapAchievementIconToIconify($achievement['icon'] ?? ''),
             'badge_color' => $achievement['badge_color'] ?? '#4a74ff',
             'criteria_type' => $criteriaType,
             'criteria_value' => $criteriaValue,
