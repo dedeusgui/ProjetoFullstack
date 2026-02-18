@@ -605,10 +605,11 @@ include_once "includes/header.php";
                     <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">
                         Dias da Semana
                     </label>
-                    <div class="d-flex gap-sm" style="flex-wrap: wrap;">
-                        <?php $dayLabels = ['D','S','T','Q','Q','S','S']; ?>
+                    <small class="text-secondary" style="display:block; margin-bottom:8px;">Selecione em quais dias este hábito deve aparecer.</small>
+                    <div class="weekday-grid">
+                        <?php $dayLabels = [0 => 'Dom', 1 => 'Seg', 2 => 'Ter', 3 => 'Qua', 4 => 'Qui', 5 => 'Sex', 6 => 'Sáb']; ?>
                         <?php for ($day = 0; $day <= 6; $day++): ?>
-                            <label style="display:flex; align-items:center; gap:4px; font-size:.85rem;">
+                            <label class="weekday-chip">
                                 <input type="checkbox" name="target_days[]" value="<?php echo $day; ?>" class="target-day-option">
                                 <span><?php echo $dayLabels[$day]; ?></span>
                             </label>
@@ -639,27 +640,18 @@ include_once "includes/header.php";
                 <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">
                     Cor do Hábito
                 </label>
-                <div class="d-flex gap-sm" style="flex-wrap: wrap;">
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#4a74ff" checked style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #4a74ff; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#59d186" style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #59d186; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#ff5757" style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #ff5757; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#eed27a" style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #eed27a; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
-                    <label style="cursor: pointer;">
-                        <input type="radio" name="color" value="#a78bfa" style="display: none;">
-                        <div style="width: 40px; height: 40px; background: #a78bfa; border-radius: var(--radius-small); border: 3px solid transparent; transition: var(--transition);" class="color-option"></div>
-                    </label>
+                <input type="hidden" name="color" id="habitColor" value="#4a74ff">
+                <div class="color-palette" id="presetColors">
+                    <button type="button" class="color-option active" data-color="#4a74ff" style="background:#4a74ff;" title="Azul"></button>
+                    <button type="button" class="color-option" data-color="#59d186" style="background:#59d186;" title="Verde"></button>
+                    <button type="button" class="color-option" data-color="#ff5757" style="background:#ff5757;" title="Vermelho"></button>
+                    <button type="button" class="color-option" data-color="#eed27a" style="background:#eed27a;" title="Dourado"></button>
+                    <button type="button" class="color-option" data-color="#a78bfa" style="background:#a78bfa;" title="Roxo"></button>
+                </div>
+                <div class="d-flex align-items-center gap-sm" style="margin-top: 10px;">
+                    <label for="customColorPicker" class="text-secondary" style="font-size: 0.85rem;">Cor personalizada:</label>
+                    <input type="color" id="customColorPicker" value="#4a74ff" class="custom-color-picker">
+                    <span class="text-secondary" id="customColorHex" style="font-size: 0.85rem;">#4a74ff</span>
                 </div>
             </div>
 
@@ -685,17 +677,73 @@ include_once "includes/header.php";
     transition: all 0.3s ease;
 }
 
+.weekday-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.weekday-chip {
+    border: 1px solid var(--border-color, rgba(255,255,255,.15));
+    border-radius: 12px;
+    padding: 8px 10px;
+    text-align: center;
+    cursor: pointer;
+    background: rgba(255,255,255,.03);
+    transition: all .2s ease;
+}
+
+.weekday-chip input {
+    display: none;
+}
+
+.weekday-chip span {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.weekday-chip.active {
+    border-color: var(--primary-color, #4a74ff);
+    box-shadow: 0 0 0 2px rgba(74,116,255,.25);
+    background: rgba(74,116,255,.12);
+}
+
+.weekday-chip.active span {
+    color: var(--text-primary);
+}
+
+.color-palette {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .color-option {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 2px solid transparent;
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .color-option:hover {
-    transform: scale(1.1);
+    transform: translateY(-2px);
 }
 
-input[type="radio"]:checked + .color-option {
-    border-color: var(--text-primary) !important;
-    transform: scale(1.15);
+.color-option.active {
+    border-color: #fff;
+    box-shadow: 0 0 0 2px rgba(74,116,255,.45);
+}
+
+.custom-color-picker {
+    width: 44px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid var(--border-color, rgba(255,255,255,.2));
+    border-radius: 8px;
+    background: transparent;
 }
 
 @media (max-width: 768px) {
@@ -738,6 +786,52 @@ function toggleGoalFields() {
 }
 
 
+
+function setHabitColor(color) {
+    const hiddenColor = document.getElementById('habitColor');
+    const picker = document.getElementById('customColorPicker');
+    const hexLabel = document.getElementById('customColorHex');
+
+    if (hiddenColor) hiddenColor.value = color;
+    if (picker) picker.value = color;
+    if (hexLabel) hexLabel.textContent = color.toLowerCase();
+
+    const options = document.querySelectorAll('#presetColors .color-option');
+    options.forEach((option) => {
+        option.classList.toggle('active', option.dataset.color?.toLowerCase() === color.toLowerCase());
+    });
+}
+
+function initHabitColorPicker() {
+    const options = document.querySelectorAll('#presetColors .color-option');
+    options.forEach((option) => {
+        option.addEventListener('click', () => {
+            setHabitColor(option.dataset.color || '#4a74ff');
+        });
+    });
+
+    const picker = document.getElementById('customColorPicker');
+    picker?.addEventListener('input', (event) => {
+        setHabitColor(event.target.value || '#4a74ff');
+    });
+}
+
+
+function refreshWeekdayChips() {
+    const dayCheckboxes = document.querySelectorAll('.target-day-option');
+    dayCheckboxes.forEach((checkbox) => {
+        checkbox.closest('.weekday-chip')?.classList.toggle('active', checkbox.checked);
+    });
+}
+
+function initWeekdayChips() {
+    const dayCheckboxes = document.querySelectorAll('.target-day-option');
+    dayCheckboxes.forEach((checkbox) => {
+        checkbox.addEventListener('change', refreshWeekdayChips);
+    });
+    refreshWeekdayChips();
+}
+
 function openHabitModal(mode = 'create') {
     document.getElementById('habitModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -751,6 +845,8 @@ function openHabitModal(mode = 'create') {
         document.getElementById('habitGoalType').value = 'completion';
         toggleTargetDays();
         toggleGoalFields();
+        setHabitColor('#4a74ff');
+        refreshWeekdayChips();
     }
 }
 
@@ -783,14 +879,10 @@ function openEditModal(habitId) {
 
     toggleTargetDays();
     toggleGoalFields();
+    refreshWeekdayChips();
     
     // Selecionar cor
-    const colorRadios = document.querySelectorAll('input[name="color"]');
-    colorRadios.forEach(radio => {
-        if (radio.value === habit.color) {
-            radio.checked = true;
-        }
-    });
+    setHabitColor(habit.color || '#4a74ff');
     
     // Abrir modal
     openHabitModal('edit');
@@ -802,6 +894,8 @@ function closeHabitModal() {
     document.getElementById('habitForm').reset();
     toggleTargetDays();
     toggleGoalFields();
+    setHabitColor('#4a74ff');
+    refreshWeekdayChips();
 }
 
 function confirmDelete(habitId, habitName) {
@@ -868,6 +962,9 @@ document.getElementById('habitModal')?.addEventListener('click', function(e) {
 
 toggleTargetDays();
 toggleGoalFields();
+initHabitColorPicker();
+initWeekdayChips();
+setHabitColor('#4a74ff');
 
 // Auto-hide alerts após 5 segundos
 setTimeout(() => {

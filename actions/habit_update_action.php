@@ -39,6 +39,9 @@ $description = trim($_POST['description'] ?? '');
 $category = trim($_POST['category'] ?? '');
 $timeOfDay = trim($_POST['time'] ?? $_POST['time_of_day'] ?? '');
 $color = trim($_POST['color'] ?? '#4a74ff');
+if (!preg_match('/^#[0-9a-fA-F]{6}$/', $color)) {
+    $color = '#4a74ff';
+}
 $icon = trim($_POST['icon'] ?? '');
 $frequency = trim($_POST['frequency'] ?? 'daily');
 $targetDays = $_POST['target_days'] ?? [];
