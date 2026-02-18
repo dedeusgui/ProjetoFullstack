@@ -27,6 +27,29 @@ function getAppToday(): string {
     return date('Y-m-d');
 }
 
+
+function getUserTodayDate(mysqli $conn, int $userId): string {
+    $timezone = 'America/Sao_Paulo';
+
+    $stmt = $conn->prepare("SELECT timezone FROM users WHERE id = ? LIMIT 1");
+    if ($stmt) {
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if (!empty($row['timezone'])) {
+            $timezone = $row['timezone'];
+        }
+    }
+
+    try {
+        $now = new DateTime('now', new DateTimeZone($timezone));
+    } catch (Throwable $e) {
+        $now = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
+    }
+
+    return $now->format('Y-m-d');
+}
+
 function normalizeTargetDays(?string $targetDays): array {
     if (empty($targetDays)) {
         return [];
@@ -189,7 +212,7 @@ function getArchivedHabits($conn, $userId) {
 }
 
 // Buscar hábitos de hoje
-function getTodayHabits($conn, $userId) {
+function getTodayHabits($conn, $userId, ?string $targetDate = null) {
     $sql = "
         SELECT 
             h.*,
@@ -207,7 +230,7 @@ function getTodayHabits($conn, $userId) {
     ";
     
     $stmt = $conn->prepare($sql);
-    $today = getAppToday();
+    $today = $targetDate ?? getAppToday();
     $stmt->bind_param("si", $today, $userId);
     $stmt->execute();
     $result = $stmt->get_result();

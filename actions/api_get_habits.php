@@ -32,7 +32,7 @@ function buildHabitsApiResponse(mysqli $conn, int $userId, string $scope = 'all'
     ];
 
     if ($scope === 'today') {
-        $todayHabitsRaw = getTodayHabits($conn, $userId);
+        $todayHabitsRaw = getTodayHabits($conn, $userId, getUserTodayDate($conn, $userId));
         $todayHabits = array_map($mapHabit, $todayHabitsRaw);
 
         $response['data'] = [

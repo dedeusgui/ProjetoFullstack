@@ -13,6 +13,7 @@ $hideLoginButton = true;
 // Buscar dados do usuário logado
 $userId = getUserId();
 $userData = getCurrentUser($conn);
+$todayDate = getUserTodayDate($conn, $userId);
 
 // Se não encontrou usuário, fazer logout
 if (!$userData) {
@@ -31,7 +32,7 @@ $stats = [
 
 // Buscar hábitos ativos do usuário, hábitos de hoje e arquivados
 $allActiveHabitsRaw = getUserHabits($conn, $userId);
-$habitsRaw = getTodayHabits($conn, $userId);
+$habitsRaw = getTodayHabits($conn, $userId, $todayDate);
 $archivedHabitsRaw = getArchivedHabits($conn, $userId);
 
 // Mapear para formato esperado pelo frontend
@@ -52,8 +53,8 @@ foreach ($habitsRaw as $habit) {
         'goal_type' => $habit['goal_type'] ?? 'completion',
         'goal_value' => (int)($habit['goal_value'] ?? 1),
         'goal_unit' => $habit['goal_unit'] ?? '',
-        'can_complete_today' => isHabitScheduledForDate($habit, getAppToday()) && !(bool)$habit['completed_today'],
-        'next_due_date' => getNextHabitDueDate($habit, (bool)$habit['completed_today'] ? date('Y-m-d', strtotime(getAppToday().' +1 day')) : getAppToday())
+        'can_complete_today' => isHabitScheduledForDate($habit, $todayDate) && !(bool)$habit['completed_today'],
+        'next_due_date' => getNextHabitDueDate($habit, (bool)$habit['completed_today'] ? date('Y-m-d', strtotime($todayDate . ' +1 day')) : $todayDate)
     ];
 }
 
@@ -396,7 +397,7 @@ include_once "includes/header.php";
                                 <div class="d-flex align-items-center gap-sm" style="flex-shrink: 0;">
                                     <form method="POST" action="../actions/habit_mark_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
                                         <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
-                                        <input type="hidden" name="completion_date" value="<?php echo date('Y-m-d'); ?>">
+                                        <input type="hidden" name="completion_date" value="<?php echo $todayDate; ?>">
                                         <?php if (($habit['goal_type'] ?? 'completion') !== 'completion' && !$habit['completed_today']): ?>
                                             <input type="number" step="0.01" min="0" name="value_achieved" class="doitly-input" style="width: 100px; padding: 6px 8px;" placeholder="valor" required>
                                         <?php endif; ?>
