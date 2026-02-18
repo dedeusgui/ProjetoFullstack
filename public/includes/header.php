@@ -64,6 +64,7 @@ $htmlInlineStyle = sprintf(
     
     <!-- AOS (Animate On Scroll) -->
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
 </head>
 
 <body>

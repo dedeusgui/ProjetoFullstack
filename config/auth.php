@@ -27,6 +27,7 @@ function getCurrentUser($conn) {
             u.name,
             u.email,
             u.avatar_url,
+            u.created_at,
             us.theme,
             us.primary_color,
             us.accent_color,

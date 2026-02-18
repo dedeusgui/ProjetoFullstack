@@ -451,34 +451,69 @@ function getCategoryStats($conn, $userId) {
 }
 
 // Histórico recente
-function getRecentHistory($conn, $userId, $days = 10) {
+function getUserCreatedAt($conn, $userId): ?string {
+    $stmt = $conn->prepare("SELECT created_at FROM users WHERE id = ? LIMIT 1");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+
+    return $row['created_at'] ?? null;
+}
+
+// Histórico recente
+function getRecentHistory($conn, $userId, $days = 10, ?string $userCreatedAt = null) {
     $history = [];
-    $totalHabits = getTotalHabits($conn, $userId);
-    
-    for ($i = 0; $i < $days; $i++) {
+
+    $maxDays = max(1, (int) $days);
+
+    if (!empty($userCreatedAt)) {
+        $createdDate = date('Y-m-d', strtotime($userCreatedAt));
+        $todayDate = date('Y-m-d');
+        $diffSeconds = strtotime($todayDate) - strtotime($createdDate);
+        if ($diffSeconds >= 0) {
+            $daysSinceCreation = (int) floor($diffSeconds / 86400) + 1;
+            $maxDays = min($maxDays, max(1, $daysSinceCreation));
+        }
+    }
+
+    $totalByDateStmt = $conn->prepare("
+        SELECT COUNT(*) as total
+        FROM habits
+        WHERE user_id = ?
+          AND DATE(created_at) <= ?
+    ");
+
+    for ($i = 0; $i < $maxDays; $i++) {
         $date = date('Y-m-d', strtotime("-$i days"));
-        
+
         $stmt = $conn->prepare("
             SELECT COUNT(*) as completed
-            FROM habit_completions 
+            FROM habit_completions
             WHERE user_id = ? AND completion_date = ?
         ");
         $stmt->bind_param("is", $userId, $date);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        $completed = $row['completed'] ?? 0;
-        
-        $percentage = $totalHabits > 0 ? round(($completed / $totalHabits) * 100, 1) : 0;
-        
+        $completed = (int) ($row['completed'] ?? 0);
+
+        $totalByDateStmt->bind_param("is", $userId, $date);
+        $totalByDateStmt->execute();
+        $totalResult = $totalByDateStmt->get_result();
+        $totalRow = $totalResult->fetch_assoc();
+        $totalHabitsOnDate = (int) ($totalRow['total'] ?? 0);
+
+        $percentage = $totalHabitsOnDate > 0 ? round(($completed / $totalHabitsOnDate) * 100, 1) : 0;
+
         $history[] = [
             'date' => $date,
             'completed' => $completed,
-            'total' => $totalHabits,
+            'total' => $totalHabitsOnDate,
             'percentage' => $percentage
         ];
     }
-    
+
     return $history;
 }
 
@@ -496,19 +531,41 @@ function getAllCategories($conn) {
 
 // Mapear ícone salvo no banco para classe Bootstrap Icons
 function mapAchievementIconToBootstrap(string $icon): string {
+    $normalized = strtolower(trim($icon));
+
     $map = [
-        'flag' => 'bi-flag',
-        'fire' => 'bi-fire',
-        'trophy' => 'bi-trophy',
-        'star' => 'bi-star',
-        'award' => 'bi-award',
-        'collection' => 'bi-collection',
-        'rocket' => 'bi-rocket',
-        'gem' => 'bi-gem'
+        'flag' => 'bi bi-flag-fill',
+        'fire' => 'bi bi-fire',
+        'trophy' => 'bi bi-trophy-fill',
+        'star' => 'bi bi-star-fill',
+        'award' => 'bi bi-award-fill',
+        'collection' => 'bi bi-collection-fill',
+        'rocket' => 'bi bi-rocket-takeoff-fill',
+        'gem' => 'bi bi-gem',
+        'patch-check' => 'bi bi-patch-check-fill',
+        'check' => 'bi bi-check-circle-fill'
     ];
 
-    return $map[$icon] ?? 'bi-patch-check';
+    if ($normalized === '') {
+        return 'bi bi-patch-check-fill';
+    }
+
+    if (isset($map[$normalized])) {
+        return $map[$normalized];
+    }
+
+    // Aceita valor já salvo como classe completa
+    if (str_starts_with($normalized, 'bi bi-')) {
+        return $normalized;
+    }
+
+    if (str_starts_with($normalized, 'bi-')) {
+        return 'bi ' . $normalized;
+    }
+
+    return 'bi bi-patch-check-fill';
 }
+
 
 // Buscar total de hábitos concluídos por data
 function getDailyCompletionsMap($conn, $userId, $days = 365) {
@@ -568,6 +625,22 @@ function getUserAchievements($conn, $userId) {
         'perfect_month' => $perfectStreak
     ];
 
+    $categoryByCriteria = [
+        'streak' => 'consistencia',
+        'perfect_week' => 'consistencia',
+        'perfect_month' => 'consistencia',
+        'habits_count' => 'exploracao',
+        'total_completions' => 'performance'
+    ];
+
+    $tierByRarity = [
+        'common' => 'bronze',
+        'rare' => 'prata',
+        'epic' => 'ouro',
+        'legendary' => 'ouro'
+    ];
+
+
     // Conquistas já desbloqueadas
     $unlockedMap = [];
     $unlockedStmt = $conn->prepare("\n        SELECT achievement_id, unlocked_at\n        FROM user_achievements\n        WHERE user_id = ?\n    ");
@@ -585,8 +658,11 @@ function getUserAchievements($conn, $userId) {
 
     $achievements = [];
 
+    $justUnlockedIds = [];
+
     while ($achievement = $achievementsResult->fetch_assoc()) {
         $achievementId = (int) $achievement['id'];
+        $slug = $achievement['slug'];
         $criteriaType = $achievement['criteria_type'];
         $criteriaValue = (int) $achievement['criteria_value'];
         $criteriaValue = $criteriaValue > 0 ? $criteriaValue : 1;
@@ -613,11 +689,34 @@ function getUserAchievements($conn, $userId) {
             $insertStmt->execute();
 
             $unlockedMap[$achievementId] = date('Y-m-d H:i:s');
+            $justUnlockedIds[$achievementId] = true;
         }
+
+        $currentValue = 0;
+        $targetValue = $criteriaValue;
+        $progressLabel = '';
+
+        if ($criteriaType === 'perfect_week') {
+            $targetValue = 7 * $criteriaValue;
+            $currentValue = $metricValue;
+            $progressLabel = $currentValue . '/' . $targetValue . ' dias perfeitos';
+        } elseif ($criteriaType === 'perfect_month') {
+            $targetValue = 30 * $criteriaValue;
+            $currentValue = $metricValue;
+            $progressLabel = $currentValue . '/' . $targetValue . ' dias perfeitos';
+        } else {
+            $currentValue = min($metricValue, $criteriaValue);
+            $progressLabel = $currentValue . '/' . $criteriaValue;
+        }
+
+        $meta = [
+            'category' => $categoryByCriteria[$criteriaType] ?? 'performance',
+            'tier' => $tierByRarity[$achievement['rarity']] ?? 'bronze'
+        ];
 
         $achievements[] = [
             'id' => $achievementId,
-            'slug' => $achievement['slug'],
+            'slug' => $slug,
             'name' => $achievement['name'],
             'description' => $achievement['description'],
             'icon' => mapAchievementIconToBootstrap($achievement['icon'] ?? ''),
@@ -627,7 +726,15 @@ function getUserAchievements($conn, $userId) {
             'points' => (int) $achievement['points'],
             'rarity' => $achievement['rarity'],
             'progress' => $progress,
+            'progress_percent' => $progress,
+            'progress_current' => $currentValue,
+            'progress_target' => $targetValue,
+            'progress_label' => $progressLabel,
+            'is_near_completion' => !$isUnlocked && $progress >= 80,
+            'category' => $meta['category'],
+            'tier' => $meta['tier'],
             'unlocked' => isset($unlockedMap[$achievementId]) || $isUnlocked,
+            'just_unlocked' => isset($justUnlockedIds[$achievementId]),
             'date' => $unlockedMap[$achievementId] ?? null
         ];
     }
