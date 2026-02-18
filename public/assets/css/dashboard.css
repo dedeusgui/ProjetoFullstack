@@ -976,3 +976,93 @@
   font-size: 0.875rem;
   color: var(--text-secondary);
 }
+
+/* Dashboard layout editor */
+.dashboard-layout-toolbar {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1300;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: 0.75rem;
+  border-radius: var(--radius-medium);
+  border: var(--border-light);
+  background: rgba(15, 23, 42, 0.92);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.32);
+  max-width: min(95vw, 540px);
+}
+
+.dashboard-layout-feedback {
+  display: none;
+  color: #dce7ff;
+  font-size: 0.85rem;
+}
+
+.dashboard-layout-feedback.is-visible {
+  display: inline-block;
+}
+
+.dashboard-layout-feedback.is-error {
+  color: #ffb0b0;
+}
+
+.dashboard-layout-feedback.is-success {
+  color: #a8f7cf;
+}
+
+[data-layout-group] > [data-widget-id] {
+  position: relative;
+}
+
+.dashboard-layout-handle {
+  display: none;
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 2rem;
+  height: 2rem;
+  border: var(--border-light);
+  border-radius: var(--radius-small);
+  background: var(--glass-bg-light);
+  color: var(--text-secondary);
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  z-index: 12;
+}
+
+.dashboard-layout-edit-mode [data-layout-group] > [data-widget-id] {
+  outline: 2px dashed rgba(74, 116, 255, 0.45);
+  outline-offset: -6px;
+}
+
+.dashboard-layout-edit-mode .dashboard-layout-handle {
+  display: inline-flex;
+}
+
+.dashboard-layout-ghost {
+  opacity: 0.45;
+}
+
+.dashboard-layout-chosen {
+  transform: scale(0.995);
+}
+
+.dashboard-layout-drag {
+  cursor: grabbing;
+}
+
+@media (max-width: 768px) {
+  .dashboard-layout-toolbar {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+  }
+
+  .dashboard-layout-toolbar .doitly-btn span {
+    display: none;
+  }
+}

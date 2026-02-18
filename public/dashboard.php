@@ -122,6 +122,56 @@ $monthSummary = [
     'total_completions' => getTotalCompletions($conn, $userId)
 ];
 
+$dashboardLayoutConfig = [
+    'stats' => [],
+    'widgets' => []
+];
+
+$layoutTableSql = "
+    CREATE TABLE IF NOT EXISTS user_page_layouts (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        page_key VARCHAR(80) NOT NULL,
+        layout_json LONGTEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        UNIQUE KEY uniq_user_page_layout (user_id, page_key),
+        CONSTRAINT fk_user_page_layouts_user
+            FOREIGN KEY (user_id) REFERENCES users(id)
+            ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+";
+
+$conn->query($layoutTableSql);
+
+$layoutStmt = $conn->prepare('SELECT layout_json FROM user_page_layouts WHERE user_id = ? AND page_key = ? LIMIT 1');
+if ($layoutStmt) {
+    $pageKey = 'dashboard';
+    $layoutStmt->bind_param('is', $userId, $pageKey);
+    if ($layoutStmt->execute()) {
+        $layoutResult = $layoutStmt->get_result();
+        $layoutRow = $layoutResult ? $layoutResult->fetch_assoc() : null;
+        if ($layoutRow && isset($layoutRow['layout_json'])) {
+            $decodedLayout = json_decode($layoutRow['layout_json'], true);
+            if (
+                json_last_error() === JSON_ERROR_NONE
+                && isset($decodedLayout['layout'])
+                && is_array($decodedLayout['layout'])
+            ) {
+                $savedStats = $decodedLayout['layout']['stats'] ?? [];
+                $savedWidgets = $decodedLayout['layout']['widgets'] ?? [];
+
+                $dashboardLayoutConfig['stats'] = is_array($savedStats)
+                    ? array_values(array_filter($savedStats, 'is_string'))
+                    : [];
+                $dashboardLayoutConfig['widgets'] = is_array($savedWidgets)
+                    ? array_values(array_filter($savedWidgets, 'is_string'))
+                    : [];
+            }
+        }
+    }
+}
+
 include_once "includes/header.php";
 ?>
 
@@ -227,9 +277,18 @@ include_once "includes/header.php";
             <p class="dashboard-subtitle">Aqui está um resumo do seu progresso hoje</p>
         </div>
 
+        <script>
+            window.DASHBOARD_LAYOUT_CONFIG = {
+                pageKey: 'dashboard',
+                isLoggedIn: true,
+                initialLayout: <?php echo json_encode($dashboardLayoutConfig, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>,
+                saveEndpoint: '../actions/page_layout_action.php'
+            };
+        </script>
+
         <!-- Quick Stats -->
-        <div class="quick-stats">
-            <div class="stat-card">
+        <div class="quick-stats" data-layout-group="stats">
+            <div class="stat-card" data-widget-id="stats-active-habits">
                 <div class="stat-header">
                     <span class="stat-label">Hábitos Ativos</span>
                     <div class="stat-icon">
@@ -243,7 +302,7 @@ include_once "includes/header.php";
                 </div>
             </div>
 
-            <div class="stat-card stat-success">
+            <div class="stat-card stat-success" data-widget-id="stats-completed-today">
                 <div class="stat-header">
                     <span class="stat-label">Concluídos Hoje</span>
                     <div class="stat-icon">
@@ -257,7 +316,7 @@ include_once "includes/header.php";
                 </div>
             </div>
 
-            <div class="stat-card stat-warning">
+            <div class="stat-card stat-warning" data-widget-id="stats-success-rate">
                 <div class="stat-header">
                     <span class="stat-label">Taxa de Sucesso</span>
                     <div class="stat-icon">
@@ -271,7 +330,7 @@ include_once "includes/header.php";
                 </div>
             </div>
 
-            <div class="stat-card stat-danger">
+            <div class="stat-card stat-danger" data-widget-id="stats-current-streak">
                 <div class="stat-header">
                     <span class="stat-label">Sequência Atual</span>
                     <div class="stat-icon">
@@ -287,9 +346,9 @@ include_once "includes/header.php";
         </div>
 
         <!-- Dashboard Grid -->
-        <div class="dashboard-grid">
+        <div class="dashboard-grid" data-layout-group="widgets">
             <!-- Progress Chart -->
-            <div class="grid-col-8">
+            <div class="grid-col-8" data-widget-id="widget-progress-chart">
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3 class="card-title">
@@ -309,7 +368,7 @@ include_once "includes/header.php";
             </div>
 
             <!-- Quick Actions -->
-            <div class="grid-col-4">
+            <div class="grid-col-4" data-widget-id="widget-quick-actions">
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3 class="card-title">
@@ -367,7 +426,7 @@ include_once "includes/header.php";
 
 
 
-            <div class="grid-col-12">
+            <div class="grid-col-12" data-widget-id="widget-ai-analysis">
                 <div class="dashboard-card recommendation-card <?php echo $riskView['class']; ?>">
                     <div class="card-header">
                         <h3 class="card-title">
@@ -435,7 +494,7 @@ include_once "includes/header.php";
             </div>
 
             <!-- Today's Habits -->
-            <div class="grid-col-12">
+            <div class="grid-col-12" data-widget-id="widget-today-habits">
                 <div class="dashboard-card">
                     <div class="card-header">
                         <h3 class="card-title">
@@ -646,5 +705,8 @@ include_once "includes/header.php";
         }, 5000);
     });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script src="assets/js/dashboard-layout-editor.js"></script>
 
 <?php include_once "includes/footer.php"; ?>

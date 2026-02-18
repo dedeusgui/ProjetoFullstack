@@ -48,7 +48,7 @@ if (!preg_match('/^[a-z0-9_-]{2,80}$/i', $pageKey)) {
     exit;
 }
 
-$allowedPages = ['landing'];
+$allowedPages = ['dashboard'];
 if (!in_array($pageKey, $allowedPages, true)) {
     http_response_code(422);
     echo json_encode([
@@ -114,35 +114,46 @@ if ($action !== 'save') {
     exit;
 }
 
-$order = $payload['order'] ?? [];
-if (!is_array($order) || !$order) {
+$layoutPayload = $payload['layout'] ?? null;
+
+if (!is_array($layoutPayload)) {
     http_response_code(422);
     echo json_encode([
         'success' => false,
-        'message' => 'A ordem dos blocos é obrigatória.'
+        'message' => 'Layout inválido.'
     ]);
     exit;
 }
 
-$normalizedOrder = [];
-foreach ($order as $item) {
-    if (!is_string($item)) {
-        continue;
+$sanitizeList = static function (array $items): array {
+    $sanitized = [];
+
+    foreach ($items as $item) {
+        if (!is_string($item)) {
+            continue;
+        }
+
+        $blockId = trim($item);
+        if ($blockId === '' || strlen($blockId) > 120) {
+            continue;
+        }
+
+        if (!preg_match('/^[a-z0-9_-]+$/i', $blockId)) {
+            continue;
+        }
+
+        $sanitized[$blockId] = $blockId;
     }
 
-    $blockId = trim($item);
-    if ($blockId === '' || strlen($blockId) > 120) {
-        continue;
-    }
+    return array_values($sanitized);
+};
 
-    if (!preg_match('/^[a-z0-9_-]+$/i', $blockId)) {
-        continue;
-    }
+$normalizedLayout = [
+    'stats' => $sanitizeList(is_array($layoutPayload['stats'] ?? null) ? $layoutPayload['stats'] : []),
+    'widgets' => $sanitizeList(is_array($layoutPayload['widgets'] ?? null) ? $layoutPayload['widgets'] : [])
+];
 
-    $normalizedOrder[$blockId] = $blockId;
-}
-
-if (!$normalizedOrder) {
+if (!$normalizedLayout['stats'] && !$normalizedLayout['widgets']) {
     http_response_code(422);
     echo json_encode([
         'success' => false,
@@ -152,7 +163,7 @@ if (!$normalizedOrder) {
 }
 
 $layoutJson = json_encode([
-    'order' => array_values($normalizedOrder)
+    'layout' => $normalizedLayout
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
 $upsertStmt = $conn->prepare(
