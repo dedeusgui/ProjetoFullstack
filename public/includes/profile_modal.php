@@ -1,7 +1,19 @@
 <?php
 $profileLevel = (int) ($userData['level'] ?? ($profileSummary['level'] ?? 1));
 $profileName = $userData['name'] ?? 'Usuário';
+$profileAvatarUrl = $userData['avatar_url'] ?? null;
+$profileInitials = $userData['initials'] ?? 'U';
 $profileAchievements = $profileSummary['unlocked_achievements'] ?? [];
+
+$memberSinceLabel = 'Data de criação indisponível';
+if (!empty($userData['created_at'])) {
+    try {
+        $createdAt = new DateTime((string) $userData['created_at']);
+        $memberSinceLabel = 'Membro desde ' . $createdAt->format('d/m/Y');
+    } catch (Throwable $e) {
+        $memberSinceLabel = 'Membro desde ' . htmlspecialchars((string) $userData['created_at'], ENT_QUOTES, 'UTF-8');
+    }
+}
 ?>
 
 <div id="profileModalOverlay" class="profile-modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
@@ -14,8 +26,20 @@ $profileAchievements = $profileSummary['unlocked_achievements'] ?? [];
         </div>
 
         <div class="profile-modal-body">
-            <div class="profile-summary">
-                <h4><?php echo htmlspecialchars($profileName, ENT_QUOTES, 'UTF-8'); ?></h4>
+            <div class="profile-summary-card">
+                <div class="profile-user-identity">
+                    <div class="profile-user-avatar">
+                        <?php if (!empty($profileAvatarUrl)): ?>
+                            <img src="<?php echo htmlspecialchars($profileAvatarUrl, ENT_QUOTES, 'UTF-8'); ?>" alt="Avatar de <?php echo htmlspecialchars($profileName, ENT_QUOTES, 'UTF-8'); ?>">
+                        <?php else: ?>
+                            <span><?php echo htmlspecialchars($profileInitials, ENT_QUOTES, 'UTF-8'); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div>
+                        <h4><?php echo htmlspecialchars($profileName, ENT_QUOTES, 'UTF-8'); ?></h4>
+                        <p><?php echo $memberSinceLabel; ?></p>
+                    </div>
+                </div>
                 <span class="user-level-badge">Nível <?php echo $profileLevel; ?></span>
             </div>
 
