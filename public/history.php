@@ -373,11 +373,7 @@ include_once "includes/header.php";
                                                 style="display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg-light); border-radius: var(--radius-medium); border: var(--border-light); <?php echo !$achievement['unlocked'] ? 'opacity: 0.82;' : ''; ?>">
                                                 <div
                                                     style="width: 56px; height: 56px; background: <?php echo $achievement['unlocked'] ? 'linear-gradient(135deg, var(--accent-blue), var(--accent-green))' : 'var(--glass-bg-medium)'; ?>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-white); flex-shrink: 0;">
-                                                    <?php if (!empty($achievement['icon'])): ?>
-                                                        <iconify-icon icon="<?php echo htmlspecialchars($achievement['icon'], ENT_QUOTES, 'UTF-8'); ?>"></iconify-icon>
-                                                    <?php else: ?>
-                                                        <i class="bi bi-patch-check"></i>
-                                                    <?php endif; ?>
+                                                    <i class="<?php echo htmlspecialchars($achievement['icon'] ?? 'bi bi-patch-check-fill', ENT_QUOTES, 'UTF-8'); ?>"></i>
                                                 </div>
                                                 <div style="flex: 1; min-width: 0;">
                                                     <h4 style="margin: 0 0 4px 0; font-size: 1rem; font-weight: var(--font-semibold);">
