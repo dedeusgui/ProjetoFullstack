@@ -27,6 +27,60 @@ function getAppToday(): string {
     return date('Y-m-d');
 }
 
+function normalizeTargetDays(?string $targetDays): array {
+    if (empty($targetDays)) {
+        return [];
+    }
+
+    $decoded = json_decode($targetDays, true);
+    if (!is_array($decoded)) {
+        return [];
+    }
+
+    $days = array_values(array_unique(array_map('intval', $decoded)));
+    return array_values(array_filter($days, static fn($day) => $day >= 0 && $day <= 6));
+}
+
+function isHabitScheduledForDate(array $habit, string $date): bool {
+    $targetDate = DateTime::createFromFormat('Y-m-d', $date);
+    if (!$targetDate) {
+        return false;
+    }
+
+    if (!empty($habit['start_date']) && $date < $habit['start_date']) {
+        return false;
+    }
+
+    if (!empty($habit['end_date']) && $date > $habit['end_date']) {
+        return false;
+    }
+
+    $frequency = $habit['frequency'] ?? 'daily';
+    if ($frequency === 'daily') {
+        return true;
+    }
+
+    $phpWeekDay = (int) $targetDate->format('w');
+
+    if ($frequency === 'weekly') {
+        $days = normalizeTargetDays($habit['target_days'] ?? null);
+        if (empty($days)) {
+            return $phpWeekDay === (int) date('w', strtotime((string) ($habit['start_date'] ?? $date)));
+        }
+        return in_array($phpWeekDay, $days, true);
+    }
+
+    if ($frequency === 'custom') {
+        $days = normalizeTargetDays($habit['target_days'] ?? null);
+        if (empty($days)) {
+            return false;
+        }
+        return in_array($phpWeekDay, $days, true);
+    }
+
+    return true;
+}
+
 // Buscar ID da categoria pelo nome
 function getCategoryIdByName($conn, $categoryName) {
     $stmt = $conn->prepare("SELECT id FROM categories WHERE name = ?");
@@ -52,7 +106,7 @@ function getUserHabits($conn, $userId) {
             ) as completed_today
         FROM habits h
         LEFT JOIN categories c ON h.category_id = c.id
-        WHERE h.user_id = ? AND h.is_active = 1
+        WHERE h.user_id = ? AND h.is_active = 1 AND h.archived_at IS NULL
         ORDER BY h.created_at DESC
     ";
     
@@ -70,6 +124,38 @@ function getUserHabits($conn, $userId) {
     return $habits;
 }
 
+function getArchivedHabits($conn, $userId) {
+    $sql = "
+        SELECT 
+            h.*,
+            c.name as category_name,
+            c.color as category_color,
+            EXISTS(
+                SELECT 1 FROM habit_completions 
+                WHERE habit_id = h.id 
+                AND completion_date = ?
+                AND user_id = h.user_id
+            ) as completed_today
+        FROM habits h
+        LEFT JOIN categories c ON h.category_id = c.id
+        WHERE h.user_id = ? AND h.archived_at IS NOT NULL
+        ORDER BY h.archived_at DESC
+    ";
+
+    $stmt = $conn->prepare($sql);
+    $today = getAppToday();
+    $stmt->bind_param("si", $today, $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    $habits = [];
+    while ($row = $result->fetch_assoc()) {
+        $habits[] = $row;
+    }
+
+    return $habits;
+}
+
 // Buscar hábitos de hoje
 function getTodayHabits($conn, $userId) {
     $sql = "
@@ -84,7 +170,7 @@ function getTodayHabits($conn, $userId) {
             ) as completed_today
         FROM habits h
         LEFT JOIN categories c ON h.category_id = c.id
-        WHERE h.user_id = ? AND h.is_active = 1
+        WHERE h.user_id = ? AND h.is_active = 1 AND h.archived_at IS NULL
         ORDER BY h.time_of_day, h.title
     ";
     
@@ -96,7 +182,9 @@ function getTodayHabits($conn, $userId) {
     
     $habits = [];
     while ($row = $result->fetch_assoc()) {
-        $habits[] = $row;
+        if (isHabitScheduledForDate($row, $today)) {
+            $habits[] = $row;
+        }
     }
     
     return $habits;
@@ -104,7 +192,16 @@ function getTodayHabits($conn, $userId) {
 
 // Total de hábitos ativos
 function getTotalHabits($conn, $userId) {
-    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM habits WHERE user_id = ? AND is_active = 1");
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM habits WHERE user_id = ? AND is_active = 1 AND archived_at IS NULL");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return $row['total'] ?? 0;
+}
+
+function getArchivedHabitsCount($conn, $userId) {
+    $stmt = $conn->prepare("SELECT COUNT(*) as total FROM habits WHERE user_id = ? AND archived_at IS NOT NULL");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $result = $stmt->get_result();

@@ -2,6 +2,7 @@
 session_start();
 require_once '../config/conexao.php';
 require_once '../config/auth.php';
+require_once '../config/helpers.php';
 
 function redirectBack(): void
 {
@@ -112,7 +113,6 @@ function completeHabitFallback(
     }
 }
 
-// Verificar autenticação
 if (!isLoggedIn()) {
     header('Location: ../public/login.php');
     exit;
@@ -132,13 +132,24 @@ if ($habitId <= 0) {
     redirectBack();
 }
 
-$stmt = $conn->prepare('SELECT id FROM habits WHERE id = ? AND user_id = ?');
+$stmt = $conn->prepare('SELECT id, is_active, archived_at, frequency, target_days, start_date, end_date, goal_type FROM habits WHERE id = ? AND user_id = ?');
 $stmt->bind_param('ii', $habitId, $userId);
 $stmt->execute();
 $result = $stmt->get_result();
+$habit = $result->fetch_assoc();
 
-if ($result->num_rows === 0) {
+if (!$habit) {
     $_SESSION['error_message'] = 'Você não tem permissão para modificar este hábito.';
+    redirectBack();
+}
+
+if (!empty($habit['archived_at']) || (int)$habit['is_active'] !== 1) {
+    $_SESSION['error_message'] = 'Não é possível concluir um hábito arquivado.';
+    redirectBack();
+}
+
+if (!isHabitScheduledForDate($habit, $completionDate)) {
+    $_SESSION['error_message'] = 'Este hábito não está programado para essa data.';
     redirectBack();
 }
 
@@ -168,6 +179,13 @@ if ($checkResult->num_rows > 0) {
     $notes = $_POST['notes'] ?? null;
     $mood = $_POST['mood'] ?? null;
     $valueAchieved = isset($_POST['value_achieved']) ? floatval($_POST['value_achieved']) : null;
+
+    if (($habit['goal_type'] ?? 'completion') !== 'completion') {
+        if ($valueAchieved === null || $valueAchieved <= 0) {
+            $_SESSION['error_message'] = 'Informe o valor alcançado para concluir esse hábito.';
+            redirectBack();
+        }
+    }
 
     $completeStmt = $conn->prepare('CALL sp_complete_habit(?, ?, ?, ?, ?, ?)');
     $completeStmt->bind_param('iisdss', $habitId, $userId, $completionDate, $valueAchieved, $notes, $mood);

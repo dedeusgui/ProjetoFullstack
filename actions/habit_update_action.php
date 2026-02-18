@@ -4,21 +4,17 @@ require_once '../config/conexao.php';
 require_once '../config/auth.php';
 require_once '../config/helpers.php';
 
-// Verificar autenticação
 if (!isLoggedIn()) {
     header('Location: ../public/login.php');
     exit;
 }
 
-// Verificar se é POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header('Location: ../public/habits.php');
     exit;
 }
 
 $userId = getUserId();
-
-// Pegar ID do hábito
 $habitId = intval($_POST['habit_id'] ?? $_POST['id'] ?? 0);
 
 if ($habitId <= 0) {
@@ -27,9 +23,8 @@ if ($habitId <= 0) {
     exit;
 }
 
-// Verificar se o hábito pertence ao usuário logado
-$stmt = $conn->prepare("SELECT id FROM habits WHERE id = ? AND user_id = ?");
-$stmt->bind_param("ii", $habitId, $userId);
+$stmt = $conn->prepare('SELECT id FROM habits WHERE id = ? AND user_id = ?');
+$stmt->bind_param('ii', $habitId, $userId);
 $stmt->execute();
 $result = $stmt->get_result();
 
@@ -39,40 +34,51 @@ if ($result->num_rows === 0) {
     exit;
 }
 
-// Pegar dados do formulário
 $title = trim($_POST['title'] ?? $_POST['name'] ?? '');
 $description = trim($_POST['description'] ?? '');
 $category = trim($_POST['category'] ?? '');
 $timeOfDay = trim($_POST['time'] ?? $_POST['time_of_day'] ?? '');
 $color = trim($_POST['color'] ?? '#4a74ff');
 $icon = trim($_POST['icon'] ?? '');
+$frequency = trim($_POST['frequency'] ?? 'daily');
+$targetDays = $_POST['target_days'] ?? [];
 $goalType = trim($_POST['goal_type'] ?? 'completion');
-$goalValue = intval($_POST['goal_value'] ?? 1);
+$goalValue = max(1, intval($_POST['goal_value'] ?? 1));
 $goalUnit = trim($_POST['goal_unit'] ?? '');
 
-// Validar campos obrigatórios
-if (empty($title)) {
-    $_SESSION['error_message'] = 'O título do hábito é obrigatório.';
+if (empty($title) || empty($category) || empty($timeOfDay)) {
+    $_SESSION['error_message'] = 'Preencha título, categoria e período do dia.';
     header('Location: ../public/habits.php');
     exit;
 }
 
-if (empty($category)) {
-    $_SESSION['error_message'] = 'A categoria é obrigatória.';
+if (!in_array($frequency, ['daily', 'weekly', 'custom'], true)) {
+    $frequency = 'daily';
+}
+
+if (!in_array($goalType, ['completion', 'quantity', 'duration'], true)) {
+    $goalType = 'completion';
+}
+
+$targetDaysValues = [];
+if (is_array($targetDays)) {
+    foreach ($targetDays as $day) {
+        $dayInt = intval($day);
+        if ($dayInt >= 0 && $dayInt <= 6) {
+            $targetDaysValues[] = $dayInt;
+        }
+    }
+    $targetDaysValues = array_values(array_unique($targetDaysValues));
+}
+
+if (($frequency === 'weekly' || $frequency === 'custom') && count($targetDaysValues) === 0) {
+    $_SESSION['error_message'] = 'Selecione pelo menos um dia da semana para frequência semanal/customizada.';
     header('Location: ../public/habits.php');
     exit;
 }
 
-if (empty($timeOfDay)) {
-    $_SESSION['error_message'] = 'O período do dia é obrigatório.';
-    header('Location: ../public/habits.php');
-    exit;
-}
-
-// Mapear time_of_day de PT-BR para EN (se necessário)
+$targetDaysJson = count($targetDaysValues) > 0 ? json_encode($targetDaysValues) : null;
 $timeOfDayEN = mapTimeOfDay($timeOfDay);
-
-// Buscar category_id pelo nome
 $categoryId = getCategoryIdByName($conn, $category);
 
 if (!$categoryId) {
@@ -81,29 +87,30 @@ if (!$categoryId) {
     exit;
 }
 
-// Atualizar hábito no banco
-$updateStmt = $conn->prepare("
-    UPDATE habits SET
+$updateStmt = $conn->prepare('UPDATE habits SET
         category_id = ?,
         title = ?,
         description = ?,
         icon = ?,
         color = ?,
+        frequency = ?,
+        target_days = ?,
         time_of_day = ?,
         goal_type = ?,
         goal_value = ?,
         goal_unit = ?,
         updated_at = CURRENT_TIMESTAMP
-    WHERE id = ? AND user_id = ?
-");
+    WHERE id = ? AND user_id = ?');
 
 $updateStmt->bind_param(
-    "issssssssii",
+    'issssssssisii',
     $categoryId,
     $title,
     $description,
     $icon,
     $color,
+    $frequency,
+    $targetDaysJson,
     $timeOfDayEN,
     $goalType,
     $goalValue,

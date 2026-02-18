@@ -26,11 +26,12 @@ $userData['initials'] = getInitials($userData['name']);
 $stats = [
     'total_habits' => getTotalHabits($conn, $userId),
     'active_habits' => getTotalHabits($conn, $userId),
-    'archived_habits' => 0 // TODO: Implementar hábitos arquivados
+    'archived_habits' => getArchivedHabitsCount($conn, $userId)
 ];
 
-// Buscar todos os hábitos do usuário
+// Buscar hábitos ativos e arquivados
 $habitsRaw = getUserHabits($conn, $userId);
+$archivedHabitsRaw = getArchivedHabits($conn, $userId);
 
 // Mapear para formato esperado pelo frontend
 $habits = [];
@@ -44,7 +45,22 @@ foreach ($habitsRaw as $habit) {
         'color' => $habit['color'] ?? '#4a74ff',
         'streak' => $habit['current_streak'],
         'completed_today' => (bool)$habit['completed_today'],
-        'created_at' => $habit['created_at']
+        'created_at' => $habit['created_at'],
+        'frequency' => $habit['frequency'] ?? 'daily',
+        'target_days' => normalizeTargetDays($habit['target_days'] ?? null),
+        'goal_type' => $habit['goal_type'] ?? 'completion',
+        'goal_value' => (int)($habit['goal_value'] ?? 1),
+        'goal_unit' => $habit['goal_unit'] ?? ''
+    ];
+}
+
+$archivedHabits = [];
+foreach ($archivedHabitsRaw as $habit) {
+    $archivedHabits[] = [
+        'id' => $habit['id'],
+        'name' => $habit['title'],
+        'category' => $habit['category_name'] ?? 'Sem categoria',
+        'archived_at' => $habit['archived_at']
     ];
 }
 
@@ -93,7 +109,7 @@ include_once "includes/header.php";
                         <a href="habits.php" class="nav-link active">
                             <i class="bi bi-list-check"></i>
                             <span>Meus Hábitos</span>
-                            <span class="nav-badge"><?php echo $stats['total_habits']; ?></span>
+                            <span class="nav-badge"><?php echo $stats['active_habits']; ?></span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -166,7 +182,7 @@ include_once "includes/header.php";
                 <h2 class="stat-value"><?php echo $stats['total_habits']; ?></h2>
                 <div class="stat-change neutral">
                     <i class="bi bi-dash"></i>
-                    <span>Ativos</span>
+                    <span>Ativos agora</span>
                 </div>
             </div>
 
@@ -180,7 +196,22 @@ include_once "includes/header.php";
                 <h2 class="stat-value"><?php echo count(array_filter($habits, fn($h) => $h['completed_today'])); ?></h2>
                 <div class="stat-change positive">
                     <i class="bi bi-arrow-up"></i>
-                    <span>de <?php echo count($habits); ?> hábitos</span>
+                    <span>de <?php echo count($habits); ?> devidos hoje</span>
+                </div>
+            </div>
+
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-label">Arquivados</span>
+                    <div class="stat-icon">
+                        <i class="bi bi-archive"></i>
+                    </div>
+                </div>
+                <h2 class="stat-value"><?php echo $stats['archived_habits']; ?></h2>
+                <div class="stat-change neutral">
+                    <i class="bi bi-clock-history"></i>
+                    <span>histórico preservado</span>
                 </div>
             </div>
 
@@ -279,6 +310,13 @@ include_once "includes/header.php";
                                             <?php else: ?>
                                                 <span class="doitly-badge doitly-badge-warning" style="font-size: 0.75rem;">🌙 Noite</span>
                                             <?php endif; ?>
+                                            <?php if ($habit['frequency'] === 'daily'): ?>
+                                                <span class="doitly-badge doitly-badge-info" style="font-size: 0.75rem;">Diário</span>
+                                            <?php elseif ($habit['frequency'] === 'weekly'): ?>
+                                                <span class="doitly-badge doitly-badge-warning" style="font-size: 0.75rem;">Semanal</span>
+                                            <?php else: ?>
+                                                <span class="doitly-badge doitly-badge-success" style="font-size: 0.75rem;">Custom</span>
+                                            <?php endif; ?>
                                         </div>
                                         
                                         <?php if (!empty($habit['description'])): ?>
@@ -291,6 +329,14 @@ include_once "includes/header.php";
                                             <small class="text-secondary">
                                                 <i class="bi bi-tag"></i> <?php echo htmlspecialchars($habit['category']); ?>
                                             </small>
+                                            <small class="text-secondary">
+                                                <i class="bi bi-bullseye"></i>
+                                                <?php if (($habit['goal_type'] ?? 'completion') === 'completion'): ?>
+                                                    Meta: concluir
+                                                <?php else: ?>
+                                                    Meta: <?php echo (int)$habit['goal_value']; ?> <?php echo htmlspecialchars($habit['goal_unit'] ?: 'unidades'); ?>
+                                                <?php endif; ?>
+                                            </small>
                                             <small style="color: var(--accent-gold); font-weight: var(--font-medium);">
                                                 <i class="bi bi-fire"></i> <?php echo $habit['streak']; ?> dias
                                             </small>
@@ -300,9 +346,12 @@ include_once "includes/header.php";
                                 
                                 <!-- Right Side: Actions -->
                                 <div class="d-flex align-items-center gap-sm" style="flex-shrink: 0;">
-                                    <form method="POST" action="../actions/habit_mark_action.php" style="display: inline;">
+                                    <form method="POST" action="../actions/habit_mark_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
                                         <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
                                         <input type="hidden" name="completion_date" value="<?php echo date('Y-m-d'); ?>">
+                                        <?php if (($habit['goal_type'] ?? 'completion') !== 'completion' && !$habit['completed_today']): ?>
+                                            <input type="number" step="0.01" min="0" name="value_achieved" class="doitly-input" style="width: 100px; padding: 6px 8px;" placeholder="valor" required>
+                                        <?php endif; ?>
                                         <?php if ($habit['completed_today']): ?>
                                             <button type="submit" class="doitly-btn doitly-btn-sm doitly-btn-success">
                                                 <i class="bi bi-check-circle-fill"></i> Feito
@@ -317,6 +366,14 @@ include_once "includes/header.php";
                                     <button class="doitly-btn doitly-btn-sm doitly-btn-ghost" onclick="openEditModal(<?php echo $habit['id']; ?>)" title="Editar">
                                         <i class="bi bi-pencil"></i>
                                     </button>
+
+                                    <form method="POST" action="../actions/habit_archive_action.php" style="display: inline;">
+                                        <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
+                                        <input type="hidden" name="operation" value="archive">
+                                        <button type="submit" class="doitly-btn doitly-btn-sm doitly-btn-ghost" title="Arquivar">
+                                            <i class="bi bi-archive"></i>
+                                        </button>
+                                    </form>
                                     
                                     <button class="doitly-btn doitly-btn-sm doitly-btn-ghost" onclick="confirmDelete(<?php echo $habit['id']; ?>, '<?php echo htmlspecialchars($habit['name'], ENT_QUOTES); ?>')" title="Excluir">
                                         <i class="bi bi-trash"></i>
@@ -347,6 +404,35 @@ include_once "includes/header.php";
                     <h4 class="empty-title">Nenhum hábito encontrado</h4>
                     <p class="empty-text">Tente ajustar os filtros ou criar um novo hábito</p>
                 </div>
+            </div>
+        </div>
+
+        <div class="dashboard-card" style="margin-top: var(--space-lg);">
+            <div class="card-header">
+                <h3 class="card-title"><i class="bi bi-archive"></i> Hábitos Arquivados</h3>
+            </div>
+            <div class="card-body">
+                <?php if (count($archivedHabits) === 0): ?>
+                    <p class="text-secondary" style="margin: 0;">Nenhum hábito arquivado.</p>
+                <?php else: ?>
+                    <div class="d-flex flex-column gap-sm">
+                        <?php foreach ($archivedHabits as $archivedHabit): ?>
+                            <div class="habit-item" style="opacity: .85;">
+                                <div>
+                                    <strong><?php echo htmlspecialchars($archivedHabit['name']); ?></strong>
+                                    <small class="text-secondary d-block"><?php echo htmlspecialchars($archivedHabit['category']); ?></small>
+                                </div>
+                                <form method="POST" action="../actions/habit_archive_action.php" style="display: inline;">
+                                    <input type="hidden" name="habit_id" value="<?php echo $archivedHabit['id']; ?>">
+                                    <input type="hidden" name="operation" value="restore">
+                                    <button type="submit" class="doitly-btn doitly-btn-sm doitly-btn-secondary">
+                                        <i class="bi bi-arrow-counterclockwise"></i> Restaurar
+                                    </button>
+                                </form>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </main>
@@ -421,6 +507,52 @@ include_once "includes/header.php";
                 </div>
             </div>
 
+
+            <div class="row g-3" style="margin-bottom: var(--space-md);">
+                <div class="col-md-6">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">
+                        Frequência
+                    </label>
+                    <select name="frequency" class="doitly-input" id="habitFrequency" onchange="toggleTargetDays()">
+                        <option value="daily">Diário</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="custom">Customizado</option>
+                    </select>
+                </div>
+                <div class="col-md-6" id="targetDaysWrapper" style="display: none;">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">
+                        Dias da Semana
+                    </label>
+                    <div class="d-flex gap-sm" style="flex-wrap: wrap;">
+                        <?php $dayLabels = ['D','S','T','Q','Q','S','S']; ?>
+                        <?php for ($day = 0; $day <= 6; $day++): ?>
+                            <label style="display:flex; align-items:center; gap:4px; font-size:.85rem;">
+                                <input type="checkbox" name="target_days[]" value="<?php echo $day; ?>" class="target-day-option">
+                                <span><?php echo $dayLabels[$day]; ?></span>
+                            </label>
+                        <?php endfor; ?>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-3" style="margin-bottom: var(--space-md);">
+                <div class="col-md-4">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">Tipo de Meta</label>
+                    <select name="goal_type" class="doitly-input" id="habitGoalType" onchange="toggleGoalFields()">
+                        <option value="completion">Concluir</option>
+                        <option value="quantity">Quantidade</option>
+                        <option value="duration">Duração</option>
+                    </select>
+                </div>
+                <div class="col-md-4" id="goalValueWrapper" style="display:none;">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">Valor</label>
+                    <input type="number" min="1" name="goal_value" id="habitGoalValue" class="doitly-input" value="1">
+                </div>
+                <div class="col-md-4" id="goalUnitWrapper" style="display:none;">
+                    <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">Unidade</label>
+                    <input type="text" name="goal_unit" id="habitGoalUnit" class="doitly-input" placeholder="min, litros, reps...">
+                </div>
+            </div>
             <div style="margin-bottom: var(--space-lg);">
                 <label class="form-label text-secondary" style="display: block; margin-bottom: 8px; font-weight: var(--font-medium);">
                     Cor do Hábito
@@ -501,6 +633,29 @@ input[type="radio"]:checked + .color-option {
 // Dados dos hábitos em JSON para JavaScript
 const habitsData = <?php echo json_encode($habits); ?>;
 
+function toggleTargetDays() {
+    const frequency = document.getElementById('habitFrequency')?.value;
+    const wrapper = document.getElementById('targetDaysWrapper');
+    if (!wrapper) return;
+    wrapper.style.display = (frequency === 'weekly' || frequency === 'custom') ? 'block' : 'none';
+}
+
+function toggleGoalFields() {
+    const goalType = document.getElementById('habitGoalType')?.value;
+    const valueWrapper = document.getElementById('goalValueWrapper');
+    const unitWrapper = document.getElementById('goalUnitWrapper');
+    const goalValue = document.getElementById('habitGoalValue');
+
+    const show = goalType !== 'completion';
+    valueWrapper.style.display = show ? 'block' : 'none';
+    unitWrapper.style.display = show ? 'block' : 'none';
+
+    if (goalValue) {
+        goalValue.required = show;
+    }
+}
+
+
 function openHabitModal(mode = 'create') {
     document.getElementById('habitModal').style.display = 'block';
     document.body.style.overflow = 'hidden';
@@ -510,6 +665,10 @@ function openHabitModal(mode = 'create') {
         document.getElementById('habitForm').action = '../actions/habit_create_action.php';
         document.getElementById('habitForm').reset();
         document.getElementById('habitId').value = '';
+        document.getElementById('habitFrequency').value = 'daily';
+        document.getElementById('habitGoalType').value = 'completion';
+        toggleTargetDays();
+        toggleGoalFields();
     }
 }
 
@@ -530,6 +689,18 @@ function openEditModal(habitId) {
     document.getElementById('habitDescription').value = habit.description || '';
     document.getElementById('habitCategory').value = habit.category;
     document.getElementById('habitTime').value = habit.time;
+    document.getElementById('habitFrequency').value = habit.frequency || 'daily';
+    document.getElementById('habitGoalType').value = habit.goal_type || 'completion';
+    document.getElementById('habitGoalValue').value = habit.goal_value || 1;
+    document.getElementById('habitGoalUnit').value = habit.goal_unit || '';
+
+    const dayCheckboxes = document.querySelectorAll('.target-day-option');
+    dayCheckboxes.forEach((checkbox) => {
+        checkbox.checked = Array.isArray(habit.target_days) && habit.target_days.includes(Number(checkbox.value));
+    });
+
+    toggleTargetDays();
+    toggleGoalFields();
     
     // Selecionar cor
     const colorRadios = document.querySelectorAll('input[name="color"]');
@@ -547,6 +718,8 @@ function closeHabitModal() {
     document.getElementById('habitModal').style.display = 'none';
     document.body.style.overflow = 'auto';
     document.getElementById('habitForm').reset();
+    toggleTargetDays();
+    toggleGoalFields();
 }
 
 function confirmDelete(habitId, habitName) {
@@ -610,6 +783,9 @@ document.getElementById('habitModal')?.addEventListener('click', function(e) {
         closeHabitModal();
     }
 });
+
+toggleTargetDays();
+toggleGoalFields();
 
 // Auto-hide alerts após 5 segundos
 setTimeout(() => {
