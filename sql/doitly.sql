@@ -318,6 +318,8 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL COMMENT 'Hash bcrypt da senha',
   `avatar_url` varchar(255) DEFAULT NULL COMMENT 'URL do avatar do usuário',
   `timezone` varchar(50) DEFAULT 'America/Sao_Paulo' COMMENT 'Fuso horário do usuário',
+  `level` int(10) UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Nível atual do usuário',
+  `experience_points` int(10) UNSIGNED NOT NULL DEFAULT 0 COMMENT 'XP acumulado via conquistas',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `last_login` timestamp NULL DEFAULT NULL,

@@ -69,18 +69,19 @@ foreach ($achievements as $achievement) {
     $groupedAchievements[$category][] = $achievement;
 }
 
-$achievementCount = count($achievements);
-$unlockedAchievements = array_values(array_filter($achievements, static fn(array $achievement): bool => (bool) ($achievement['unlocked'] ?? false)));
-$unlockedCount = count($unlockedAchievements);
+$profileSummary = getUserProgressSummary($conn, (int) $userId, $achievements);
+$userData['level'] = (int) ($profileSummary['level'] ?? 1);
 
-$totalXp = array_sum(array_map(static fn(array $achievement): int => (int) ($achievement['points'] ?? 0), $unlockedAchievements));
-$currentLevel = max(1, (int) floor(sqrt($totalXp / 120)) + 1);
-$xpLevelStart = (($currentLevel - 1) ** 2) * 120;
-$xpLevelEnd = ($currentLevel ** 2) * 120;
-$xpIntoCurrentLevel = max(0, $totalXp - $xpLevelStart);
-$xpNeededForLevel = max(1, $xpLevelEnd - $xpLevelStart);
-$xpToNextLevel = max(0, $xpLevelEnd - $totalXp);
-$xpLevelProgress = min(100, (int) round(($xpIntoCurrentLevel / $xpNeededForLevel) * 100));
+$achievementCount = (int) ($profileSummary['achievements_count'] ?? count($achievements));
+$unlockedAchievements = $profileSummary['unlocked_achievements'] ?? [];
+$unlockedCount = (int) ($profileSummary['unlocked_achievements_count'] ?? count($unlockedAchievements));
+
+$totalXp = (int) ($profileSummary['total_xp'] ?? 0);
+$currentLevel = (int) ($profileSummary['level'] ?? 1);
+$xpIntoCurrentLevel = (int) ($profileSummary['xp_into_level'] ?? 0);
+$xpNeededForLevel = (int) ($profileSummary['xp_needed_for_level'] ?? 1);
+$xpToNextLevel = (int) ($profileSummary['xp_to_next_level'] ?? 0);
+$xpLevelProgress = (int) ($profileSummary['xp_progress_percent'] ?? 0);
 
 $recentRewards = $unlockedAchievements;
 usort($recentRewards, static function (array $a, array $b): int {
@@ -102,7 +103,7 @@ include_once "includes/header.php";
     <aside class="dashboard-sidebar">
         <!-- User Info -->
         <div class="sidebar-header">
-            <div class="sidebar-user">
+            <button type="button" class="sidebar-user sidebar-user-button" data-open-profile-modal aria-controls="profileModalOverlay" aria-haspopup="dialog">
                 <div class="user-avatar">
                     <?php if (!empty($userData['avatar_url'])): ?>
                         <img src="<?php echo htmlspecialchars($userData['avatar_url'], ENT_QUOTES, 'UTF-8'); ?>"
@@ -113,10 +114,11 @@ include_once "includes/header.php";
                     <?php endif; ?>
                 </div>
                 <div class="user-info">
-                    <h4 class="user-name"><?php echo $userData['name']; ?></h4>
-                    <p class="user-email"><?php echo $userData['email']; ?></p>
+                    <h4 class="user-name"><?php echo htmlspecialchars($userData['name'], ENT_QUOTES, 'UTF-8'); ?></h4>
+                    <p class="user-email"><?php echo htmlspecialchars($userData['email'], ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
-            </div>
+                <span class="user-level-badge">Nível <?php echo (int) ($userData['level'] ?? 1); ?></span>
+            </button>
         </div>
 
         <!-- Navigation -->
@@ -532,6 +534,7 @@ include_once "includes/header.php";
 </div>
 
 <?php include_once "includes/settings_modal.php"; ?>
+<?php include_once "includes/profile_modal.php"; ?>
 
 <!-- Charts Scripts -->
 <script>
