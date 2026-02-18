@@ -46,6 +46,50 @@ $categoryStats = $historyData['category_stats'] ?? [];
 $achievements = $historyData['achievements'] ?? [];
 $recentHistory = $historyData['recent_history'] ?? [];
 
+$tierOrder = ['bronze' => 1, 'prata' => 2, 'ouro' => 3];
+$categoryOrder = ['consistencia' => 1, 'exploracao' => 2, 'performance' => 3, 'social' => 4];
+
+usort($achievements, static function (array $a, array $b) use ($tierOrder, $categoryOrder): int {
+    $categoryCompare = ($categoryOrder[$a['category'] ?? 'performance'] ?? 99) <=> ($categoryOrder[$b['category'] ?? 'performance'] ?? 99);
+    if ($categoryCompare !== 0) {
+        return $categoryCompare;
+    }
+
+    $tierCompare = ($tierOrder[$a['tier'] ?? 'bronze'] ?? 99) <=> ($tierOrder[$b['tier'] ?? 'bronze'] ?? 99);
+    if ($tierCompare !== 0) {
+        return $tierCompare;
+    }
+
+    return ($a['criteria_value'] ?? 0) <=> ($b['criteria_value'] ?? 0);
+});
+
+$groupedAchievements = [];
+foreach ($achievements as $achievement) {
+    $category = $achievement['category'] ?? 'performance';
+    $groupedAchievements[$category][] = $achievement;
+}
+
+$achievementCount = count($achievements);
+$unlockedAchievements = array_values(array_filter($achievements, static fn(array $achievement): bool => (bool) ($achievement['unlocked'] ?? false)));
+$unlockedCount = count($unlockedAchievements);
+
+$totalXp = array_sum(array_map(static fn(array $achievement): int => (int) ($achievement['points'] ?? 0), $unlockedAchievements));
+$currentLevel = max(1, (int) floor(sqrt($totalXp / 120)) + 1);
+$xpLevelStart = (($currentLevel - 1) ** 2) * 120;
+$xpLevelEnd = ($currentLevel ** 2) * 120;
+$xpIntoCurrentLevel = max(0, $totalXp - $xpLevelStart);
+$xpNeededForLevel = max(1, $xpLevelEnd - $xpLevelStart);
+$xpToNextLevel = max(0, $xpLevelEnd - $totalXp);
+$xpLevelProgress = min(100, (int) round(($xpIntoCurrentLevel / $xpNeededForLevel) * 100));
+
+$recentRewards = $unlockedAchievements;
+usort($recentRewards, static function (array $a, array $b): int {
+    return strtotime((string) ($b['date'] ?? '1970-01-01')) <=> strtotime((string) ($a['date'] ?? '1970-01-01'));
+});
+$recentRewards = array_slice($recentRewards, 0, 5);
+
+$justUnlocked = array_values(array_filter($achievements, static fn(array $achievement): bool => (bool) ($achievement['just_unlocked'] ?? false)));
+
 include_once "includes/header.php";
 ?>
 
@@ -137,6 +181,55 @@ include_once "includes/header.php";
                     <i class="bi bi-download"></i>
                     Exportar Dados
                 </a>
+            </div>
+        </div>
+
+        <?php if (!empty($justUnlocked)): ?>
+            <div class="dashboard-card" style="margin-bottom: var(--space-lg); border: 1px solid rgba(89, 209, 134, 0.35);">
+                <div class="card-body" style="display:flex; align-items:center; gap: var(--space-sm);">
+                    <i class="bi bi-stars" style="color: var(--accent-green); font-size: 1.4rem;"></i>
+                    <div>
+                        <strong>Nova conquista desbloqueada!</strong>
+                        <span style="color: var(--text-secondary);">Você acabou de ganhar: <?php echo htmlspecialchars($justUnlocked[0]['name'], ENT_QUOTES, 'UTF-8'); ?>.</span>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <div class="dashboard-card" style="margin-bottom: var(--space-xl);">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="bi bi-lightning-charge"></i>
+                    Progressão e Recompensas
+                </h3>
+                <span class="doitly-badge doitly-badge-warning">Nível <?php echo $currentLevel; ?></span>
+            </div>
+            <div class="card-body" style="display:grid; grid-template-columns: 2fr 1fr; gap: var(--space-lg);">
+                <div>
+                    <p style="margin-bottom: 8px; color: var(--text-secondary);">
+                        XP total: <strong style="color: var(--text-primary);"><?php echo $totalXp; ?></strong> ·
+                        Faltam <strong style="color: var(--text-primary);"><?php echo $xpToNextLevel; ?> XP</strong> para o próximo nível
+                    </p>
+                    <div style="height: 10px; background: var(--glass-bg-medium); border-radius: var(--radius-pill); overflow: hidden;">
+                        <div style="height: 100%; width: <?php echo $xpLevelProgress; ?>%; background: linear-gradient(90deg, var(--accent-gold), var(--accent-blue));"></div>
+                    </div>
+                    <small style="display:block; margin-top: 6px; color: var(--text-tertiary);"><?php echo $xpIntoCurrentLevel; ?>/<?php echo $xpNeededForLevel; ?> XP no nível atual</small>
+                </div>
+                <div>
+                    <p style="margin: 0 0 8px 0; font-weight: var(--font-semibold);">Últimas recompensas</p>
+                    <div class="d-flex flex-column gap-sm">
+                        <?php if (empty($recentRewards)): ?>
+                            <small style="color: var(--text-tertiary);">Conclua suas primeiras conquistas para ganhar XP.</small>
+                        <?php else: ?>
+                            <?php foreach ($recentRewards as $reward): ?>
+                                <small style="display:flex; justify-content:space-between; gap:8px;">
+                                    <span><?php echo htmlspecialchars($reward['name'], ENT_QUOTES, 'UTF-8'); ?></span>
+                                    <span style="color: var(--accent-gold);">+<?php echo (int) ($reward['points'] ?? 0); ?> XP</span>
+                                </small>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -261,52 +354,67 @@ include_once "includes/header.php";
                             <i class="bi bi-award"></i>
                             Conquistas
                         </h3>
-                        <div class="card-actions">
+                        <div class="card-actions" style="display:flex; align-items:center; gap: var(--space-sm);">
                             <span class="doitly-badge doitly-badge-success">
-                                <?php echo count(array_filter($achievements, fn($a) => $a['unlocked'])); ?>/<?php echo count($achievements); ?>
+                                <?php echo $unlockedCount; ?>/<?php echo $achievementCount; ?>
                             </span>
                         </div>
                     </div>
                     <div class="card-body">
                         <div class="d-flex flex-column gap-md">
-                            <?php foreach ($achievements as $achievement): ?>
-                                <div
-                                    style="display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg-light); border-radius: var(--radius-medium); border: var(--border-light); <?php echo !$achievement['unlocked'] ? 'opacity: 0.6;' : ''; ?>">
-                                    <div
-                                        style="width: 56px; height: 56px; background: <?php echo $achievement['unlocked'] ? 'linear-gradient(135deg, var(--accent-blue), var(--accent-green))' : 'var(--glass-bg-medium)'; ?>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-white); flex-shrink: 0;">
-                                        <i class="<?php echo $achievement['icon']; ?>"></i>
-                                    </div>
-                                    <div style="flex: 1; min-width: 0;">
-                                        <h4 style="margin: 0 0 4px 0; font-size: 1rem; font-weight: var(--font-semibold);">
-                                            <?php echo $achievement['name']; ?>
-                                            <?php if ($achievement['unlocked']): ?>
-                                                <i class="bi bi-check-circle-fill"
-                                                    style="color: var(--accent-green); font-size: 0.875rem;"></i>
-                                            <?php endif; ?>
-                                        </h4>
-                                        <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">
-                                            <?php echo $achievement['description']; ?>
-                                        </p>
-                                        <?php if (!$achievement['unlocked'] && isset($achievement['progress'])): ?>
-                                            <div style="margin-top: 8px;">
+                            <?php foreach ($groupedAchievements as $category => $categoryAchievements): ?>
+                                <div>
+                                    <h4 style="margin: 0 0 var(--space-sm) 0; text-transform: capitalize; font-size: 0.85rem; letter-spacing: 0.04em; color: var(--text-tertiary);">
+                                        <?php echo htmlspecialchars(str_replace('_', ' ', $category), ENT_QUOTES, 'UTF-8'); ?>
+                                    </h4>
+                                    <div class="d-flex flex-column gap-sm">
+                                        <?php foreach ($categoryAchievements as $achievement): ?>
+                                            <div
+                                                style="display: flex; align-items: center; gap: var(--space-md); padding: var(--space-md); background: var(--glass-bg-light); border-radius: var(--radius-medium); border: var(--border-light); <?php echo !$achievement['unlocked'] ? 'opacity: 0.82;' : ''; ?>">
                                                 <div
-                                                    style="height: 6px; background: var(--glass-bg-medium); border-radius: var(--radius-pill); overflow: hidden;">
-                                                    <div
-                                                        style="height: 100%; width: <?php echo $achievement['progress']; ?>%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-green)); transition: width 0.3s ease;">
-                                                    </div>
+                                                    style="width: 56px; height: 56px; background: <?php echo $achievement['unlocked'] ? 'linear-gradient(135deg, var(--accent-blue), var(--accent-green))' : 'var(--glass-bg-medium)'; ?>; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-white); flex-shrink: 0;">
+                                                    <i class="<?php echo $achievement['icon']; ?>"></i>
                                                 </div>
-                                                <small
-                                                    style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 4px; display: block;">
-                                                    <?php echo $achievement['progress']; ?>% completo
-                                                </small>
+                                                <div style="flex: 1; min-width: 0;">
+                                                    <h4 style="margin: 0 0 4px 0; font-size: 1rem; font-weight: var(--font-semibold);">
+                                                        <?php echo htmlspecialchars($achievement['name'], ENT_QUOTES, 'UTF-8'); ?>
+                                                        <span style="font-size: 0.7rem; text-transform: uppercase; color: var(--text-tertiary); margin-left: 4px;">
+                                                            <?php echo htmlspecialchars($achievement['tier'] ?? 'bronze', ENT_QUOTES, 'UTF-8'); ?>
+                                                        </span>
+                                                        <?php if ($achievement['unlocked']): ?>
+                                                            <i class="bi bi-check-circle-fill"
+                                                                style="color: var(--accent-green); font-size: 0.875rem;"></i>
+                                                        <?php endif; ?>
+                                                    </h4>
+                                                    <p style="margin: 0; font-size: 0.875rem; color: var(--text-secondary);">
+                                                        <?php echo htmlspecialchars($achievement['description'], ENT_QUOTES, 'UTF-8'); ?>
+                                                    </p>
+                                                    <?php if (!$achievement['unlocked']): ?>
+                                                        <div style="margin-top: 8px;">
+                                                            <div
+                                                                style="height: 6px; background: var(--glass-bg-medium); border-radius: var(--radius-pill); overflow: hidden;">
+                                                                <div
+                                                                    style="height: 100%; width: <?php echo (int) ($achievement['progress_percent'] ?? 0); ?>%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-green)); transition: width 0.3s ease;">
+                                                                </div>
+                                                            </div>
+                                                            <small
+                                                                style="font-size: 0.75rem; color: var(--text-tertiary); margin-top: 4px; display: block;">
+                                                                <?php echo htmlspecialchars($achievement['progress_label'] ?? '0/0', ENT_QUOTES, 'UTF-8'); ?> · <?php echo (int) ($achievement['progress_percent'] ?? 0); ?>% completo
+                                                                <?php if (!empty($achievement['is_near_completion'])): ?>
+                                                                    <span style="color: var(--accent-gold);">· Quase lá! 🚀</span>
+                                                                <?php endif; ?>
+                                                            </small>
+                                                        </div>
+                                                    <?php else: ?>
+                                                        <small
+                                                            style="font-size: 0.75rem; color: var(--accent-green); margin-top: 4px; display: block;">
+                                                            <i class="bi bi-calendar-check"></i> Desbloqueado em
+                                                            <?php echo !empty($achievement['date']) ? date('d/m/Y', strtotime($achievement['date'])) : 'hoje'; ?> · +<?php echo (int) ($achievement['points'] ?? 0); ?> XP
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </div>
                                             </div>
-                                        <?php elseif ($achievement['unlocked']): ?>
-                                            <small
-                                                style="font-size: 0.75rem; color: var(--accent-green); margin-top: 4px; display: block;">
-                                                <i class="bi bi-calendar-check"></i> Desbloqueado em
-                                                <?php echo date('d/m/Y', strtotime($achievement['date'])); ?>
-                                            </small>
-                                        <?php endif; ?>
+                                        <?php endforeach; ?>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
