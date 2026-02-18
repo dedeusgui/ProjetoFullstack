@@ -199,7 +199,12 @@ if ($checkResult->num_rows > 0) {
 
     if ($completed) {
         invalidateRecommendationSnapshot($conn, $userId);
-        $_SESSION['success_message'] = 'Hábito marcado como concluído!';
+
+        $nextSearchDate = date('Y-m-d', strtotime($completionDate . ' +1 day'));
+        $nextDueDate = getNextHabitDueDate($habit, $nextSearchDate);
+        $nextDueText = $nextDueDate ? formatDateBr($nextDueDate) : 'sem próxima data';
+
+        $_SESSION['success_message'] = 'Hábito marcado como concluído! Próxima execução: ' . $nextDueText . '.';
     } else {
         $_SESSION['error_message'] = 'Erro ao marcar conclusão. Tente novamente.';
     }

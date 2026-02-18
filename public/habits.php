@@ -29,8 +29,9 @@ $stats = [
     'archived_habits' => getArchivedHabitsCount($conn, $userId)
 ];
 
-// Buscar hábitos ativos e arquivados
-$habitsRaw = getUserHabits($conn, $userId);
+// Buscar hábitos ativos do usuário, hábitos de hoje e arquivados
+$allActiveHabitsRaw = getUserHabits($conn, $userId);
+$habitsRaw = getTodayHabits($conn, $userId);
 $archivedHabitsRaw = getArchivedHabits($conn, $userId);
 
 // Mapear para formato esperado pelo frontend
@@ -51,7 +52,8 @@ foreach ($habitsRaw as $habit) {
         'goal_type' => $habit['goal_type'] ?? 'completion',
         'goal_value' => (int)($habit['goal_value'] ?? 1),
         'goal_unit' => $habit['goal_unit'] ?? '',
-        'next_due_date' => getNextHabitDueDate($habit)
+        'can_complete_today' => isHabitScheduledForDate($habit, getAppToday()) && !(bool)$habit['completed_today'],
+        'next_due_date' => getNextHabitDueDate($habit, (bool)$habit['completed_today'] ? date('Y-m-d', strtotime(getAppToday().' +1 day')) : getAppToday())
     ];
 }
 
@@ -84,7 +86,13 @@ foreach ($weekDaysMeta as $weekDayIndex => $weekDayLabel) {
     ];
 }
 
-foreach ($habits as $habit) {
+foreach ($allActiveHabitsRaw as $habitRaw) {
+    $habit = [
+        'id' => $habitRaw['id'],
+        'name' => $habitRaw['title'],
+        'frequency' => $habitRaw['frequency'] ?? 'daily',
+        'target_days' => normalizeTargetDays($habitRaw['target_days'] ?? null)
+    ];
     $frequency = $habit['frequency'] ?? 'daily';
     if ($frequency === 'daily') {
         foreach (array_keys($habitsByWeekDay) as $weekDayIndex) {
@@ -198,7 +206,7 @@ include_once "includes/header.php";
             <div class="d-flex justify-content-between align-items-center" style="flex-wrap: wrap; gap: var(--space-md);">
                 <div>
                     <h1 class="dashboard-title">Meus Hábitos 📝</h1>
-                    <p class="dashboard-subtitle">Gerencie e acompanhe seus hábitos diários</p>
+                    <p class="dashboard-subtitle">Você está vendo apenas os hábitos programados para hoje.</p>
                 </div>
                 <button class="doitly-btn" onclick="openHabitModal('create')">
                     <i class="bi bi-plus-circle"></i>
@@ -309,7 +317,7 @@ include_once "includes/header.php";
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="bi bi-list-check"></i>
-                    Lista de Hábitos
+                    Hábitos de Hoje
                 </h3>
                 <div class="card-actions">
                     <span class="doitly-badge doitly-badge-info" id="habitCount">
@@ -426,8 +434,8 @@ include_once "includes/header.php";
                             <div class="empty-icon">
                                 <i class="bi bi-inbox"></i>
                             </div>
-                            <h4 class="empty-title">Nenhum hábito cadastrado</h4>
-                            <p class="empty-text">Comece criando seu primeiro hábito!</p>
+                            <h4 class="empty-title">Nenhum hábito para hoje</h4>
+                            <p class="empty-text">Hoje não há hábitos programados. Veja a seção semanal abaixo.</p>
                             <button class="doitly-btn" onclick="openHabitModal('create')">
                                 <i class="bi bi-plus-circle"></i>
                                 Criar Primeiro Hábito
