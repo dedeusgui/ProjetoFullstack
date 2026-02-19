@@ -1,28 +1,26 @@
+// cypress/support/commands.js
+
+// ─── LOGIN VIA UI (para testes de autenticação) ───────────────────────────────
 Cypress.Commands.add('login', (email, password) => {
   cy.visit('/login.php');
   cy.get('#email').clear().type(email);
-  cy.get('#password').clear().type(password, { log: false });
-  cy.get('form[action="../actions/login_action.php"]').submit();
-  cy.url().should('include', '/dashboard.php');
+  cy.get('#password').clear().type(password);
+  cy.get('form').first().submit();
+  cy.url().should('include', 'dashboard.php');
 });
 
+// ─── LOGIN COM CACHE DE SESSÃO (para testes que não testam login em si) ───────
 Cypress.Commands.add('loginDirect', (email, password) => {
-  cy.visit('/login.php');
-  cy.get('input[name="csrf_token"]').invoke('val').then((csrfToken) => {
-    cy.request({
-      method: 'POST',
-      url: 'http://localhost/doitly/actions/login_action.php',
-      form: true,
-      body: {
-        email,
-        password,
-        csrf_token: csrfToken
-      },
-      followRedirect: false
-    }).its('status').should('be.oneOf', [302, 303]);
+  cy.session([email, password], () => {
+    cy.visit('/login.php');
+    cy.get('#email').clear().type(email);
+    cy.get('#password').clear().type(password);
+    cy.get('form').first().submit();
+    cy.url().should('include', 'dashboard.php');
   });
 });
 
+// ─── CRIAR HÁBITO VIA UI ──────────────────────────────────────────────────────
 Cypress.Commands.add('createHabit', (name, category, time) => {
   cy.contains('button', 'Novo Hábito').first().click();
   cy.get('#habitModal').should('be.visible');

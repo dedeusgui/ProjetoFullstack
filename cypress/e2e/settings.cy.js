@@ -30,7 +30,7 @@ describe('Modal de configurações', () => {
 
         cy.get('html').then(($html) => {
           const isDark = $html.attr('data-theme') === 'dark';
-          cy.get('[data-theme-toggle]').click();
+          cy.get('[data-theme-toggle]').click({ force: true }); // force: checkbox oculto visualmente pelo CSS
 
           if (isDark) {
             cy.get('html').should('not.have.attr', 'data-theme', 'dark');

@@ -2,15 +2,14 @@ const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
   e2e: {
-    baseUrl: 'http://localhost/doitly/public',
-    defaultCommandTimeout: 8000,
+    baseUrl: 'http://localhost:8080/ProjetoFullstack/public',
+    defaultCommandTimeout: 10000,
     screenshotsOnRunFailure: true,
     video: false,
     env: {
-      testUserEmail: 'teste@doitly.com',
-      testUserPassword: 'senha123',
-      testUserName: 'Usuário Teste'
-    },
-    supportFile: 'cypress/support/e2e.js'
+      userEmail: 'teste@doitly.com',
+      userPassword: 'senha123',
+      userName: 'Usuário Teste'
+    }
   }
 });
