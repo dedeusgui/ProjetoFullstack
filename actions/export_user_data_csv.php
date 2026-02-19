@@ -8,9 +8,7 @@ $userId = (int) getUserId();
 $userData = getCurrentUser($conn);
 
 if (!$userData) {
-    $_SESSION['error_message'] = 'Usuário não encontrado para exportação.';
-    header('Location: ../public/dashboard.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'Usuário não encontrado para exportação.', '../public/dashboard.php');
 }
 
 $today = date('Y-m-d');

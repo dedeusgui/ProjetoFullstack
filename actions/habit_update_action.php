@@ -2,6 +2,7 @@
 require_once '../config/bootstrap.php';
 bootApp();
 require_once '../app/habits/HabitInputSanitizer.php';
+require_once '../app/habits/HabitAccessService.php';
 
 actionRequireLoggedIn();
 actionRequirePost('habits.php');
@@ -12,11 +13,8 @@ if ($habitId <= 0) {
     actionFlashAndRedirect('error_message', 'Hábito inválido.', '../public/habits.php');
 }
 
-$stmt = $conn->prepare('SELECT id FROM habits WHERE id = ? AND user_id = ?');
-$stmt->bind_param('ii', $habitId, $userId);
-$stmt->execute();
-$result = $stmt->get_result();
-if ($result->num_rows === 0) {
+$habitAccessService = new HabitAccessService($conn);
+if (!$habitAccessService->userOwnsHabit($habitId, $userId)) {
     actionFlashAndRedirect('error_message', 'Você não tem permissão para editar este hábito.', '../public/habits.php');
 }
 
