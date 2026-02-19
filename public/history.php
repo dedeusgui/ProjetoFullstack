@@ -1,8 +1,7 @@
 <?php
 // Proteger página - requer login
-require_once '../config/conexao.php';
-require_once '../config/auth.php';
-require_once '../config/helpers.php';
+require_once '../config/bootstrap.php';
+bootApp();
 
 requireLogin();
 

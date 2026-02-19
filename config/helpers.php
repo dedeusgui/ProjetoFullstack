@@ -321,35 +321,43 @@ function getCompletionSummaryByRange($conn, $userId, string $startDate, string $
         return ['rate' => 0, 'completed' => 0, 'scheduled' => 0, 'days_analyzed' => 0];
     }
 
-    $dailyTotalsStmt = $conn->prepare("
-        SELECT
-            COALESCE(SUM(CASE WHEN h.is_active = 1 AND h.created_at <= CONCAT(?, ' 23:59:59') AND (h.archived_at IS NULL OR h.archived_at > CONCAT(?, ' 23:59:59')) THEN 1 ELSE 0 END), 0) AS total_habits,
-            COALESCE(SUM(CASE WHEN h.is_active = 1 AND h.created_at <= CONCAT(?, ' 23:59:59') AND (h.archived_at IS NULL OR h.archived_at > CONCAT(?, ' 23:59:59')) AND EXISTS (
-                SELECT 1 FROM habit_completions hc
-                WHERE hc.habit_id = h.id
-                  AND hc.user_id = h.user_id
-                  AND hc.completion_date = ?
-            ) THEN 1 ELSE 0 END), 0) AS completed_habits
+    $daysAnalyzed = (int) max(0, (strtotime($endDate) - strtotime($startDate)) / 86400) + 1;
+
+    $scheduledStmt = $conn->prepare("
+        SELECT COALESCE(SUM(
+            GREATEST(
+                0,
+                DATEDIFF(
+                    LEAST(?, COALESCE(DATE_SUB(h.archived_at, INTERVAL 1 DAY), ?)),
+                    GREATEST(?, DATE(h.created_at))
+                ) + 1
+            )
+        ), 0) AS scheduled
         FROM habits h
         WHERE h.user_id = ?
+          AND h.is_active = 1
+          AND DATE(h.created_at) <= ?
+          AND (h.archived_at IS NULL OR DATE(h.archived_at) > ?)
     ");
+    $scheduledStmt->bind_param('sssiss', $endDate, $endDate, $startDate, $userId, $endDate, $startDate);
+    $scheduledStmt->execute();
+    $scheduledRow = $scheduledStmt->get_result()->fetch_assoc() ?: [];
+    $scheduled = (int) ($scheduledRow['scheduled'] ?? 0);
 
-    $scheduled = 0;
-    $completed = 0;
-    $currentDate = $startDate;
-    $daysAnalyzed = 0;
-
-    while ($currentDate <= $endDate) {
-        $dailyTotalsStmt->bind_param('sssssi', $currentDate, $currentDate, $currentDate, $currentDate, $currentDate, $userId);
-        $dailyTotalsStmt->execute();
-        $row = $dailyTotalsStmt->get_result()->fetch_assoc() ?: [];
-
-        $scheduled += (int) ($row['total_habits'] ?? 0);
-        $completed += (int) ($row['completed_habits'] ?? 0);
-        $daysAnalyzed++;
-
-        $currentDate = date('Y-m-d', strtotime($currentDate . ' +1 day'));
-    }
+    $completedStmt = $conn->prepare("
+        SELECT COUNT(DISTINCT CONCAT(hc.habit_id, '|', hc.completion_date)) AS completed
+        FROM habit_completions hc
+        INNER JOIN habits h ON h.id = hc.habit_id AND h.user_id = hc.user_id
+        WHERE hc.user_id = ?
+          AND hc.completion_date BETWEEN ? AND ?
+          AND h.is_active = 1
+          AND hc.completion_date >= DATE(h.created_at)
+          AND (h.archived_at IS NULL OR hc.completion_date < DATE(h.archived_at))
+    ");
+    $completedStmt->bind_param('iss', $userId, $startDate, $endDate);
+    $completedStmt->execute();
+    $completedRow = $completedStmt->get_result()->fetch_assoc() ?: [];
+    $completed = (int) ($completedRow['completed'] ?? 0);
 
     $rate = $scheduled > 0 ? round(($completed / $scheduled) * 100) : 0;
 

@@ -1,8 +1,7 @@
 <?php 
 // Proteger página - requer login
-require_once '../config/conexao.php';
-require_once '../config/auth.php';
-require_once '../config/helpers.php';
+require_once '../config/bootstrap.php';
+bootApp();
 
 requireLogin();
 
@@ -115,6 +114,7 @@ foreach ($allActiveHabitsRaw as $habitRaw) {
 
 // Buscar todas as categorias para o modal
 $categories = getAllCategories($conn);
+$csrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
 
 include_once "includes/header.php";
 ?>
@@ -402,6 +402,7 @@ include_once "includes/header.php";
                                 <!-- Right Side: Actions -->
                                 <div class="d-flex align-items-center gap-sm" style="flex-shrink: 0;">
                                     <form method="POST" action="../actions/habit_mark_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                         <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
                                         <input type="hidden" name="completion_date" value="<?php echo $todayDate; ?>">
                                         <?php if (($habit['goal_type'] ?? 'completion') !== 'completion' && !$habit['completed_today']): ?>
@@ -423,6 +424,7 @@ include_once "includes/header.php";
                                     </button>
 
                                     <form method="POST" action="../actions/habit_archive_action.php" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                         <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
                                         <input type="hidden" name="operation" value="archive">
                                         <button type="submit" class="doitly-btn doitly-btn-sm doitly-btn-ghost" title="Arquivar">
@@ -511,6 +513,7 @@ include_once "includes/header.php";
                                     <small class="text-secondary d-block"><?php echo htmlspecialchars($archivedHabit['category']); ?></small>
                                 </div>
                                 <form method="POST" action="../actions/habit_archive_action.php" style="display: inline;">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                     <input type="hidden" name="habit_id" value="<?php echo $archivedHabit['id']; ?>">
                                     <input type="hidden" name="operation" value="restore">
                                     <button type="submit" class="doitly-btn doitly-btn-sm doitly-btn-secondary">
@@ -542,6 +545,7 @@ include_once "includes/header.php";
         </div>
 
         <form id="habitForm" method="POST" action="../actions/habit_create_action.php">
+            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
             <input type="hidden" name="habit_id" id="habitId" value="">
             
             <div style="margin-bottom: var(--space-md);">
@@ -676,6 +680,7 @@ include_once "includes/header.php";
 
 <!-- Form de Delete (escondido) -->
 <form id="deleteForm" method="POST" action="../actions/habit_delete_action.php" style="display: none;">
+    <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
     <input type="hidden" name="habit_id" id="deleteHabitId">
 </form>
 
