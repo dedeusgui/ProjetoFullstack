@@ -1,0 +1,13 @@
+{
+  "name": "doitly-cypress-tests",
+  "private": true,
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "cypress:run:auth": "cypress run --spec cypress/e2e/auth.cy.js",
+    "cypress:run:habits": "cypress run --spec cypress/e2e/habits.cy.js"
+  },
+  "devDependencies": {
+    "cypress": "^13.17.0"
+  }
+}

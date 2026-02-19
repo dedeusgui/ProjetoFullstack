@@ -24,7 +24,7 @@ include_once "includes/header.php";
         </div>
 
         <?php if (isset($_SESSION['error_message'])): ?>
-            <div class="alert alert-danger doitly-badge-danger w-100 mb-3 d-flex align-items-center gap-2" role="alert">
+            <div class="alert alert-danger alert-danger-theme doitly-badge-danger w-100 mb-3 d-flex align-items-center gap-2" role="alert">
                 <i class="bi bi-exclamation-circle-fill"></i>
                 <?php echo htmlspecialchars($_SESSION['error_message']);
                 unset($_SESSION['error_message']); ?>
