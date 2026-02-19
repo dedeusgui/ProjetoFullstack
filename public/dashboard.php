@@ -106,6 +106,18 @@ $trendConfig = [
 $riskView = $riskConfig[$recommendationRisk] ?? $riskConfig['stable'];
 $trendView = $trendConfig[$recommendationTrend] ?? $trendConfig['neutral'];
 
+$completionChange = $stats['completion_change'] ?? ['status' => 'insufficient', 'label' => 'Dados insuficientes', 'icon' => 'bi-dash'];
+$completionChangeStatus = $completionChange['status'] ?? 'insufficient';
+$completionChangeClassMap = [
+    'up' => 'positive',
+    'down' => 'negative',
+    'stable' => 'neutral',
+    'insufficient' => 'neutral'
+];
+$completionChangeClass = $completionChangeClassMap[$completionChangeStatus] ?? 'neutral';
+$completionChangeIcon = $completionChange['icon'] ?? 'bi-dash';
+$completionChangeLabel = $completionChange['label'] ?? 'Dados insuficientes';
+
 $weeklyChartLabels = $weeklyData['labels'] ?? [];
 $weeklyChartCompleted = $weeklyData['completed'] ?? [];
 
@@ -115,8 +127,8 @@ if (count($weeklyChartLabels) === 0) {
 }
 
 $monthSummary = [
-    'active_days' => (int) round((($stats['completion_rate'] ?? 0) / 100) * 30),
-    'total_days' => 30,
+    'active_days' => (int) ($stats['active_days'] ?? 0),
+    'total_days' => max(1, (int) ($stats['tracked_days'] ?? 0)),
     'best_streak' => getBestStreak($conn, $userId),
     'total_completions' => getTotalCompletions($conn, $userId)
 ];
@@ -263,10 +275,10 @@ include_once "includes/header.php";
                         <i class="bi bi-trophy"></i>
                     </div>
                 </div>
-                <h2 class="stat-value"><?php echo $stats['completion_rate']; ?>%</h2>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i>
-                    <span>+5% esta semana</span>
+                <h2 class="stat-value"><?php echo (int) ($stats['completion_rate'] ?? 0); ?>%</h2>
+                <div class="stat-change <?php echo $completionChangeClass; ?>">
+                    <i class="bi <?php echo $completionChangeIcon; ?>"></i>
+                    <span><?php echo htmlspecialchars($completionChangeLabel); ?></span>
                 </div>
             </div>
 
@@ -337,11 +349,11 @@ include_once "includes/header.php";
                             style="margin-top: var(--space-xl); padding-top: var(--space-lg); border-top: var(--border-light);">
                             <h4
                                 style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: var(--space-md);">
-                                Resumo do Mês
+                                Resumo Geral
                             </h4>
                             <div class="d-flex flex-column gap-sm">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Dias ativos</span>
+                                    <span style="font-size: 0.875rem; color: var(--text-secondary);">Dias ativos no histórico</span>
                                     <strong
                                         style="color: var(--accent-green);"><?php echo $monthSummary['active_days']; ?>/<?php echo $monthSummary['total_days']; ?></strong>
                                 </div>

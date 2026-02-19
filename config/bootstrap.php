@@ -18,6 +18,7 @@ function bootApp(bool $loadDatabase = true): void
     require_once __DIR__ . '/action_helpers.php';
 
     if ($loadDatabase) {
+        global $conn;
         require_once __DIR__ . '/conexao.php';
     }
 }

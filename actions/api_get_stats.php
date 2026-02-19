@@ -102,6 +102,8 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
     $totalHabits = getTotalHabits($conn, $userId);
     $completedToday = getCompletedToday($conn, $userId);
     $completionRate = getCompletionRate($conn, $userId);
+    $completionTrend = getCompletionTrend($conn, $userId, 7);
+    $overallCompletion = getCompletionWindowSummary($conn, $userId);
     $currentStreak = getCurrentStreak($conn, $userId);
 
     $dashboardData = [
@@ -109,6 +111,9 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
             'total_habits' => $totalHabits,
             'completed_today' => $completedToday,
             'completion_rate' => $completionRate,
+            'completion_change' => $completionTrend,
+            'active_days' => getActiveDays($conn, $userId),
+            'tracked_days' => (int) ($overallCompletion['days_analyzed'] ?? 0),
             'current_streak' => $currentStreak
         ],
         'today_habits' => array_map(static function (array $habit): array {
