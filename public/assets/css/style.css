@@ -1,0 +1,1636 @@
+/* ===============================================
+   DOITLY DESIGN SYSTEM
+   Modern, Apple-inspired UI with Glassmorphism
+   =============================================== */
+
+/* ===== 1. IMPORTS & FONTS ===== */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,200;0,300;0,400;0,500;0,600;0,700;1,200;1,300;1,400&display=swap");
+
+/* ===== 2. CSS VARIABLES (DESIGN TOKENS) ===== */
+:root {
+  /* Colors */
+  --bg-light: #ffffff;
+  --bg-body: #f5f7fa;
+  --bg-darker: #e6e7e9;
+
+  --text-primary: #222222;
+  --text-secondary: #6c757d;
+  --text-tertiary: #a0a0a0;
+  --text-white: #ffffff;
+
+  --accent-blue: #4a74ff;
+  --accent-blue-hover: #3d63e6;
+  --accent-green: #59d186;
+  --accent-gold: #eed27a;
+  --accent-red: #ff5757;
+  --accent-purple: #a78bfa;
+
+  --surface-elevated: #ffffff;
+  --overlay-backdrop: rgba(0, 0, 0, 0.5);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --select-arrow-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23222222' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  --alert-success-bg: #d4edda;
+  --alert-success-border: #c3e6cb;
+  --alert-success-text: #155724;
+  --alert-danger-bg: #f8d7da;
+  --alert-danger-border: #f5c6cb;
+  --alert-danger-text: #721c24;
+  --rating-star: #fbbf24;
+
+  /* Glass Effect Variants */
+  --glass-bg-light: rgba(17, 24, 39, 0.02);
+  --glass-bg-medium: rgba(17, 24, 39, 0.05);
+  --glass-bg-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(17, 24, 39, 0.1);
+  --glass-blur: blur(22px) saturate(180%);
+  --glass-blur-medium: blur(14px) saturate(160%);
+  --glass-blur-light: blur(10px) saturate(140%);
+
+  /* Borders */
+  --border-light: 1.95px solid rgba(17, 24, 39, 0.14);
+  --border-medium: 2px solid rgba(17, 24, 39, 0.2);
+  --glass-border-highlight: 1.95px solid rgba(255, 255, 255, 0.75);
+
+  /* Border Radius */
+  --radius-xl: 32px;
+  --radius-large: 28px;
+  --radius-medium: 20px;
+  --radius-small: 14px;
+  --radius-xs: 10px;
+  --radius-pill: 9999px;
+
+  /* Shadows */
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.06);
+  --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --shadow-strong: 0 8px 28px rgba(0, 0, 0, 0.12);
+  --shadow-inset: 0 -1px 0 rgba(0, 0, 0, 0.04) inset;
+
+  /* Transitions */
+  --transition-fast: 0.15s ease;
+  --transition: 0.25s ease;
+  --transition-slow: 0.35s ease;
+
+  /* Spacing Scale */
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Font Weights */
+  --font-light: 200;
+  --font-normal: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+
+  /* Z-Index Layers */
+  --z-base: 1;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+}
+
+html[data-theme="dark"] {
+  --bg-light: #161b22;
+  --bg-body: #0d1117;
+  --bg-darker: #21262d;
+  --text-primary: #e6edf3;
+  --text-secondary: #9da7b3;
+  --text-tertiary: #7d8590;
+  --glass-bg-light: rgba(255, 255, 255, 0.04);
+  --glass-bg-medium: rgba(255, 255, 255, 0.08);
+  --glass-bg-strong: rgba(22, 27, 34, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.2);
+  --border-light: 1.95px solid rgba(255, 255, 255, 0.14);
+  --border-medium: 2px solid rgba(255, 255, 255, 0.2);
+  --glass-border-highlight: 1.95px solid rgba(255, 255, 255, 0.22);
+  --surface-elevated: #1f2631;
+  --overlay-backdrop: rgba(0, 0, 0, 0.72);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.3);
+  --select-arrow-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23e6edf3' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.35);
+  --shadow-soft: 0 4px 14px rgba(0, 0, 0, 0.45);
+  --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.5);
+  --shadow-strong: 0 8px 28px rgba(0, 0, 0, 0.6);
+  --shadow-inset: 0 -1px 0 rgba(255, 255, 255, 0.06) inset;
+  --alert-success-bg: rgba(21, 87, 36, 0.28);
+  --alert-success-border: rgba(44, 154, 76, 0.45);
+  --alert-success-text: #8ee3a8;
+  --alert-danger-bg: rgba(114, 28, 36, 0.3);
+  --alert-danger-border: rgba(233, 86, 86, 0.45);
+  --alert-danger-text: #ffb4b4;
+}
+
+/* ===== 3. RESET & BASE STYLES ===== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  font-weight: var(--font-normal);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Sticky Footer */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Main content wrapper para sticky footer */
+.main-content {
+  flex: 1;
+  padding-top: 80px; /* Espaço para navbar fixo */
+}
+
+/* ===== 4. TYPOGRAPHY SYSTEM ===== */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: var(--font-light);
+  font-style: italic;
+  letter-spacing: -0.5px;
+  line-height: 1.3;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: var(--font-normal);
+}
+h2 {
+  font-size: clamp(1.5rem, 4vw, 2.25rem);
+}
+h3 {
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+}
+h4 {
+  font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+}
+
+p {
+  margin: 0 0 1rem 0;
+  line-height: 1.7;
+}
+
+/* Typography Utilities */
+.text-primary {
+  color: var(--text-primary);
+}
+.text-secondary {
+  color: var(--text-secondary);
+}
+.text-tertiary {
+  color: var(--text-tertiary);
+}
+.text-white {
+  color: var(--text-white);
+}
+
+.font-light {
+  font-weight: var(--font-light);
+}
+.font-normal {
+  font-weight: var(--font-normal);
+}
+.font-medium {
+  font-weight: var(--font-medium);
+}
+.font-semibold {
+  font-weight: var(--font-semibold);
+}
+
+/* ===== 5. LAYOUT UTILITIES ===== */
+.container-doitly {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.container-narrow {
+  max-width: 800px;
+}
+
+.container-wide {
+  max-width: 1400px;
+}
+
+/* ===== 6. BOOTSTRAP 5 OVERRIDES ===== */
+/* Ensure Bootstrap doesn't override our custom components */
+.btn {
+  font-family: "Inter", sans-serif;
+  font-weight: var(--font-medium);
+  border-radius: var(--radius-small);
+  transition: var(--transition);
+}
+
+.btn-primary {
+  background: linear-gradient(
+    135deg,
+    rgba(74, 116, 255, 0.9),
+    rgba(74, 116, 255, 0.75)
+  );
+  border: none;
+  color: var(--text-white);
+}
+
+.btn-primary:hover {
+  background: var(--accent-blue-hover);
+  transform: translateY(-1px);
+}
+
+.form-control {
+  border-radius: var(--radius-medium);
+  border: var(--border-light);
+  font-family: "Inter", sans-serif;
+  transition: var(--transition);
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+.form-control::placeholder {
+  color: var(--text-tertiary);
+}
+
+.form-control:focus {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 0.2rem rgba(74, 116, 255, 0.15);
+}
+
+/* ===== 7. GLASS COMPONENTS ===== */
+.glass-light {
+  background: var(--glass-bg-light);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+}
+
+.glass-medium {
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+}
+
+.glass-strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+/* Main Glass Card Component */
+.doitly-card {
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-light);
+  border-top: var(--glass-border-highlight);
+  border-radius: var(--radius-large);
+  box-shadow: var(--shadow-inset);
+  padding: var(--space-lg);
+  transition: var(--transition);
+}
+
+.doitly-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+.doitly-card-flat {
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--border-light);
+  border-radius: var(--radius-large);
+  padding: var(--space-lg);
+}
+
+/* ===== 8. BUTTONS & FORMS ===== */
+
+/* Primary Button */
+.doitly-btn {
+  padding: 14px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 116, 255, 0.9),
+    rgba(74, 116, 255, 0.75)
+  );
+  color: var(--text-white);
+  border: none;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  font-weight: var(--font-medium);
+  font-size: 15px;
+  font-family: "Inter", sans-serif;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  text-decoration: none;
+}
+
+.doitly-btn:hover {
+  background: var(--accent-blue-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.doitly-btn:active {
+  transform: translateY(1px);
+}
+
+.doitly-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Button Variants */
+.doitly-btn-secondary {
+  background: var(--glass-bg-strong);
+  color: var(--text-primary);
+  border: var(--border-light);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+}
+
+.doitly-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.doitly-btn-outline {
+  background: transparent;
+  color: var(--accent-blue);
+  border: 2px solid var(--accent-blue);
+}
+
+.doitly-btn-outline:hover {
+  background: var(--accent-blue);
+  color: var(--text-white);
+}
+
+.doitly-btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: none;
+}
+
+.doitly-btn-ghost:hover {
+  background: var(--glass-bg-light);
+}
+
+.doitly-btn-success {
+  background: linear-gradient(
+    135deg,
+    rgba(89, 209, 134, 0.9),
+    rgba(89, 209, 134, 0.75)
+  );
+}
+
+.doitly-btn-success:hover {
+  background: #4bc177;
+}
+
+.doitly-btn-danger {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 87, 87, 0.9),
+    rgba(255, 87, 87, 0.75)
+  );
+}
+
+.doitly-btn-danger:hover {
+  background: #e64545;
+}
+
+/* Button Sizes */
+.doitly-btn-sm {
+  padding: 8px 14px;
+  font-size: 14px;
+}
+
+.doitly-btn-lg {
+  padding: 16px 28px;
+  font-size: 16px;
+}
+
+/* Input Fields */
+.doitly-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: var(--border-light);
+  border-radius: var(--radius-medium);
+  color: var(--text-primary);
+  font-size: 15px;
+  font-family: "Inter", sans-serif;
+  transition: var(--transition);
+  outline: none;
+}
+
+.doitly-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.doitly-input:focus {
+  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(74, 116, 255, 0.1);
+}
+
+.doitly-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* Classe para elementos desabilitados sem cursor de bloqueado (para demos) */
+.demo-disabled {
+  pointer-events: none;
+  cursor: default !important;
+  opacity: 0.75;
+}
+
+.demo-disabled .doitly-input,
+.demo-disabled .doitly-btn,
+.demo-disabled select.doitly-input,
+.demo-disabled textarea.doitly-input {
+  cursor: default !important;
+  pointer-events: none;
+}
+
+/* Textarea */
+.doitly-textarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: "Inter", sans-serif;
+}
+
+/* Select */
+.doitly-input[type="select"],
+select.doitly-input {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: var(--select-arrow-icon);
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 12px;
+  padding-right: 40px;
+  cursor: pointer;
+}
+
+/* Tentativa de arredondar dropdown (suporte limitado em navegadores) */
+select.doitly-input::-webkit-scrollbar {
+  width: 8px;
+}
+
+select.doitly-input::-webkit-scrollbar-track {
+  background: var(--bg-light);
+  border-radius: var(--radius-medium);
+}
+
+select.doitly-input::-webkit-scrollbar-thumb {
+  background: var(--glass-bg-strong);
+  border-radius: var(--radius-pill);
+}
+
+select.doitly-input::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb);
+}
+
+select.doitly-input:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+select.doitly-input:focus {
+  border-color: var(--accent-blue);
+  background-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 3px rgba(74, 116, 255, 0.1);
+}
+
+select.doitly-input option {
+  background: var(--bg-light);
+  color: var(--text-primary);
+  padding: 12px 16px;
+  font-family: "Inter", sans-serif;
+  font-weight: var(--font-normal);
+  font-size: 15px;
+  line-height: 1.5;
+  border-radius: var(--radius-xs);
+  margin: 2px 0;
+}
+
+select.doitly-input option:hover {
+  background: var(--glass-bg-strong);
+  color: var(--text-primary);
+}
+
+select.doitly-input option:checked,
+select.doitly-input option:active {
+  background: linear-gradient(
+    135deg,
+    rgba(74, 116, 255, 0.15),
+    rgba(74, 116, 255, 0.1)
+  );
+  color: var(--accent-blue);
+  font-weight: var(--font-medium);
+}
+
+select.doitly-input option:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: var(--text-tertiary);
+}
+
+/* ===== 9. SPECIFIC COMPONENTS ===== */
+
+/* Navbar */
+.doitly-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-bottom: var(--border-light);
+  border-radius: 0 0 var(--radius-large) var(--radius-large);
+  padding: 12px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  z-index: var(--z-fixed);
+  box-shadow: var(--shadow-subtle);
+}
+
+.doitly-navbar-brand {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: var(--font-semibold);
+  font-size: 1.5rem;
+  margin: 0;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+/* Logo Styles with Premium Hover Effect */
+.doitly-logo {
+  height: auto;
+  width: auto;
+  max-width: 60px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: brightness(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.doitly-logo:hover {
+  transform: scale(1.05) rotate(2deg) translateY(-2px);
+  filter: brightness(1.1) drop-shadow(0 6px 16px rgba(74, 116, 255, 0.3));
+  animation: logoFloat 2.5s ease-in-out infinite;
+}
+
+.doitly-logo:active {
+  transform: scale(0.98) rotate(-1deg);
+  transition: all 0.1s ease;
+}
+
+/* Floating Animation for Logo */
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: scale(1.05) rotate(2deg) translateY(-2px);
+  }
+  50% {
+    transform: scale(1.06) rotate(2deg) translateY(-4px);
+  }
+}
+
+/* Feature Cards */
+.feature-card {
+  background: var(--glass-bg-strong);
+  border: var(--border-light);
+  border-radius: var(--radius-medium);
+  backdrop-filter: var(--glass-blur-medium);
+  -webkit-backdrop-filter: var(--glass-blur-medium);
+  padding: var(--space-lg);
+  transition: var(--transition);
+}
+
+.feature-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-medium);
+}
+
+/* Habit Items */
+.habit-item {
+  background: var(--glass-bg-strong);
+  border-radius: var(--radius-medium);
+  border: var(--border-light);
+  backdrop-filter: var(--glass-blur-light);
+  -webkit-backdrop-filter: var(--glass-blur-light);
+  padding: var(--space-md);
+  transition: var(--transition-fast);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.habit-item:hover {
+  background: color-mix(in srgb, var(--surface-elevated) 84%, transparent);
+  transform: translateX(4px);
+}
+
+/* Badge Component */
+.doitly-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: var(--font-medium);
+  background: var(--glass-bg-medium);
+  border: var(--border-light);
+  color: var(--text-primary);
+}
+
+.doitly-badge-success {
+  background: rgba(89, 209, 134, 0.15);
+  color: color-mix(in srgb, var(--accent-green) 70%, var(--text-primary));
+  border-color: rgba(89, 209, 134, 0.3);
+}
+
+.doitly-badge-warning {
+  background: rgba(238, 210, 122, 0.15);
+  color: color-mix(in srgb, var(--accent-gold) 70%, var(--text-primary));
+  border-color: rgba(238, 210, 122, 0.3);
+}
+
+.doitly-badge-danger {
+  background: rgba(255, 87, 87, 0.15);
+  color: color-mix(in srgb, var(--accent-red) 75%, var(--text-primary));
+  border-color: rgba(255, 87, 87, 0.3);
+}
+
+.doitly-badge-info {
+  background: rgba(74, 116, 255, 0.15);
+  color: color-mix(in srgb, var(--accent-blue) 75%, var(--text-primary));
+  border-color: rgba(74, 116, 255, 0.3);
+}
+
+/* Stats Card */
+.stats-card {
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.stats-number {
+  font-size: clamp(2rem, 5vw, 2.5rem);
+  font-weight: var(--font-semibold);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  margin: var(--space-sm) 0;
+  color: var(--text-primary);
+}
+
+.stats-label {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+
+.alert-success-theme {
+  background: var(--alert-success-bg);
+  border: 1px solid var(--alert-success-border);
+  color: var(--alert-success-text);
+}
+
+.alert-danger-theme {
+  background: var(--alert-danger-bg);
+  border: 1px solid var(--alert-danger-border);
+  color: var(--alert-danger-text);
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-md);
+  padding: var(--space-sm) var(--space-md);
+  background: var(--glass-bg-light);
+  border: var(--border-light);
+  border-radius: var(--radius-small);
+}
+
+.theme-toggle-switch {
+  position: relative;
+  display: inline-flex;
+  width: 52px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.theme-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.theme-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-darker);
+  border: var(--border-light);
+  border-radius: var(--radius-pill);
+  transition: var(--transition);
+  cursor: pointer;
+}
+
+.theme-toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  left: 3px;
+  top: 2px;
+  background: var(--text-white);
+  border-radius: 50%;
+  transition: var(--transition);
+}
+
+.theme-toggle-switch input:checked + .theme-toggle-slider {
+  background: var(--accent-blue);
+  border-color: transparent;
+}
+
+.theme-toggle-switch input:checked + .theme-toggle-slider::before {
+  transform: translateX(22px);
+}
+
+/* ===== 10. ANIMATIONS & TRANSITIONS ===== */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition) ease;
+}
+
+.slide-in-right {
+  animation: slideInRight var(--transition) ease;
+}
+
+/* Loading State */
+.loading {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ===== 11. RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+  :root {
+    --radius-large: 24px;
+    --radius-medium: 16px;
+    --space-lg: 20px;
+    --space-xl: 28px;
+  }
+
+  .doitly-navbar {
+    padding: 12px 20px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .doitly-card {
+    padding: var(--space-md);
+  }
+
+  .container-doitly {
+    padding: 0 var(--space-md);
+  }
+
+  /* Reduce blur on mobile for performance */
+  .doitly-card,
+  .glass-strong {
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+  }
+
+  .habit-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-sm);
+  }
+
+  .doitly-btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .doitly-navbar-brand {
+    font-size: 1.25rem;
+  }
+
+  .stats-number {
+    font-size: 2rem;
+  }
+}
+
+/* ===== 12. ACCESSIBILITY ===== */
+
+/* Focus Styles */
+*:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+.doitly-btn:focus-visible,
+.doitly-input:focus-visible {
+  outline: 2px solid var(--accent-blue);
+  outline-offset: 2px;
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .doitly-card:hover,
+  .doitly-btn:hover,
+  .feature-card:hover,
+  .habit-item:hover {
+    transform: none;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  :root {
+    --border-light: 2px solid rgba(0, 0, 0, 0.3);
+    --text-secondary: #555555;
+  }
+}
+
+/* ===== 13. UTILITY CLASSES ===== */
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-direction: column;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.gap-sm {
+  gap: var(--space-sm);
+}
+
+.gap-md {
+  gap: var(--space-md);
+}
+
+.gap-lg {
+  gap: var(--space-lg);
+}
+
+.w-100 {
+  width: 100%;
+}
+
+.mt-1 {
+  margin-top: var(--space-xs);
+}
+.mt-2 {
+  margin-top: var(--space-sm);
+}
+.mt-3 {
+  margin-top: var(--space-md);
+}
+.mt-4 {
+  margin-top: var(--space-lg);
+}
+
+.mb-1 {
+  margin-bottom: var(--space-xs);
+}
+.mb-2 {
+  margin-bottom: var(--space-sm);
+}
+.mb-3 {
+  margin-bottom: var(--space-md);
+}
+.mb-4 {
+  margin-bottom: var(--space-lg);
+}
+
+.p-1 {
+  padding: var(--space-xs);
+}
+.p-2 {
+  padding: var(--space-sm);
+}
+.p-3 {
+  padding: var(--space-md);
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+.doitly-logo img:hover {
+  transform: scale(1.1);
+  opacity: 0.9;
+}
+
+/* ===== FOOTER STYLES ===== */
+.doitly-footer {
+  margin-top: var(--space-2xl);
+  padding: var(--space-xl) 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.02) 0%,
+    var(--glass-bg-strong) 100%
+  );
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: var(--border-light);
+  border-radius: var(--radius-large) var(--radius-large) 0 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.doitly-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--glass-border) 50%,
+    transparent 100%
+  );
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
+}
+
+.footer-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: var(--space-xl);
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  max-width: 350px;
+}
+
+.footer-brand h3 {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: var(--font-semibold);
+  font-size: 1.5rem;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.footer-brand p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.footer-links {
+  display: flex;
+  gap: var(--space-2xl);
+  flex-wrap: wrap;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  min-width: 150px;
+}
+
+.footer-column h4 {
+  font-size: 14px;
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-xs) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.footer-column a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-size: 14px;
+  transition: var(--transition);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-column a:hover {
+  color: var(--accent-blue);
+  transform: translateX(3px);
+}
+
+.footer-bottom {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  padding-top: 0;
+  text-align: center;
+}
+
+.footer-copyright {
+  color: var(--text-tertiary);
+  font-size: 13px;
+  margin: 0;
+}
+
+.footer-social {
+  display: flex;
+  gap: var(--space-sm);
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: var(--glass-bg-medium);
+  border: var(--border-light);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: var(--transition);
+  font-size: 16px;
+}
+
+.social-link:hover {
+  background: var(--accent-blue);
+  color: var(--text-white);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Footer Responsive */
+@media (max-width: 768px) {
+  .doitly-footer {
+    padding: var(--space-xl) 0 var(--space-lg) 0;
+    margin-top: var(--space-xl);
+  }
+
+  .footer-top {
+    flex-direction: column;
+    gap: var(--space-lg);
+  }
+
+  .footer-links {
+    width: 100%;
+    gap: var(--space-lg);
+  }
+
+  .footer-column {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-md);
+  }
+}
+
+/* ===============================================
+   HOVER EFFECTS SOFISTICADOS - DOITLY
+   =============================================== */
+
+/* ===== 1. CARDS COM SHINE EFFECT ===== */
+.doitly-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Shine effect que passa ao hover */
+.doitly-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.7s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.doitly-card:hover::before {
+  left: 100%;
+}
+
+/* Elevação e glow sutil */
+.doitly-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(74, 116, 255, 0.15);
+  border-color: rgba(74, 116, 255, 0.3);
+}
+
+/* ===== 2. FEATURE CARDS - EFEITO ESPECIAL ===== */
+.feature-card {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Glow effect ao redor do card */
+.feature-card::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: linear-gradient(
+    135deg,
+    rgba(74, 116, 255, 0.3),
+    rgba(89, 209, 134, 0.3)
+  );
+  border-radius: var(--radius-medium);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  z-index: -1;
+}
+
+.feature-card:hover::after {
+  opacity: 1;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(74, 116, 255, 0.2);
+  border-color: rgba(74, 116, 255, 0.5);
+}
+
+/* Ícone aumenta no hover */
+.feature-card:hover .feature-icon {
+  transform: scale(1.05);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-icon {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== 3. HABIT ITEMS - HOVER INTERATIVO ===== */
+.habit-item {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Background animado */
+.habit-item::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(74, 116, 255, 0.05),
+    transparent
+  );
+  transition: left 0.5s ease;
+  z-index: 0;
+}
+
+.habit-item:hover::before {
+  left: 100%;
+}
+
+.habit-item:hover {
+  background: color-mix(in srgb, var(--surface-elevated) 92%, transparent);
+  transform: translateX(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-color: rgba(74, 116, 255, 0.3);
+}
+
+/* Badge anima no hover do item */
+.habit-item:hover .doitly-badge {
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.doitly-badge {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== 4. BOTÕES COM RIPPLE EFFECT ===== */
+.doitly-btn {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Ripple animado */
+.doitly-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.doitly-btn:hover::after {
+  width: 300px;
+  height: 300px;
+}
+
+.doitly-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(74, 116, 255, 0.3);
+}
+
+.doitly-btn:active {
+  transform: translateY(0) scale(0.98);
+  transition: all 0.1s ease;
+}
+
+/* ===== 5. STATS CARDS - HOVER ELEGANTE ===== */
+.stats-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Brilho sutil que sobe */
+.stats-card::before {
+  content: "";
+  position: absolute;
+  bottom: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, rgba(74, 116, 255, 0.08));
+  transition: bottom 0.5s ease;
+}
+
+.stats-card:hover::before {
+  bottom: 0;
+}
+
+.stats-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  border-color: rgba(74, 116, 255, 0.4);
+}
+
+.stats-card:hover .stats-number {
+  transform: scale(1.1);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stats-number {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== 6. TESTIMONIAL CARDS ===== */
+.testimonial-card {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12);
+  border-color: rgba(74, 116, 255, 0.3);
+}
+
+/* Estrelas brilham no hover */
+.testimonial-card:hover .testimonial-rating i {
+  animation: starPulse 0.5s ease;
+}
+
+@keyframes starPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* ===== 7. FEATURE GRID ITEMS ===== */
+.feature-grid-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.feature-grid-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-medium);
+  background: linear-gradient(
+    135deg,
+    rgba(74, 116, 255, 0.1),
+    rgba(89, 209, 134, 0.1)
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feature-grid-item:hover::before {
+  opacity: 1;
+}
+
+.feature-grid-item:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(74, 116, 255, 0.15);
+  border-color: rgba(74, 116, 255, 0.4);
+}
+
+.feature-grid-item:hover .feature-grid-icon {
+  transform: scale(1.2) rotate(5deg);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.feature-grid-icon {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== 8. LINKS E BADGES ===== */
+.doitly-badge {
+  transition: all 0.3s ease;
+}
+
+.doitly-badge:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Links com underline animado */
+a:not(.doitly-btn):not(.social-link):not(.doitly-logo-link) {
+  position: relative;
+  text-decoration: none;
+}
+
+a:not(.doitly-btn):not(.social-link):not(.doitly-logo-link)::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--accent-blue);
+  transition: width 0.3s ease;
+}
+
+a:not(.doitly-btn):not(.social-link):not(.doitly-logo-link):hover::after {
+  width: 100%;
+}
+
+/* ===== 9. NAVBAR - HOVER NOS BOTÕES ===== */
+.doitly-navbar .doitly-btn {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.doitly-navbar .doitly-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(74, 116, 255, 0.25);
+}
+
+/* ===== 10. FOOTER SOCIAL LINKS ===== */
+.social-link {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.social-link::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: var(--radius-xs);
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.social-link:hover::before {
+  opacity: 1;
+}
+
+.social-link:hover {
+  transform: translateY(-3px) scale(1.1);
+  box-shadow: 0 6px 20px rgba(74, 116, 255, 0.3);
+}
+
+/* ===== 11. INPUTS - FEEDBACK VISUAL ===== */
+.doitly-input {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.doitly-input:hover:not(:focus) {
+  border-color: rgba(74, 116, 255, 0.3);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.doitly-input:focus {
+  transform: scale(1.01);
+  border-color: var(--accent-blue);
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 0 0 4px rgba(74, 116, 255, 0.1);
+}
+
+/* ===== 12. ACCORDION ITEMS ===== */
+.doitly-accordion-item {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.doitly-accordion-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  border-color: rgba(74, 116, 255, 0.3);
+}
+
+/* ===== PERFORMANCE - DISABLE EM MOBILE ===== */
+@media (max-width: 768px) {
+  /* Simplifica animações no mobile para melhor performance */
+  .doitly-card:hover,
+  .feature-card:hover,
+  .habit-item:hover {
+    transform: translateY(-4px);
+  }
+
+  /* Remove animações pesadas no mobile */
+  .doitly-card::before,
+  .feature-card::after,
+  .habit-item::before,
+  .stats-card::before {
+    display: none;
+  }
+}
+
+/* ===== ACESSIBILIDADE ===== */
+@media (prefers-reduced-motion: reduce) {
+  /* Remove todas as animações para quem prefere */
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .doitly-card:hover,
+  .feature-card:hover,
+  .doitly-btn:hover {
+    transform: none;
+  }
+}
+
+/* ===== LOGO HOVER ESPECIAL ===== */
+.doitly-logo {
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: brightness(1) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  transform-style: preserve-3d;
+}
+
+.doitly-logo:hover {
+  transform: scale(1.08) rotate(3deg) translateY(-2px);
+  filter: brightness(1.15) drop-shadow(0 6px 20px rgba(74, 116, 255, 0.4));
+  animation: logoFloat 2s ease-in-out infinite;
+}
+
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: scale(1.08) rotate(3deg) translateY(-2px);
+  }
+  50% {
+    transform: scale(1.1) rotate(3deg) translateY(-5px);
+  }
+}
