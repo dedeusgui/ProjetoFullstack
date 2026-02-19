@@ -64,3 +64,47 @@ function actionRequireCsrf(string $fallbackPublicPage): void
         actionFlashAndRedirect('error_message', 'Sessão inválida. Atualize a página e tente novamente.', '../public/' . ltrim($fallbackPublicPage, '/'));
     }
 }
+
+
+function authAttemptKey(): string
+{
+    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    return 'auth_attempts_' . hash('sha256', $ip);
+}
+
+function authIsRateLimited(int $maxAttempts = 5, int $windowSeconds = 900): bool
+{
+    $key = authAttemptKey();
+    $state = $_SESSION[$key] ?? ['count' => 0, 'first_attempt_at' => time()];
+
+    if (!is_array($state) || !isset($state['count'], $state['first_attempt_at'])) {
+        $_SESSION[$key] = ['count' => 0, 'first_attempt_at' => time()];
+        return false;
+    }
+
+    if ((time() - (int) $state['first_attempt_at']) > $windowSeconds) {
+        $_SESSION[$key] = ['count' => 0, 'first_attempt_at' => time()];
+        return false;
+    }
+
+    return (int) $state['count'] >= $maxAttempts;
+}
+
+function authRegisterFailure(int $windowSeconds = 900): void
+{
+    $key = authAttemptKey();
+    $state = $_SESSION[$key] ?? ['count' => 0, 'first_attempt_at' => time()];
+
+    if ((time() - (int) ($state['first_attempt_at'] ?? time())) > $windowSeconds) {
+        $state = ['count' => 0, 'first_attempt_at' => time()];
+    }
+
+    $state['count'] = (int) ($state['count'] ?? 0) + 1;
+    $_SESSION[$key] = $state;
+}
+
+function authClearFailures(): void
+{
+    $key = authAttemptKey();
+    unset($_SESSION[$key]);
+}

@@ -9,12 +9,12 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
    - Inicialização centralizada com `bootApp`.
    - Padrão comum de sessão/dependências em páginas e actions principais.
 
-2. **Padronização de actions HTTP** — **94%**
+2. **Padronização de actions HTTP** — **96%**
    - Helpers de redirect/guardas/flash implementados.
    - Maioria dos actions críticos já migrados.
    - Pendente: substituir alguns padrões locais restantes (ex.: helpers locais de redirectBack em actions específicos).
 
-3. **Extração de serviços de domínio** — **90%**
+3. **Extração de serviços de domínio** — **92%**
    - `AuthService` concluído.
    - `HabitInputSanitizer` concluído.
    - `HabitAccessService` concluído.
@@ -30,13 +30,12 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
    - Pendente: checklist de regressão funcional por fluxo e matriz de risco por módulo.
 
 ## Estimativa de conclusão global
-**~92% concluído** para uma base “já refatorada” no núcleo crítico.
+**~95% concluído** para uma base “já refatorada” no núcleo crítico.
 
 ## O que ainda falta para considerar "versão refatorada" pronta
 1. Extrair repositórios para consultas recorrentes de hábitos/perfil.
-2. Reduzir lógica remanescente em actions para somente orquestração HTTP.
-3. Definir e executar checklist de regressão manual por fluxo (login, cadastro, dashboard, hábitos, perfil, exportação).
-4. Opcional recomendado: adicionar suíte mínima de testes automatizados para serviços novos.
+2. Definir e executar checklist de regressão manual por fluxo (login, cadastro, dashboard, hábitos, perfil, exportação).
+3. Opcional recomendado: adicionar suíte mínima de testes automatizados para serviços novos.
 
 ## Próximo passo sugerido imediato
 Fase 6: **introduzir repositórios** para desacoplar SQL de serviços (`app/*Repository`).
@@ -46,3 +45,7 @@ Fase 6: **introduzir repositórios** para desacoplar SQL de serviços (`app/*Rep
 - Validações críticas de cadastro/autenticação reforçadas (confirmação de senha no cadastro e normalização de e-mail).
 
 - Proteções CSRF em login/cadastro adicionadas.
+
+- Rate limiting simples no login aplicado.
+- Conexão com banco preparada para variáveis de ambiente.
+- Regeneração de sessão no login adicionada (session fixation hardening).
