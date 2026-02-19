@@ -122,6 +122,9 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
                 'name' => $habit['title'],
                 'category' => $habit['category_name'] ?? 'Sem categoria',
                 'time' => mapTimeOfDayReverse($habit['time_of_day'] ?? 'anytime'),
+                'goal_type' => $habit['goal_type'] ?? 'completion',
+                'goal_value' => (int) ($habit['goal_value'] ?? 1),
+                'goal_unit' => $habit['goal_unit'] ?? '',
                 'completed' => (bool) ($habit['completed_today'] ?? false)
             ];
         }, getTodayHabits($conn, $userId, getUserTodayDate($conn, $userId))),

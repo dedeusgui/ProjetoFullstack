@@ -477,8 +477,17 @@ include_once "includes/header.php";
                                                 style="<?php echo $habit['completed'] ? 'text-decoration: line-through;' : ''; ?>">
                                                 <?php echo htmlspecialchars($habit['name']); ?>
                                             </span>
-                                            <small
-                                                class="text-secondary"><?php echo htmlspecialchars($habit['category']); ?></small>
+                                            <small class="text-secondary" style="display: block;">
+                                                <?php echo htmlspecialchars($habit['category']); ?>
+                                            </small>
+                                            <small class="text-secondary" style="display: block;">
+                                                <i class="bi bi-bullseye"></i>
+                                                <?php if (($habit['goal_type'] ?? 'completion') === 'completion'): ?>
+                                                    Meta: concluir
+                                                <?php else: ?>
+                                                    Meta: <?php echo (int) ($habit['goal_value'] ?? 1); ?> <?php echo htmlspecialchars(($habit['goal_unit'] ?? '') ?: 'unidades'); ?>
+                                                <?php endif; ?>
+                                            </small>
                                         </div>
                                     </div>
 
@@ -487,10 +496,21 @@ include_once "includes/header.php";
                                             <i class="bi bi-check-circle-fill"></i> Concluído
                                         </button>
                                     <?php else: ?>
-                                        <form method="POST" action="../actions/habit_mark_action.php" style="display: inline;">
+                                        <form method="POST" action="../actions/habit_mark_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
                                             <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
+                                            <?php if (($habit['goal_type'] ?? 'completion') !== 'completion'): ?>
+                                                <input
+                                                    type="number"
+                                                    step="0.01"
+                                                    min="0"
+                                                    name="value_achieved"
+                                                    class="doitly-input"
+                                                    style="width: 100px; padding: 6px 8px;"
+                                                    placeholder="valor"
+                                                    required>
+                                            <?php endif; ?>
                                             <button type="submit" class="doitly-btn doitly-btn-sm">
-                                                <i class="bi bi-circle"></i> Marcar
+                                                <i class="bi bi-circle"></i> Concluir
                                             </button>
                                         </form>
                                     <?php endif; ?>
