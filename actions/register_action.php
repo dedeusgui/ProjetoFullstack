@@ -1,6 +1,6 @@
 <?php
-session_start();
-require_once '../config/conexao.php';
+require_once '../config/bootstrap.php';
+bootApp();
 
 // Verificar se é POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -60,13 +60,10 @@ if (!$insertStmt->execute()) {
 }
 
 // Pegar ID do usuário criado
-$userId = $insertStmt->insert_id;
+$userId = (int) $insertStmt->insert_id;
 
 // Fazer login automático
-$_SESSION['user_id'] = $userId;
-$_SESSION['user_name'] = $name;
-$_SESSION['user_email'] = $email;
-$_SESSION['logged_in_at'] = time();
+login($userId, $name, $email);
 
 // Redirecionar para dashboard
 header('Location: ../public/dashboard.php');

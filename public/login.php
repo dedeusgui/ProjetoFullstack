@@ -1,6 +1,7 @@
 <?php
-// Iniciar sessão
-session_start();
+require_once '../config/bootstrap.php';
+bootApp(false);
+
 
 // Se já estiver logado, redirecionar para dashboard
 if (isset($_SESSION['user_id'])) {
