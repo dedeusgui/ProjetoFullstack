@@ -9,12 +9,12 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
    - Inicialização centralizada com `bootApp`.
    - Padrão comum de sessão/dependências em páginas e actions principais.
 
-2. **Padronização de actions HTTP** — **92%**
+2. **Padronização de actions HTTP** — **94%**
    - Helpers de redirect/guardas/flash implementados.
    - Maioria dos actions críticos já migrados.
    - Pendente: substituir alguns padrões locais restantes (ex.: helpers locais de redirectBack em actions específicos).
 
-3. **Extração de serviços de domínio** — **88%**
+3. **Extração de serviços de domínio** — **90%**
    - `AuthService` concluído.
    - `HabitInputSanitizer` concluído.
    - `HabitAccessService` concluído.
@@ -30,7 +30,7 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
    - Pendente: checklist de regressão funcional por fluxo e matriz de risco por módulo.
 
 ## Estimativa de conclusão global
-**~90% concluído** para uma base “já refatorada” no núcleo crítico.
+**~92% concluído** para uma base “já refatorada” no núcleo crítico.
 
 ## O que ainda falta para considerar "versão refatorada" pronta
 1. Extrair repositórios para consultas recorrentes de hábitos/perfil.
@@ -44,3 +44,5 @@ Fase 6: **introduzir repositórios** para desacoplar SQL de serviços (`app/*Rep
 
 ## Melhorias adicionais já aplicadas
 - Validações críticas de cadastro/autenticação reforçadas (confirmação de senha no cadastro e normalização de e-mail).
+
+- Proteções CSRF em login/cadastro adicionadas.

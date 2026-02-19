@@ -4,6 +4,7 @@ bootApp();
 require_once '../app/auth/AuthService.php';
 
 actionRequirePost('register.php');
+actionRequireCsrf('register.php');
 
 $name = trim($_POST['name'] ?? '');
 $email = strtolower(trim($_POST['email'] ?? ''));

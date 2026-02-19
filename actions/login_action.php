@@ -4,6 +4,7 @@ bootApp();
 require_once '../app/auth/AuthService.php';
 
 actionRequirePost('login.php');
+actionRequireCsrf('login.php');
 
 $email = strtolower(trim($_POST['email'] ?? ''));
 $password = $_POST['password'] ?? '';

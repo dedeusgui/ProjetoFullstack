@@ -32,6 +32,7 @@ include_once "includes/header.php";
         <?php endif; ?>
 
         <form action="../actions/register_action.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
             <div class="mb-4">
                 <label for="name" class="form-label text-secondary fs-6">Nome</label>
                 <div class="input-group">
