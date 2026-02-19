@@ -1,27 +1,21 @@
 <?php
 
+require_once __DIR__ . '/../repository/UserRepository.php';
+
 class AuthService
 {
-    private mysqli $conn;
+    private UserRepository $userRepository;
 
     public function __construct(mysqli $conn)
     {
-        $this->conn = $conn;
+        $this->userRepository = new UserRepository($conn);
     }
 
     public function authenticate(string $email, string $password): ?array
     {
         $email = $this->normalizeEmail($email);
-        $stmt = $this->conn->prepare('SELECT id, name, email, password FROM users WHERE email = ? AND is_active = 1');
-        $stmt->bind_param('s', $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $user = $this->userRepository->findActiveByEmail($email);
 
-        if ($result->num_rows === 0) {
-            return null;
-        }
-
-        $user = $result->fetch_assoc();
         if (!$user || !password_verify($password, $user['password'])) {
             return null;
         }
@@ -35,13 +29,7 @@ class AuthService
 
     public function emailExists(string $email): bool
     {
-        $email = $this->normalizeEmail($email);
-        $stmt = $this->conn->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
-        $stmt->bind_param('s', $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        return $result->num_rows > 0;
+        return $this->userRepository->emailExists($this->normalizeEmail($email));
     }
 
     public function register(string $name, string $email, string $password): ?array
@@ -50,15 +38,13 @@ class AuthService
         $email = $this->normalizeEmail($email);
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-        $insertStmt = $this->conn->prepare('INSERT INTO users (name, email, password, is_active, email_verified) VALUES (?, ?, ?, 1, 0)');
-        $insertStmt->bind_param('sss', $name, $email, $passwordHash);
-
-        if (!$insertStmt->execute()) {
+        $userId = $this->userRepository->createUser($name, $email, $passwordHash);
+        if ($userId === null) {
             return null;
         }
 
         return [
-            'id' => (int) $insertStmt->insert_id,
+            'id' => $userId,
             'name' => $name,
             'email' => $email
         ];
@@ -66,9 +52,7 @@ class AuthService
 
     public function updateLastLogin(int $userId): void
     {
-        $updateStmt = $this->conn->prepare('UPDATE users SET last_login = NOW() WHERE id = ?');
-        $updateStmt->bind_param('i', $userId);
-        $updateStmt->execute();
+        $this->userRepository->updateLastLogin($userId);
     }
 
     private function normalizeEmail(string $email): string

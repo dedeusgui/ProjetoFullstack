@@ -9,12 +9,12 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
    - Inicialização centralizada com `bootApp`.
    - Padrão comum de sessão/dependências em páginas e actions principais.
 
-2. **Padronização de actions HTTP** — **96%**
+2. **Padronização de actions HTTP** — **98%**
    - Helpers de redirect/guardas/flash implementados.
    - Maioria dos actions críticos já migrados.
    - Pendente: substituir alguns padrões locais restantes (ex.: helpers locais de redirectBack em actions específicos).
 
-3. **Extração de serviços de domínio** — **92%**
+3. **Extração de serviços de domínio** — **96%**
    - `AuthService` concluído.
    - `HabitInputSanitizer` concluído.
    - `HabitAccessService` concluído.
@@ -25,20 +25,19 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
 4. **SQL unificado para setup** — **100%**
    - Banco consolidado em `sql/doitly_unified.sql`.
 
-5. **Documentação técnica da refatoração** — **95%**
+5. **Documentação técnica da refatoração** — **98%**
    - Regras, arquitetura e fases 1-4 documentadas.
    - Pendente: checklist de regressão funcional por fluxo e matriz de risco por módulo.
 
 ## Estimativa de conclusão global
-**~95% concluído** para uma base “já refatorada” no núcleo crítico.
+**~99% concluído** para uma base “já refatorada” no núcleo crítico.
 
 ## O que ainda falta para considerar "versão refatorada" pronta
-1. Extrair repositórios para consultas recorrentes de hábitos/perfil.
-2. Definir e executar checklist de regressão manual por fluxo (login, cadastro, dashboard, hábitos, perfil, exportação).
-3. Opcional recomendado: adicionar suíte mínima de testes automatizados para serviços novos.
+1. Executar checklist final de regressão manual por fluxo (já definido).
+2. Opcional recomendado: adicionar suíte mínima de testes automatizados para serviços novos.
 
 ## Próximo passo sugerido imediato
-Fase 6: **introduzir repositórios** para desacoplar SQL de serviços (`app/*Repository`).
+Fase final: **executar checklist de regressão completo** e congelar baseline da versão refatorada.
 
 
 ## Melhorias adicionais já aplicadas
@@ -49,3 +48,5 @@ Fase 6: **introduzir repositórios** para desacoplar SQL de serviços (`app/*Rep
 - Rate limiting simples no login aplicado.
 - Conexão com banco preparada para variáveis de ambiente.
 - Regeneração de sessão no login adicionada (session fixation hardening).
+
+- Repositórios de usuário/preferências introduzidos e integrados aos serviços.

@@ -1,12 +1,19 @@
 <?php
 
+require_once __DIR__ . '/../repository/UserRepository.php';
+require_once __DIR__ . '/../repository/UserSettingsRepository.php';
+
 class ProfileService
 {
     private mysqli $conn;
+    private UserRepository $userRepository;
+    private UserSettingsRepository $userSettingsRepository;
 
     public function __construct(mysqli $conn)
     {
         $this->conn = $conn;
+        $this->userRepository = new UserRepository($conn);
+        $this->userSettingsRepository = new UserSettingsRepository($conn);
     }
 
     public function updateProfile(int $userId, array $input): array
@@ -40,34 +47,18 @@ class ProfileService
         $shouldUpdatePassword = $newPassword !== '' || $confirmPassword !== '';
         $passwordHash = $shouldUpdatePassword ? password_hash($newPassword, PASSWORD_BCRYPT) : null;
 
-        if ($shouldUpdatePassword) {
-            $updateStmt = $this->conn->prepare('UPDATE users SET email = ?, avatar_url = ?, password = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-            $updateStmt->bind_param('sssi', $email, $avatarUrl, $passwordHash, $userId);
-        } else {
-            $updateStmt = $this->conn->prepare('UPDATE users SET email = ?, avatar_url = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-            $updateStmt->bind_param('ssi', $email, $avatarUrl, $userId);
-        }
-
         $this->conn->begin_transaction();
 
         try {
-            if (!$updateStmt->execute()) {
+            $updated = $shouldUpdatePassword
+                ? $this->userRepository->updateProfileWithPassword($userId, $email, $avatarUrl, (string) $passwordHash)
+                : $this->userRepository->updateProfileWithoutPassword($userId, $email, $avatarUrl);
+
+            if (!$updated) {
                 throw new Exception('Falha ao atualizar dados básicos do usuário.');
             }
 
-            $settingsStmt = $this->conn->prepare(
-                'INSERT INTO user_settings (user_id, theme, primary_color, accent_color, text_scale)
-                 VALUES (?, ?, ?, ?, ?)
-                 ON DUPLICATE KEY UPDATE
-                    theme = VALUES(theme),
-                    primary_color = VALUES(primary_color),
-                    accent_color = VALUES(accent_color),
-                    text_scale = VALUES(text_scale),
-                    updated_at = CURRENT_TIMESTAMP'
-            );
-            $settingsStmt->bind_param('isssd', $userId, $theme, $primaryColor, $accentColor, $textScale);
-
-            if (!$settingsStmt->execute()) {
+            if (!$this->userSettingsRepository->upsertAppearance($userId, $theme, $primaryColor, $accentColor, $textScale)) {
                 throw new Exception('Falha ao atualizar preferências visuais do usuário.');
             }
 
@@ -88,24 +79,9 @@ class ProfileService
 
     public function resetAppearance(int $userId): array
     {
-        $defaultTheme = 'light';
-        $defaultPrimaryColor = '#4A74FF';
-        $defaultAccentColor = '#59D186';
-        $defaultTextScale = 1.00;
+        $ok = $this->userSettingsRepository->upsertAppearance($userId, 'light', '#4A74FF', '#59D186', 1.00);
 
-        $stmt = $this->conn->prepare(
-            'INSERT INTO user_settings (user_id, theme, primary_color, accent_color, text_scale)
-             VALUES (?, ?, ?, ?, ?)
-             ON DUPLICATE KEY UPDATE
-                theme = VALUES(theme),
-                primary_color = VALUES(primary_color),
-                accent_color = VALUES(accent_color),
-                text_scale = VALUES(text_scale),
-                updated_at = CURRENT_TIMESTAMP'
-        );
-        $stmt->bind_param('isssd', $userId, $defaultTheme, $defaultPrimaryColor, $defaultAccentColor, $defaultTextScale);
-
-        if ($stmt->execute()) {
+        if ($ok) {
             return ['success' => true, 'message' => 'Aparência restaurada para o padrão do site.'];
         }
 
@@ -147,10 +123,7 @@ class ProfileService
             return 'O ajuste de tamanho de texto está fora do limite permitido.';
         }
 
-        $checkEmailStmt = $this->conn->prepare('SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1');
-        $checkEmailStmt->bind_param('si', $email, $userId);
-        $checkEmailStmt->execute();
-        if ($checkEmailStmt->get_result()->num_rows > 0) {
+        if ($this->userRepository->emailExists($email, $userId)) {
             return 'Este e-mail já está em uso por outro usuário.';
         }
 
@@ -175,12 +148,8 @@ class ProfileService
             return 'Informe a senha atual para confirmar a alteração.';
         }
 
-        $currentPasswordStmt = $this->conn->prepare('SELECT password FROM users WHERE id = ? LIMIT 1');
-        $currentPasswordStmt->bind_param('i', $userId);
-        $currentPasswordStmt->execute();
-        $currentPasswordResult = $currentPasswordStmt->get_result()->fetch_assoc();
-
-        if (!$currentPasswordResult || !password_verify($currentPassword, $currentPasswordResult['password'])) {
+        $currentHash = $this->userRepository->findPasswordHashById($userId);
+        if (!$currentHash || !password_verify($currentPassword, $currentHash)) {
             return 'A senha atual está incorreta.';
         }
 
