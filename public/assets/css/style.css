@@ -38,18 +38,18 @@
   --rating-star: #fbbf24;
 
   /* Glass Effect Variants */
-  --glass-bg-light: rgba(255, 255, 255, 0.08);
-  --glass-bg-medium: rgba(255, 255, 255, 0.12);
-  --glass-bg-strong: rgba(255, 255, 255, 0.55);
-  --glass-border: rgba(255, 255, 255, 0.45);
+  --glass-bg-light: rgba(17, 24, 39, 0.02);
+  --glass-bg-medium: rgba(17, 24, 39, 0.05);
+  --glass-bg-strong: rgba(255, 255, 255, 0.78);
+  --glass-border: rgba(17, 24, 39, 0.1);
   --glass-blur: blur(22px) saturate(180%);
   --glass-blur-medium: blur(14px) saturate(160%);
   --glass-blur-light: blur(10px) saturate(140%);
 
   /* Borders */
-  --border-light: 1.95px solid rgba(0, 0, 0, 0.08);
-  --border-medium: 2px solid rgba(0, 0, 0, 0.12);
-  --glass-border-highlight: 1.95px solid rgba(255, 255, 255, 0.55);
+  --border-light: 1.95px solid rgba(17, 24, 39, 0.14);
+  --border-medium: 2px solid rgba(17, 24, 39, 0.2);
+  --glass-border-highlight: 1.95px solid rgba(255, 255, 255, 0.75);
 
   /* Border Radius */
   --radius-xl: 32px;
