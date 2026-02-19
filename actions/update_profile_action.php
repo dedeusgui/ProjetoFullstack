@@ -2,22 +2,10 @@
 require_once '../config/bootstrap.php';
 bootApp();
 
-if (!isLoggedIn()) {
-    header('Location: ../public/login.php');
-    exit;
-}
-
-$returnTo = trim($_POST['return_to'] ?? 'dashboard.php');
+actionRequireLoggedIn();
 $allowedReturnPages = ['dashboard.php', 'habits.php', 'history.php'];
-if (!in_array($returnTo, $allowedReturnPages, true)) {
-    $returnTo = 'dashboard.php';
-}
-$redirectPath = '../public/' . $returnTo;
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ' . $redirectPath);
-    exit;
-}
+$redirectPath = actionResolveReturnPath($allowedReturnPages, 'dashboard.php');
+actionRequirePost('dashboard.php');
 
 $userId = (int) getUserId();
 $email = trim($_POST['email'] ?? '');
@@ -31,50 +19,29 @@ $accentColor = strtoupper(trim($_POST['accent_color'] ?? '#59D186'));
 $textScale = (float) ($_POST['text_scale'] ?? 1.00);
 
 if ($email === '') {
-    $_SESSION['error_message'] = 'O e-mail é obrigatório.';
-    header('Location: ' . $redirectPath);
-    exit;
+    actionFlashAndRedirect('error_message', 'O e-mail é obrigatório.', $redirectPath);
 }
-
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $_SESSION['error_message'] = 'Informe um e-mail válido.';
-    header('Location: ' . $redirectPath);
-    exit;
+    actionFlashAndRedirect('error_message', 'Informe um e-mail válido.', $redirectPath);
 }
-
 if ($avatarUrl !== '' && !filter_var($avatarUrl, FILTER_VALIDATE_URL)) {
-    $_SESSION['error_message'] = 'A URL da imagem de perfil é inválida.';
-    header('Location: ' . $redirectPath);
-    exit;
+    actionFlashAndRedirect('error_message', 'A URL da imagem de perfil é inválida.', $redirectPath);
 }
-
 if (!preg_match('/^#[0-9A-F]{6}$/', $primaryColor)) {
-    $_SESSION['error_message'] = 'A cor principal é inválida.';
-    header('Location: ' . $redirectPath);
-    exit;
+    actionFlashAndRedirect('error_message', 'A cor principal é inválida.', $redirectPath);
 }
-
 if (!preg_match('/^#[0-9A-F]{6}$/', $accentColor)) {
-    $_SESSION['error_message'] = 'A cor de destaque é inválida.';
-    header('Location: ' . $redirectPath);
-    exit;
+    actionFlashAndRedirect('error_message', 'A cor de destaque é inválida.', $redirectPath);
 }
-
 if ($textScale < 0.9 || $textScale > 1.2) {
-    $_SESSION['error_message'] = 'O ajuste de tamanho de texto está fora do limite permitido.';
-    header('Location: ' . $redirectPath);
-    exit;
+    actionFlashAndRedirect('error_message', 'O ajuste de tamanho de texto está fora do limite permitido.', $redirectPath);
 }
 
 $checkEmailStmt = $conn->prepare('SELECT id FROM users WHERE email = ? AND id != ? LIMIT 1');
 $checkEmailStmt->bind_param('si', $email, $userId);
 $checkEmailStmt->execute();
-$checkEmailResult = $checkEmailStmt->get_result();
-
-if ($checkEmailResult->num_rows > 0) {
-    $_SESSION['error_message'] = 'Este e-mail já está em uso por outro usuário.';
-    header('Location: ' . $redirectPath);
-    exit;
+if ($checkEmailStmt->get_result()->num_rows > 0) {
+    actionFlashAndRedirect('error_message', 'Este e-mail já está em uso por outro usuário.', $redirectPath);
 }
 
 $shouldUpdatePassword = $newPassword !== '' || $confirmPassword !== '';
@@ -82,27 +49,16 @@ $passwordHash = null;
 
 if ($shouldUpdatePassword) {
     if ($newPassword === '' || $confirmPassword === '') {
-        $_SESSION['error_message'] = 'Para alterar a senha, preencha os campos de nova senha e confirmação.';
-        header('Location: ' . $redirectPath);
-        exit;
+        actionFlashAndRedirect('error_message', 'Para alterar a senha, preencha os campos de nova senha e confirmação.', $redirectPath);
     }
-
     if (strlen($newPassword) < 6) {
-        $_SESSION['error_message'] = 'A nova senha deve ter ao menos 6 caracteres.';
-        header('Location: ' . $redirectPath);
-        exit;
+        actionFlashAndRedirect('error_message', 'A nova senha deve ter ao menos 6 caracteres.', $redirectPath);
     }
-
     if ($newPassword !== $confirmPassword) {
-        $_SESSION['error_message'] = 'A confirmação da nova senha não confere.';
-        header('Location: ' . $redirectPath);
-        exit;
+        actionFlashAndRedirect('error_message', 'A confirmação da nova senha não confere.', $redirectPath);
     }
-
     if ($currentPassword === '') {
-        $_SESSION['error_message'] = 'Informe a senha atual para confirmar a alteração.';
-        header('Location: ' . $redirectPath);
-        exit;
+        actionFlashAndRedirect('error_message', 'Informe a senha atual para confirmar a alteração.', $redirectPath);
     }
 
     $currentPasswordStmt = $conn->prepare('SELECT password FROM users WHERE id = ? LIMIT 1');
@@ -111,9 +67,7 @@ if ($shouldUpdatePassword) {
     $currentPasswordResult = $currentPasswordStmt->get_result()->fetch_assoc();
 
     if (!$currentPasswordResult || !password_verify($currentPassword, $currentPasswordResult['password'])) {
-        $_SESSION['error_message'] = 'A senha atual está incorreta.';
-        header('Location: ' . $redirectPath);
-        exit;
+        actionFlashAndRedirect('error_message', 'A senha atual está incorreta.', $redirectPath);
     }
 
     $passwordHash = password_hash($newPassword, PASSWORD_BCRYPT);
@@ -151,15 +105,13 @@ try {
     }
 
     $conn->commit();
-
     $_SESSION['user_email'] = $email;
-    $_SESSION['success_message'] = $shouldUpdatePassword
+    $message = $shouldUpdatePassword
         ? 'Configurações atualizadas com sucesso! E sua senha foi alterada.'
         : 'Configurações atualizadas com sucesso!';
+
+    actionFlashAndRedirect('success_message', $message, $redirectPath);
 } catch (Throwable $exception) {
     $conn->rollback();
-    $_SESSION['error_message'] = 'Não foi possível salvar as configurações. Tente novamente.';
+    actionFlashAndRedirect('error_message', 'Não foi possível salvar as configurações. Tente novamente.', $redirectPath);
 }
-
-header('Location: ' . $redirectPath);
-exit;

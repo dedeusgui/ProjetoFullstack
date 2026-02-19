@@ -2,10 +2,7 @@
 require_once '../config/bootstrap.php';
 bootApp();
 
-if (!isLoggedIn()) {
-    header('Location: ../public/login.php');
-    exit;
-}
+actionRequireLoggedIn();
 
 $userId = (int) getUserId();
 $userData = getCurrentUser($conn);

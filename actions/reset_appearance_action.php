@@ -2,22 +2,10 @@
 require_once '../config/bootstrap.php';
 bootApp();
 
-if (!isLoggedIn()) {
-    header('Location: ../public/login.php');
-    exit;
-}
-
-$returnTo = trim($_POST['return_to'] ?? 'dashboard.php');
+actionRequireLoggedIn();
 $allowedReturnPages = ['dashboard.php', 'habits.php', 'history.php'];
-if (!in_array($returnTo, $allowedReturnPages, true)) {
-    $returnTo = 'dashboard.php';
-}
-$redirectPath = '../public/' . $returnTo;
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ' . $redirectPath);
-    exit;
-}
+$redirectPath = actionResolveReturnPath($allowedReturnPages, 'dashboard.php');
+actionRequirePost('dashboard.php');
 
 $userId = (int) getUserId();
 $defaultTheme = 'light';
@@ -38,10 +26,7 @@ $stmt = $conn->prepare(
 $stmt->bind_param('isssd', $userId, $defaultTheme, $defaultPrimaryColor, $defaultAccentColor, $defaultTextScale);
 
 if ($stmt->execute()) {
-    $_SESSION['success_message'] = 'Aparência restaurada para o padrão do site.';
-} else {
-    $_SESSION['error_message'] = 'Não foi possível restaurar as configurações de aparência.';
+    actionFlashAndRedirect('success_message', 'Aparência restaurada para o padrão do site.', $redirectPath);
 }
 
-header('Location: ' . $redirectPath);
-exit;
+actionFlashAndRedirect('error_message', 'Não foi possível restaurar as configurações de aparência.', $redirectPath);

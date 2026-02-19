@@ -3,48 +3,34 @@ require_once '../config/bootstrap.php';
 bootApp();
 require_once '../app/auth/AuthService.php';
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../public/register.php');
-    exit;
-}
+actionRequirePost('register.php');
 
 $name = trim($_POST['name'] ?? '');
 $email = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 
 if (empty($name) || empty($email) || empty($password)) {
-    $_SESSION['error_message'] = 'Por favor, preencha todos os campos.';
-    header('Location: ../public/register.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'Por favor, preencha todos os campos.', '../public/register.php');
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $_SESSION['error_message'] = 'Email inválido.';
-    header('Location: ../public/register.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'Email inválido.', '../public/register.php');
 }
 
 if (strlen($password) < 6) {
-    $_SESSION['error_message'] = 'A senha deve ter no mínimo 6 caracteres.';
-    header('Location: ../public/register.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'A senha deve ter no mínimo 6 caracteres.', '../public/register.php');
 }
 
 $authService = new AuthService($conn);
 if ($authService->emailExists($email)) {
-    $_SESSION['error_message'] = 'Este email já está cadastrado.';
-    header('Location: ../public/register.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'Este email já está cadastrado.', '../public/register.php');
 }
 
 $user = $authService->register($name, $email, $password);
 if (!$user) {
-    $_SESSION['error_message'] = 'Erro ao criar conta. Tente novamente.';
-    header('Location: ../public/register.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'Erro ao criar conta. Tente novamente.', '../public/register.php');
 }
 
 login($user['id'], $user['name'], $user['email']);
 
-header('Location: ../public/dashboard.php');
-exit;
+actionRedirect('../public/dashboard.php');

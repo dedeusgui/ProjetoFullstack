@@ -3,16 +3,10 @@ require_once '../config/bootstrap.php';
 bootApp();
 
 // Verificar autenticação
-if (!isLoggedIn()) {
-    header('Location: ../public/login.php');
-    exit;
-}
+actionRequireLoggedIn();
 
 // Verificar se é POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../public/habits.php');
-    exit;
-}
+actionRequirePost('habits.php');
 
 $userId = getUserId();
 

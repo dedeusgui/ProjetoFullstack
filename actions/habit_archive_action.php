@@ -2,15 +2,9 @@
 require_once '../config/bootstrap.php';
 bootApp();
 
-if (!isLoggedIn()) {
-    header('Location: ../public/login.php');
-    exit;
-}
+actionRequireLoggedIn();
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../public/habits.php');
-    exit;
-}
+actionRequirePost('habits.php');
 
 $userId = getUserId();
 $habitId = intval($_POST['habit_id'] ?? 0);
