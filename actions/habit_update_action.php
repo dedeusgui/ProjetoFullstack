@@ -1,8 +1,6 @@
 <?php
-session_start();
-require_once '../config/conexao.php';
-require_once '../config/auth.php';
-require_once '../config/helpers.php';
+require_once '../config/bootstrap.php';
+bootApp();
 
 if (!isLoggedIn()) {
     header('Location: ../public/login.php');
