@@ -11,6 +11,7 @@ class AuthService
 
     public function authenticate(string $email, string $password): ?array
     {
+        $email = $this->normalizeEmail($email);
         $stmt = $this->conn->prepare('SELECT id, name, email, password FROM users WHERE email = ? AND is_active = 1');
         $stmt->bind_param('s', $email);
         $stmt->execute();
@@ -34,6 +35,7 @@ class AuthService
 
     public function emailExists(string $email): bool
     {
+        $email = $this->normalizeEmail($email);
         $stmt = $this->conn->prepare('SELECT id FROM users WHERE email = ? LIMIT 1');
         $stmt->bind_param('s', $email);
         $stmt->execute();
@@ -44,6 +46,8 @@ class AuthService
 
     public function register(string $name, string $email, string $password): ?array
     {
+        $name = trim($name);
+        $email = $this->normalizeEmail($email);
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
         $insertStmt = $this->conn->prepare('INSERT INTO users (name, email, password, is_active, email_verified) VALUES (?, ?, ?, 1, 0)');
@@ -65,5 +69,10 @@ class AuthService
         $updateStmt = $this->conn->prepare('UPDATE users SET last_login = NOW() WHERE id = ?');
         $updateStmt->bind_param('i', $userId);
         $updateStmt->execute();
+    }
+
+    private function normalizeEmail(string $email): string
+    {
+        return strtolower(trim($email));
     }
 }

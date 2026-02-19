@@ -14,7 +14,7 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
    - Maioria dos actions críticos já migrados.
    - Pendente: substituir alguns padrões locais restantes (ex.: helpers locais de redirectBack em actions específicos).
 
-3. **Extração de serviços de domínio** — **85%**
+3. **Extração de serviços de domínio** — **88%**
    - `AuthService` concluído.
    - `HabitInputSanitizer` concluído.
    - `HabitAccessService` concluído.
@@ -30,7 +30,7 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
    - Pendente: checklist de regressão funcional por fluxo e matriz de risco por módulo.
 
 ## Estimativa de conclusão global
-**~88% concluído** para uma base “já refatorada” no núcleo crítico.
+**~90% concluído** para uma base “já refatorada” no núcleo crítico.
 
 ## O que ainda falta para considerar "versão refatorada" pronta
 1. Extrair repositórios para consultas recorrentes de hábitos/perfil.
@@ -40,3 +40,7 @@ Este status consolida o progresso real das fases executadas para aproximar a cod
 
 ## Próximo passo sugerido imediato
 Fase 6: **introduzir repositórios** para desacoplar SQL de serviços (`app/*Repository`).
+
+
+## Melhorias adicionais já aplicadas
+- Validações críticas de cadastro/autenticação reforçadas (confirmação de senha no cadastro e normalização de e-mail).

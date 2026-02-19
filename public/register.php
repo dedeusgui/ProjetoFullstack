@@ -62,6 +62,21 @@ include_once "includes/header.php";
                 </div>
             </div>
 
+
+            <div class="mb-4">
+                <label for="confirm_password" class="form-label text-secondary fs-6">Confirmar senha</label>
+                <div class="position-relative">
+                    <input type="password" class="doitly-input" id="confirm_password" name="confirm_password" placeholder="••••••••"
+                        required minlength="6" style="padding-right: 45px;">
+                    <button type="button" class="btn btn-link position-absolute"
+                        onclick="togglePasswordVisibility('confirm_password', this)"
+                        style="right: 8px; top: 50%; transform: translateY(-50%); padding: 4px 8px; color: var(--text-secondary); text-decoration: none;"
+                        title="Mostrar/Ocultar senha">
+                        <i class="bi bi-eye" style="font-size: 1.1rem;"></i>
+                    </button>
+                </div>
+            </div>
+
             <button type="submit" class="doitly-btn w-100 mb-3">
                 <span>Cadastrar</span>
                 <i class="bi bi-arrow-right"></i>

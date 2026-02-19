@@ -5,7 +5,7 @@ require_once '../app/auth/AuthService.php';
 
 actionRequirePost('login.php');
 
-$email = trim($_POST['email'] ?? '');
+$email = strtolower(trim($_POST['email'] ?? ''));
 $password = $_POST['password'] ?? '';
 
 if (empty($email) || empty($password)) {

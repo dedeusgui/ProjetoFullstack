@@ -6,10 +6,11 @@ require_once '../app/auth/AuthService.php';
 actionRequirePost('register.php');
 
 $name = trim($_POST['name'] ?? '');
-$email = trim($_POST['email'] ?? '');
+$email = strtolower(trim($_POST['email'] ?? ''));
 $password = $_POST['password'] ?? '';
+$confirmPassword = $_POST['confirm_password'] ?? '';
 
-if (empty($name) || empty($email) || empty($password)) {
+if (empty($name) || empty($email) || empty($password) || empty($confirmPassword)) {
     actionFlashAndRedirect('error_message', 'Por favor, preencha todos os campos.', '../public/register.php');
 }
 
@@ -19,6 +20,10 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 if (strlen($password) < 6) {
     actionFlashAndRedirect('error_message', 'A senha deve ter no mínimo 6 caracteres.', '../public/register.php');
+}
+
+if ($password !== $confirmPassword) {
+    actionFlashAndRedirect('error_message', 'As senhas não conferem.', '../public/register.php');
 }
 
 $authService = new AuthService($conn);
