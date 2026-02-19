@@ -1,73 +1,42 @@
 <?php
-session_start();
-require_once '../config/conexao.php';
+require_once '../config/bootstrap.php';
+bootApp();
+require_once '../app/auth/AuthService.php';
 
-// Verificar se é POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../public/register.php');
-    exit;
-}
+actionRequirePost('register.php');
+actionRequireCsrf('register.php');
 
-// Pegar dados do formulário
 $name = trim($_POST['name'] ?? '');
-$email = trim($_POST['email'] ?? '');
+$email = strtolower(trim($_POST['email'] ?? ''));
 $password = $_POST['password'] ?? '';
+$confirmPassword = $_POST['confirm_password'] ?? '';
 
-// Validar campos
-if (empty($name) || empty($email) || empty($password)) {
-    $_SESSION['error_message'] = 'Por favor, preencha todos os campos.';
-    header('Location: ../public/register.php');
-    exit;
+if (empty($name) || empty($email) || empty($password) || empty($confirmPassword)) {
+    actionFlashAndRedirect('error_message', 'Por favor, preencha todos os campos.', '../public/register.php');
 }
 
-// Validar email
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    $_SESSION['error_message'] = 'Email inválido.';
-    header('Location: ../public/register.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'Email inválido.', '../public/register.php');
 }
 
-// Validar senha (mínimo 6 caracteres)
 if (strlen($password) < 6) {
-    $_SESSION['error_message'] = 'A senha deve ter no mínimo 6 caracteres.';
-    header('Location: ../public/register.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'A senha deve ter no mínimo 6 caracteres.', '../public/register.php');
 }
 
-// Verificar se email já existe
-$stmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $_SESSION['error_message'] = 'Este email já está cadastrado.';
-    header('Location: ../public/register.php');
-    exit;
+if ($password !== $confirmPassword) {
+    actionFlashAndRedirect('error_message', 'As senhas não conferem.', '../public/register.php');
 }
 
-// Hash da senha
-$passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
-// Inserir usuário
-$insertStmt = $conn->prepare("INSERT INTO users (name, email, password, is_active, email_verified) VALUES (?, ?, ?, 1, 0)");
-$insertStmt->bind_param("sss", $name, $email, $passwordHash);
-
-if (!$insertStmt->execute()) {
-    $_SESSION['error_message'] = 'Erro ao criar conta. Tente novamente.';
-    header('Location: ../public/register.php');
-    exit;
+$authService = new AuthService($conn);
+if ($authService->emailExists($email)) {
+    actionFlashAndRedirect('error_message', 'Este email já está cadastrado.', '../public/register.php');
 }
 
-// Pegar ID do usuário criado
-$userId = $insertStmt->insert_id;
+$user = $authService->register($name, $email, $password);
+if (!$user) {
+    actionFlashAndRedirect('error_message', 'Erro ao criar conta. Tente novamente.', '../public/register.php');
+}
 
-// Fazer login automático
-$_SESSION['user_id'] = $userId;
-$_SESSION['user_name'] = $name;
-$_SESSION['user_email'] = $email;
-$_SESSION['logged_in_at'] = time();
+login($user['id'], $user['name'], $user['email']);
 
-// Redirecionar para dashboard
-header('Location: ../public/dashboard.php');
-exit;
+actionRedirect('../public/dashboard.php');

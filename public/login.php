@@ -1,6 +1,7 @@
 <?php
-// Iniciar sessão
-session_start();
+require_once '../config/bootstrap.php';
+bootApp(false);
+
 
 // Se já estiver logado, redirecionar para dashboard
 if (isset($_SESSION['user_id'])) {
@@ -31,6 +32,7 @@ include_once "includes/header.php";
         <?php endif; ?>
 
         <form action="../actions/login_action.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
             <div class="mb-4">
                 <label for="email" class="form-label text-secondary fs-6">Email</label>
                 <div class="input-group">

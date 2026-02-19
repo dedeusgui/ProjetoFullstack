@@ -1,6 +1,7 @@
 <?php
-// Iniciar sessão
-session_start();
+require_once '../config/bootstrap.php';
+bootApp(false);
+
 
 // Se já estiver logado, redirecionar para dashboard
 if (isset($_SESSION['user_id'])) {
@@ -31,6 +32,7 @@ include_once "includes/header.php";
         <?php endif; ?>
 
         <form action="../actions/register_action.php" method="post">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
             <div class="mb-4">
                 <label for="name" class="form-label text-secondary fs-6">Nome</label>
                 <div class="input-group">
@@ -54,6 +56,21 @@ include_once "includes/header.php";
                         required style="padding-right: 45px;">
                     <button type="button" class="btn btn-link position-absolute"
                         onclick="togglePasswordVisibility('password', this)"
+                        style="right: 8px; top: 50%; transform: translateY(-50%); padding: 4px 8px; color: var(--text-secondary); text-decoration: none;"
+                        title="Mostrar/Ocultar senha">
+                        <i class="bi bi-eye" style="font-size: 1.1rem;"></i>
+                    </button>
+                </div>
+            </div>
+
+
+            <div class="mb-4">
+                <label for="confirm_password" class="form-label text-secondary fs-6">Confirmar senha</label>
+                <div class="position-relative">
+                    <input type="password" class="doitly-input" id="confirm_password" name="confirm_password" placeholder="••••••••"
+                        required minlength="6" style="padding-right: 45px;">
+                    <button type="button" class="btn btn-link position-absolute"
+                        onclick="togglePasswordVisibility('confirm_password', this)"
                         style="right: 8px; top: 50%; transform: translateY(-50%); padding: 4px 8px; color: var(--text-secondary); text-decoration: none;"
                         title="Mostrar/Ocultar senha">
                         <i class="bi bi-eye" style="font-size: 1.1rem;"></i>

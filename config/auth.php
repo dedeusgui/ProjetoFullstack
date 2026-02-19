@@ -61,6 +61,7 @@ function getCurrentUser($conn) {
 
 // Fazer login
 function login($userId, $userName, $userEmail) {
+    session_regenerate_id(true);
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $userName;
     $_SESSION['user_email'] = $userEmail;

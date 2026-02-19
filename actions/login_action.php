@@ -1,56 +1,32 @@
 <?php
-session_start();
-require_once '../config/conexao.php';
+require_once '../config/bootstrap.php';
+bootApp();
+require_once '../app/auth/AuthService.php';
 
-// Verificar se é POST
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../public/login.php');
-    exit;
-}
+actionRequirePost('login.php');
+actionRequireCsrf('login.php');
 
-// Pegar dados do formulário
-$email = trim($_POST['email'] ?? '');
+$email = strtolower(trim($_POST['email'] ?? ''));
 $password = $_POST['password'] ?? '';
 
-// Validar campos
 if (empty($email) || empty($password)) {
-    $_SESSION['error_message'] = 'Por favor, preencha todos os campos.';
-    header('Location: ../public/login.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'Por favor, preencha todos os campos.', '../public/login.php');
 }
 
-// Buscar usuário no banco
-$stmt = $conn->prepare("SELECT id, name, email, password FROM users WHERE email = ? AND is_active = 1");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows === 0) {
-    $_SESSION['error_message'] = 'Email ou senha incorretos.';
-    header('Location: ../public/login.php');
-    exit;
+if (authIsRateLimited()) {
+    actionFlashAndRedirect('error_message', 'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.', '../public/login.php');
 }
 
-$user = $result->fetch_assoc();
+$authService = new AuthService($conn);
+$user = $authService->authenticate($email, $password);
 
-// Verificar senha
-if (!password_verify($password, $user['password'])) {
-    $_SESSION['error_message'] = 'Email ou senha incorretos.';
-    header('Location: ../public/login.php');
-    exit;
+if (!$user) {
+    authRegisterFailure();
+    actionFlashAndRedirect('error_message', 'Email ou senha incorretos.', '../public/login.php');
 }
 
-// Login bem-sucedido
-$_SESSION['user_id'] = $user['id'];
-$_SESSION['user_name'] = $user['name'];
-$_SESSION['user_email'] = $user['email'];
-$_SESSION['logged_in_at'] = time();
+authClearFailures();
+login($user['id'], $user['name'], $user['email']);
+$authService->updateLastLogin($user['id']);
 
-// Atualizar last_login
-$updateStmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
-$updateStmt->bind_param("i", $user['id']);
-$updateStmt->execute();
-
-// Redirecionar para dashboard
-header('Location: ../public/dashboard.php');
-exit;
+actionRedirect('../public/dashboard.php');

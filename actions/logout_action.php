@@ -1,7 +1,8 @@
 <?php
-session_start();
+require_once '../config/bootstrap.php';
+bootApp(false);
+
 session_unset();
 session_destroy();
 
-header('Location: ../public/login.php');
-exit;
+actionRedirect('../public/login.php');

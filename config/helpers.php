@@ -282,32 +282,141 @@ function getCompletedToday($conn, $userId) {
     return $row['total'] ?? 0;
 }
 
-// Taxa de conclusão (últimos 30 dias)
+// Taxa de conclusão (histórico completo do usuário)
 function getCompletionRate($conn, $userId) {
-    $stmt = $conn->prepare("
-        SELECT 
-            COUNT(DISTINCT hc.completion_date) as days_active,
-            (SELECT COUNT(*) FROM habits WHERE user_id = ? AND is_active = 1) as total_habits
-        FROM habit_completions hc
-        INNER JOIN habits h ON hc.habit_id = h.id
-        WHERE hc.user_id = ? 
-        AND hc.completion_date >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
-        AND h.is_active = 1
-    ");
-    $stmt->bind_param("ii", $userId, $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    
-    $daysActive = $row['days_active'] ?? 0;
-    $totalHabits = $row['total_habits'] ?? 0;
-    
-    if ($totalHabits == 0) {
-        return 0;
+    $summary = getCompletionWindowSummary($conn, $userId);
+    return (int) ($summary['rate'] ?? 0);
+}
+
+function getCompletionWindowSummary($conn, $userId, int $days = 0): array {
+    $today = getAppToday();
+    $startDate = getCompletionWindowStartDate($conn, $userId, $days, $today);
+
+    if ($startDate === null || $startDate > $today) {
+        return ['rate' => 0, 'completed' => 0, 'scheduled' => 0, 'days_analyzed' => 0];
     }
-    
-    // Taxa = (dias ativos / 30) * 100
-    return round(($daysActive / 30) * 100);
+
+    return getCompletionSummaryByRange($conn, $userId, $startDate, $today);
+}
+
+function getCompletionWindowStartDate($conn, $userId, int $days, string $referenceDate): ?string {
+    $userCreatedAt = getUserCreatedAt($conn, $userId);
+    if (empty($userCreatedAt)) {
+        return null;
+    }
+
+    $createdDate = date('Y-m-d', strtotime($userCreatedAt));
+    $maxDays = max(0, $days);
+
+    if ($maxDays === 0) {
+        return $createdDate;
+    }
+
+    $windowStart = date('Y-m-d', strtotime('-' . ($maxDays - 1) . ' days', strtotime($referenceDate)));
+    return $windowStart > $createdDate ? $windowStart : $createdDate;
+}
+
+function getCompletionSummaryByRange($conn, $userId, string $startDate, string $endDate): array {
+    if ($startDate > $endDate) {
+        return ['rate' => 0, 'completed' => 0, 'scheduled' => 0, 'days_analyzed' => 0];
+    }
+
+    $dailyTotalsStmt = $conn->prepare("
+        SELECT
+            COALESCE(SUM(CASE WHEN h.is_active = 1 AND h.created_at <= CONCAT(?, ' 23:59:59') AND (h.archived_at IS NULL OR h.archived_at > CONCAT(?, ' 23:59:59')) THEN 1 ELSE 0 END), 0) AS total_habits,
+            COALESCE(SUM(CASE WHEN h.is_active = 1 AND h.created_at <= CONCAT(?, ' 23:59:59') AND (h.archived_at IS NULL OR h.archived_at > CONCAT(?, ' 23:59:59')) AND EXISTS (
+                SELECT 1 FROM habit_completions hc
+                WHERE hc.habit_id = h.id
+                  AND hc.user_id = h.user_id
+                  AND hc.completion_date = ?
+            ) THEN 1 ELSE 0 END), 0) AS completed_habits
+        FROM habits h
+        WHERE h.user_id = ?
+    ");
+
+    $scheduled = 0;
+    $completed = 0;
+    $currentDate = $startDate;
+    $daysAnalyzed = 0;
+
+    while ($currentDate <= $endDate) {
+        $dailyTotalsStmt->bind_param('sssssi', $currentDate, $currentDate, $currentDate, $currentDate, $currentDate, $userId);
+        $dailyTotalsStmt->execute();
+        $row = $dailyTotalsStmt->get_result()->fetch_assoc() ?: [];
+
+        $scheduled += (int) ($row['total_habits'] ?? 0);
+        $completed += (int) ($row['completed_habits'] ?? 0);
+        $daysAnalyzed++;
+
+        $currentDate = date('Y-m-d', strtotime($currentDate . ' +1 day'));
+    }
+
+    $rate = $scheduled > 0 ? round(($completed / $scheduled) * 100) : 0;
+
+    return [
+        'rate' => (int) $rate,
+        'completed' => $completed,
+        'scheduled' => $scheduled,
+        'days_analyzed' => $daysAnalyzed
+    ];
+}
+
+function getCompletionTrend($conn, $userId, int $windowDays = 7): array {
+    $period = max(1, $windowDays);
+
+    $today = getAppToday();
+    $currentEnd = $today;
+    $currentStart = getCompletionWindowStartDate($conn, $userId, $period, $currentEnd);
+
+    if ($currentStart === null) {
+        return ['status' => 'insufficient', 'label' => 'Dados insuficientes', 'icon' => 'bi-dash', 'delta' => 0];
+    }
+
+    $current = getCompletionSummaryByRange($conn, $userId, $currentStart, $currentEnd);
+
+    $previousEnd = date('Y-m-d', strtotime($currentStart . ' -1 day'));
+    $previousStart = date('Y-m-d', strtotime('-' . ($period - 1) . ' days', strtotime($previousEnd)));
+
+    $createdDate = getCompletionWindowStartDate($conn, $userId, 0, $today);
+    if ($createdDate === null || $previousEnd < $createdDate) {
+        return ['status' => 'insufficient', 'label' => 'Dados insuficientes', 'icon' => 'bi-dash', 'delta' => 0];
+    }
+
+    if ($previousStart < $createdDate) {
+        $previousStart = $createdDate;
+    }
+
+    $previous = getCompletionSummaryByRange($conn, $userId, $previousStart, $previousEnd);
+
+    if (($current['scheduled'] ?? 0) === 0 || ($previous['scheduled'] ?? 0) === 0) {
+        return ['status' => 'insufficient', 'label' => 'Dados insuficientes', 'icon' => 'bi-dash', 'delta' => 0];
+    }
+
+    $delta = (int) ($current['rate'] - $previous['rate']);
+
+    if ($delta > 0) {
+        return ['status' => 'up', 'label' => '+' . $delta . '% vs semana anterior', 'icon' => 'bi-arrow-up', 'delta' => $delta];
+    }
+
+    if ($delta < 0) {
+        return ['status' => 'down', 'label' => $delta . '% vs semana anterior', 'icon' => 'bi-arrow-down', 'delta' => $delta];
+    }
+
+    return ['status' => 'stable', 'label' => 'Sem alteração vs semana anterior', 'icon' => 'bi-dash', 'delta' => 0];
+}
+
+
+function getActiveDays($conn, $userId): int {
+    $stmt = $conn->prepare("
+        SELECT COUNT(DISTINCT completion_date) AS total
+        FROM habit_completions
+        WHERE user_id = ?
+    ");
+    $stmt->bind_param('i', $userId);
+    $stmt->execute();
+    $row = $stmt->get_result()->fetch_assoc();
+
+    return (int) ($row['total'] ?? 0);
 }
 
 // Sequência atual (streak)

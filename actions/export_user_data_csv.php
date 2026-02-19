@@ -1,22 +1,14 @@
 <?php
-session_start();
+require_once '../config/bootstrap.php';
+bootApp();
 
-require_once '../config/conexao.php';
-require_once '../config/auth.php';
-require_once '../config/helpers.php';
-
-if (!isLoggedIn()) {
-    header('Location: ../public/login.php');
-    exit;
-}
+actionRequireLoggedIn();
 
 $userId = (int) getUserId();
 $userData = getCurrentUser($conn);
 
 if (!$userData) {
-    $_SESSION['error_message'] = 'Usuário não encontrado para exportação.';
-    header('Location: ../public/dashboard.php');
-    exit;
+    actionFlashAndRedirect('error_message', 'Usuário não encontrado para exportação.', '../public/dashboard.php');
 }
 
 $today = date('Y-m-d');
