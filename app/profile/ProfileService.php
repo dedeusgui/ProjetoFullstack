@@ -111,6 +111,10 @@ class ProfileService
             return 'A URL da imagem de perfil é inválida.';
         }
 
+        if ($avatarUrl !== '' && !$this->isSafeAvatarUrl($avatarUrl)) {
+            return 'A URL da imagem de perfil não é permitida. Use um domínio público com HTTP/HTTPS.';
+        }
+
         if (!preg_match('/^#[0-9A-F]{6}$/', $primaryColor)) {
             return 'A cor principal é inválida.';
         }
@@ -154,5 +158,39 @@ class ProfileService
         }
 
         return null;
+    }
+
+    private function isSafeAvatarUrl(string $avatarUrl): bool
+    {
+        $parts = parse_url($avatarUrl);
+        if (!is_array($parts)) {
+            return false;
+        }
+
+        $scheme = strtolower((string) ($parts['scheme'] ?? ''));
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            return false;
+        }
+
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        if ($host === '' || $host === 'localhost') {
+            return false;
+        }
+
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return !$this->isPrivateOrReservedIp($host);
+        }
+
+        $resolvedIp = gethostbyname($host);
+        if ($resolvedIp === $host) {
+            return false;
+        }
+
+        return !$this->isPrivateOrReservedIp($resolvedIp);
+    }
+
+    private function isPrivateOrReservedIp(string $ip): bool
+    {
+        return filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false;
     }
 }

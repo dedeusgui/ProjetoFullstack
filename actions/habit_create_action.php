@@ -5,6 +5,7 @@ require_once '../app/habits/HabitInputSanitizer.php';
 
 actionRequireLoggedIn();
 actionRequirePost('habits.php');
+actionRequireCsrf('habits.php');
 
 $userId = (int) getUserId();
 $input = HabitInputSanitizer::fromRequest($_POST);

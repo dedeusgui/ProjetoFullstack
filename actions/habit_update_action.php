@@ -6,6 +6,7 @@ require_once '../app/habits/HabitAccessService.php';
 
 actionRequireLoggedIn();
 actionRequirePost('habits.php');
+actionRequireCsrf('habits.php');
 
 $userId = (int) getUserId();
 $habitId = (int) ($_POST['habit_id'] ?? $_POST['id'] ?? 0);
