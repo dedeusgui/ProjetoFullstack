@@ -120,7 +120,7 @@ include_once "includes/header.php";
 ?>
 
 <!-- Link para CSS do Dashboard -->
-<link rel="stylesheet" href="assets/css/dashboard.css" />
+<link rel="stylesheet" href="assets/css/dashboard.css?v=<?php echo filemtime(__DIR__ . '/assets/css/dashboard.css'); ?>" />
 
 <!-- Dashboard Wrapper -->
 <div class="dashboard-wrapper">
