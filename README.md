@@ -238,7 +238,7 @@ Com base no código atual:
 
 ## Equipe
 
-- Guilherme Deus - Frontend & Design
+- Guilherme de Deus - Frontend & Design
 - Ismael Gomes - Backend & Database
 
 GitHub do projeto: [dedeusgui/ProjetoFullstack](https://github.com/dedeusgui/ProjetoFullstack)
