@@ -236,14 +236,19 @@ Com base no código atual:
 
 ---
 
-## Equipe
+<div align="center">
 
-- Guilherme de Deus - Frontend & Design
-- Ismael Gomes - Backend & Database
+## 👨‍💻 Autores
 
-GitHub do projeto: [dedeusgui/ProjetoFullstack](https://github.com/dedeusgui/ProjetoFullstack)
+Este projeto foi desenvolvido com dedicação por:
+
+| [<img src="https://avatars.githubusercontent.com/u/200134059?v=4" width=115><br><sub>Ismael Gomes (Rex)</sub>](https://github.com/rex23js) | [<img src="https://avatars.githubusercontent.com/u/202681712?v=4" width=115><br><sub>Guilherme de Deus</sub>](https://github.com/dedeusgui) |
+| :----------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------: |
+|                                                    [GitHub](https://github.com/rex23js)                                                    |                                                   [GitHub](https://github.com/dedeusgui)                                                    |
 
 ---
+
+</div>
 
 ## Observações
 
