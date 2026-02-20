@@ -580,8 +580,6 @@ function getUserCreatedAt($conn, $userId): ?string {
 
 // Histórico recente
 function getRecentHistory($conn, $userId, $days = 10, ?string $userCreatedAt = null) {
-    $history = [];
-
     $maxDays = max(1, (int) $days);
 
     if (!empty($userCreatedAt)) {
@@ -594,45 +592,73 @@ function getRecentHistory($conn, $userId, $days = 10, ?string $userCreatedAt = n
         }
     }
 
-    $totalByDateStmt = $conn->prepare("
-        SELECT COUNT(*) as total
-        FROM habits
-        WHERE user_id = ?
-          AND DATE(created_at) <= ?
-    ");
+    $startDate = date('Y-m-d', strtotime('-' . ($maxDays - 1) . ' days'));
+    $endDate = date('Y-m-d');
 
-    for ($i = 0; $i < $maxDays; $i++) {
-        $date = date('Y-m-d', strtotime("-$i days"));
-
-        $stmt = $conn->prepare("
-            SELECT COUNT(*) as completed
+    $stmt = $conn->prepare("
+        WITH RECURSIVE date_range AS (
+            SELECT ? AS day
+            UNION ALL
+            SELECT DATE_ADD(day, INTERVAL 1 DAY)
+            FROM date_range
+            WHERE day < ?
+        ),
+        initial_base AS (
+            SELECT COUNT(*) AS initial_total
+            FROM habits
+            WHERE user_id = ?
+              AND DATE(created_at) < ?
+        ),
+        created_daily AS (
+            SELECT DATE(created_at) AS day, COUNT(*) AS created_count
+            FROM habits
+            WHERE user_id = ?
+              AND DATE(created_at) BETWEEN ? AND ?
+            GROUP BY DATE(created_at)
+        ),
+        completed_daily AS (
+            SELECT completion_date AS day, COUNT(*) AS completed_count
             FROM habit_completions
-            WHERE user_id = ? AND completion_date = ?
-        ");
-        $stmt->bind_param("is", $userId, $date);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $completed = (int) ($row['completed'] ?? 0);
+            WHERE user_id = ?
+              AND completion_date BETWEEN ? AND ?
+            GROUP BY completion_date
+        )
+        SELECT
+            dr.day AS date,
+            COALESCE(cd.completed_count, 0) AS completed,
+            ib.initial_total + SUM(COALESCE(cr.created_count, 0)) OVER (ORDER BY dr.day) AS total,
+            CASE
+                WHEN (ib.initial_total + SUM(COALESCE(cr.created_count, 0)) OVER (ORDER BY dr.day)) > 0 THEN
+                    ROUND(
+                        (COALESCE(cd.completed_count, 0) * 100.0)
+                        / (ib.initial_total + SUM(COALESCE(cr.created_count, 0)) OVER (ORDER BY dr.day)),
+                        1
+                    )
+                ELSE 0
+            END AS percentage
+        FROM date_range dr
+        CROSS JOIN initial_base ib
+        LEFT JOIN created_daily cr ON cr.day = dr.day
+        LEFT JOIN completed_daily cd ON cd.day = dr.day
+        ORDER BY dr.day DESC
+    ");
+    $stmt->bind_param('ssisississ', $startDate, $endDate, $userId, $startDate, $userId, $startDate, $endDate, $userId, $startDate, $endDate);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-        $totalByDateStmt->bind_param("is", $userId, $date);
-        $totalByDateStmt->execute();
-        $totalResult = $totalByDateStmt->get_result();
-        $totalRow = $totalResult->fetch_assoc();
-        $totalHabitsOnDate = (int) ($totalRow['total'] ?? 0);
-
-        $percentage = $totalHabitsOnDate > 0 ? round(($completed / $totalHabitsOnDate) * 100, 1) : 0;
-
+    $history = [];
+    while ($row = $result->fetch_assoc()) {
         $history[] = [
-            'date' => $date,
-            'completed' => $completed,
-            'total' => $totalHabitsOnDate,
-            'percentage' => $percentage
+            'date' => $row['date'],
+            'completed' => (int) ($row['completed'] ?? 0),
+            'total' => (int) ($row['total'] ?? 0),
+            'percentage' => (float) ($row['percentage'] ?? 0)
         ];
     }
 
     return $history;
 }
+
 
 // Buscar todas as categorias
 function getAllCategories($conn) {
