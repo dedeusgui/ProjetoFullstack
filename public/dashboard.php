@@ -133,6 +133,9 @@ $monthSummary = [
     'total_completions' => getTotalCompletions($conn, $userId)
 ];
 
+$csrfToken = getCsrfToken();
+$userTodayDate = getUserTodayDate($conn, (int) $userId);
+
 include_once "includes/header.php";
 ?>
 
@@ -497,6 +500,8 @@ include_once "includes/header.php";
                                         </button>
                                     <?php else: ?>
                                         <form method="POST" action="../actions/habit_mark_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
+                                            <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
+                                            <input type="hidden" name="completion_date" value="<?php echo $userTodayDate; ?>">
                                             <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
                                             <?php if (($habit['goal_type'] ?? 'completion') !== 'completion'): ?>
                                                 <input
