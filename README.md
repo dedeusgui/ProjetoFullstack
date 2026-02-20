@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <img src="https://img.shields.io/badge/Doitly-Gerenciador%20de%20H%C3%A1bitos-6C63FF?style=for-the-badge" alt="Doitly" />
 
@@ -40,7 +40,6 @@ O sistema conta com um fluxo completo e funcional: autenticação segura, dashbo
 ## Tecnologias
 
 ### Frontend
-
 - HTML5 + CSS3 (Design System próprio)
 - Bootstrap 5.3.2 + Bootstrap Icons
 - JavaScript Vanilla
@@ -48,14 +47,12 @@ O sistema conta com um fluxo completo e funcional: autenticação segura, dashbo
 - AOS — Animate On Scroll
 
 ### Backend
-
 - PHP 8.0+
 - MySQL / MariaDB via MySQLi
 - Sessões PHP nativas
 - Arquitetura em camadas: `public` → `actions` → `app` → `repository`
 
 ### Banco de Dados
-
 - Script unificado: `sql/doitly_unified.sql`
 - Stored procedures para conclusão de hábitos e estatísticas
 - Views para consultas agregadas
@@ -66,21 +63,18 @@ O sistema conta com um fluxo completo e funcional: autenticação segura, dashbo
 ## Funcionalidades
 
 ### Autenticação e Conta
-
 - Cadastro com validações server-side
 - Login com proteção CSRF e rate limit de tentativas
 - Sessão autenticada e logout seguro
 - Atualização de perfil: e-mail, avatar e senha
 
 ### Dashboard
-
 - Resumo diário: hábitos ativos, concluídos, taxa de conclusão e streak
 - Gráfico de progresso semanal
 - Lista de hábitos do dia com marcação direta
 - Recomendações adaptativas baseadas no comportamento do usuário
 
 ### Gerenciamento de Hábitos
-
 - CRUD completo de hábitos
 - Frequências: `daily`, `weekly` e `custom`
 - Seleção de dias da semana por hábito
@@ -89,7 +83,6 @@ O sistema conta com um fluxo completo e funcional: autenticação segura, dashbo
 - Filtros por busca, categoria e horário
 
 ### Histórico e Gamificação
-
 - Métricas gerais de desempenho histórico
 - Gráficos mensais e por categoria
 - Hub de conquistas com progresso, raridade e XP
@@ -97,12 +90,10 @@ O sistema conta com um fluxo completo e funcional: autenticação segura, dashbo
 - Histórico recente de atividade
 
 ### Configurações e Exportação
-
 - Personalização de tema (cor primária, secundária e escala de texto)
 - Exportação do resumo do usuário em CSV
 
 ### Landing Page
-
 - Página pública de apresentação do produto
 - Seções de benefícios, recursos, FAQ e CTA
 - Layout responsivo com animações
@@ -180,7 +171,7 @@ mysql -u root -p < sql/doitly_unified.sql
 A conexão usa variáveis de ambiente com fallback automático. Configure conforme necessário:
 
 | Variável  | Padrão      |
-| --------- | ----------- |
+|-----------|-------------|
 | `DB_HOST` | `localhost` |
 | `DB_USER` | `root`      |
 | `DB_PASS` | _(vazio)_   |
@@ -201,21 +192,21 @@ http://localhost/ProjetoFullstack/public/
 
 ## Endpoints
 
-| Arquivo                               | Descrição                     |
-| ------------------------------------- | ----------------------------- |
-| `actions/login_action.php`            | Autenticação de usuário       |
-| `actions/register_action.php`         | Cadastro de novo usuário      |
-| `actions/logout_action.php`           | Encerramento de sessão        |
-| `actions/habit_create_action.php`     | Criação de hábito             |
-| `actions/habit_update_action.php`     | Edição de hábito              |
-| `actions/habit_delete_action.php`     | Exclusão de hábito            |
-| `actions/habit_mark_action.php`       | Marcar hábito como concluído  |
-| `actions/habit_archive_action.php`    | Arquivar/restaurar hábito     |
-| `actions/api_get_habits.php`          | Listagem de hábitos (API)     |
-| `actions/api_get_stats.php`           | Estatísticas do usuário (API) |
-| `actions/update_profile_action.php`   | Atualização de perfil         |
-| `actions/reset_appearance_action.php` | Resetar aparência             |
-| `actions/export_user_data_csv.php`    | Exportar dados em CSV         |
+| Arquivo | Descrição |
+|---|---|
+| `actions/login_action.php` | Autenticação de usuário |
+| `actions/register_action.php` | Cadastro de novo usuário |
+| `actions/logout_action.php` | Encerramento de sessão |
+| `actions/habit_create_action.php` | Criação de hábito |
+| `actions/habit_update_action.php` | Edição de hábito |
+| `actions/habit_delete_action.php` | Exclusão de hábito |
+| `actions/habit_mark_action.php` | Marcar hábito como concluído |
+| `actions/habit_archive_action.php` | Arquivar/restaurar hábito |
+| `actions/api_get_habits.php` | Listagem de hábitos (API) |
+| `actions/api_get_stats.php` | Estatísticas do usuário (API) |
+| `actions/update_profile_action.php` | Atualização de perfil |
+| `actions/reset_appearance_action.php` | Resetar aparência |
+| `actions/export_user_data_csv.php` | Exportar dados em CSV |
 
 ---
 
@@ -223,15 +214,15 @@ http://localhost/ProjetoFullstack/public/
 
 Melhorias planejadas com base no estado atual do projeto:
 
-| #   | Funcionalidade                                             | Status      |
-| --- | ---------------------------------------------------------- | ----------- |
-| 1   | Wizard de boas-vindas (onboarding) no primeiro login       | 🔲 Pendente |
-| 2   | Notificações in-app com toasts modernos                    | 🔲 Pendente |
-| 3   | Indicador visual de força de senha no cadastro             | 🔲 Pendente |
-| 4   | Fluxo real de confirmação de e-mail                        | 🔲 Pendente |
-| 5   | Micro-animação ao concluir hábito (confetti/check animado) | 🔲 Pendente |
-| 6   | Página dedicada de conquistas (`achievements.php`)         | 🔲 Pendente |
-| 7   | Favoritos e lembretes avançados para hábitos prioritários  | 🔲 Pendente |
+| # | Funcionalidade | Status |
+|---|---|---|
+| 1 | Wizard de boas-vindas (onboarding) no primeiro login | 🔲 Pendente |
+| 2 | Notificações in-app com toasts modernos | 🔲 Pendente |
+| 3 | Indicador visual de força de senha no cadastro | 🔲 Pendente |
+| 4 | Fluxo real de confirmação de e-mail | 🔲 Pendente |
+| 5 | Micro-animação ao concluir hábito (confetti/check animado) | 🔲 Pendente |
+| 6 | Página dedicada de conquistas (`achievements.php`) | 🔲 Pendente |
+| 7 | Favoritos e lembretes avançados para hábitos prioritários | 🔲 Pendente |
 
 > O campo `email_verified` já existe no banco de dados, aguardando implementação do fluxo.
 
@@ -244,8 +235,8 @@ Melhorias planejadas com base no estado atual do projeto:
 Desenvolvido com dedicação por:
 
 | [<img src="https://avatars.githubusercontent.com/u/200134059?v=4" width=100><br>**Ismael Gomes (Rex)**](https://github.com/rex23js) | [<img src="https://avatars.githubusercontent.com/u/202681712?v=4" width=100><br>**Guilherme de Deus**](https://github.com/dedeusgui) |
-| :---------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------: |
-|         [![GitHub](https://img.shields.io/badge/GitHub-rex23js-181717?style=flat&logo=github)](https://github.com/rex23js)          |        [![GitHub](https://img.shields.io/badge/GitHub-dedeusgui-181717?style=flat&logo=github)](https://github.com/dedeusgui)        |
+|:---:|:---:|
+| [![GitHub](https://img.shields.io/badge/GitHub-rex23js-181717?style=flat&logo=github)](https://github.com/rex23js) | [![GitHub](https://img.shields.io/badge/GitHub-dedeusgui-181717?style=flat&logo=github)](https://github.com/dedeusgui) |
 
 </div>
 
