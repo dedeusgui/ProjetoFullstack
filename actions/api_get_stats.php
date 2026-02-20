@@ -99,8 +99,9 @@ function buildAdaptiveRecommendation(mysqli $conn, int $userId): array
 
 function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashboard'): array
 {
+    $userTodayDate = getUserTodayDate($conn, $userId);
     $totalHabits = getTotalHabits($conn, $userId);
-    $completedToday = getCompletedToday($conn, $userId);
+    $completedToday = getCompletedToday($conn, $userId, $userTodayDate);
     $completionRate = getCompletionRate($conn, $userId);
     $completionTrend = getCompletionTrend($conn, $userId, 7);
     $overallCompletion = getCompletionWindowSummary($conn, $userId);
@@ -127,7 +128,7 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
                 'goal_unit' => $habit['goal_unit'] ?? '',
                 'completed' => (bool) ($habit['completed_today'] ?? false)
             ];
-        }, getTodayHabits($conn, $userId, getUserTodayDate($conn, $userId))),
+        }, getTodayHabits($conn, $userId, $userTodayDate)),
         'weekly_data' => getMonthlyData($conn, $userId, 7),
         'adaptive_recommendation' => buildAdaptiveRecommendation($conn, $userId)
     ];

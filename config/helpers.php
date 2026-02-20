@@ -265,16 +265,16 @@ function getArchivedHabitsCount($conn, $userId) {
 }
 
 // Hábitos concluídos hoje
-function getCompletedToday($conn, $userId) {
+function getCompletedToday($conn, $userId, ?string $date = null) {
     $stmt = $conn->prepare("
         SELECT COUNT(DISTINCT hc.habit_id) as total
         FROM habit_completions hc
         INNER JOIN habits h ON hc.habit_id = h.id
-        WHERE hc.user_id = ? 
+        WHERE hc.user_id = ?
         AND hc.completion_date = ?
         AND h.is_active = 1
     ");
-    $today = getAppToday();
+    $today = $date ?? getAppToday();
     $stmt->bind_param("is", $userId, $today);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -323,26 +323,39 @@ function getCompletionSummaryByRange($conn, $userId, string $startDate, string $
 
     $daysAnalyzed = (int) max(0, (strtotime($endDate) - strtotime($startDate)) / 86400) + 1;
 
-    $scheduledStmt = $conn->prepare("
-        SELECT COALESCE(SUM(
-            GREATEST(
-                0,
-                DATEDIFF(
-                    LEAST(?, COALESCE(DATE_SUB(h.archived_at, INTERVAL 1 DAY), ?)),
-                    GREATEST(?, DATE(h.created_at))
-                ) + 1
-            )
-        ), 0) AS scheduled
-        FROM habits h
-        WHERE h.user_id = ?
-          AND h.is_active = 1
-          AND DATE(h.created_at) <= ?
-          AND (h.archived_at IS NULL OR DATE(h.archived_at) > ?)
+    // Busca hábitos com dados completos de frequência para calcular scheduled corretamente
+    $habitStmt = $conn->prepare("
+        SELECT id, frequency, target_days, start_date, end_date, created_at, archived_at
+        FROM habits
+        WHERE user_id = ?
+          AND is_active = 1
+          AND DATE(created_at) <= ?
+          AND (archived_at IS NULL OR DATE(archived_at) > ?)
     ");
-    $scheduledStmt->bind_param('sssiss', $endDate, $endDate, $startDate, $userId, $endDate, $startDate);
-    $scheduledStmt->execute();
-    $scheduledRow = $scheduledStmt->get_result()->fetch_assoc() ?: [];
-    $scheduled = (int) ($scheduledRow['scheduled'] ?? 0);
+    $habitStmt->bind_param('iss', $userId, $endDate, $startDate);
+    $habitStmt->execute();
+    $habits = $habitStmt->get_result()->fetch_all(MYSQLI_ASSOC);
+
+    $scheduled = 0;
+    if (!empty($habits)) {
+        $current = new DateTime($startDate);
+        $end = new DateTime($endDate);
+        while ($current <= $end) {
+            $dateStr = $current->format('Y-m-d');
+            foreach ($habits as $habit) {
+                $habitStart = max($startDate, date('Y-m-d', strtotime($habit['created_at'])));
+                $archivedDate = !empty($habit['archived_at'])
+                    ? date('Y-m-d', strtotime($habit['archived_at'] . ' -1 day'))
+                    : $endDate;
+                $habitEnd = min($endDate, $archivedDate);
+
+                if ($dateStr >= $habitStart && $dateStr <= $habitEnd && isHabitScheduledForDate($habit, $dateStr)) {
+                    $scheduled++;
+                }
+            }
+            $current->modify('+1 day');
+        }
+    }
 
     $completedStmt = $conn->prepare("
         SELECT COUNT(DISTINCT CONCAT(hc.habit_id, '|', hc.completion_date)) AS completed
