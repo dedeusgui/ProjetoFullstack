@@ -238,7 +238,7 @@ Com base no código atual:
 
 <div align="center">
 
-## 👨‍💻 Autores
+## Autores
 
 Este projeto foi desenvolvido com dedicação por:
 
