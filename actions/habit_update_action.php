@@ -47,7 +47,7 @@ $updateStmt = $conn->prepare("UPDATE habits SET
     WHERE id = ? AND user_id = ?");
 
 $updateStmt->bind_param(
-    'isssssssssisii',
+    'issssssssisii',
     $categoryId,
     $data['title'],
     $data['description'],
