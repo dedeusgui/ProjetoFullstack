@@ -56,8 +56,8 @@ $htmlInlineStyle = sprintf(
     />
 
     <!-- Doitly Custom CSS -->
-    <link rel="stylesheet" href="assets/css/style.css" />
-    <link rel="stylesheet" href="assets/css/landing-sections.css" />
+    <link rel="stylesheet" href="assets/css/style.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/style.css'); ?>" />
+    <link rel="stylesheet" href="assets/css/landing-sections.css?v=<?php echo filemtime(__DIR__ . '/../assets/css/landing-sections.css'); ?>" />
     
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
