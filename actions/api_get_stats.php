@@ -58,7 +58,7 @@ function saveRecommendationSnapshot(mysqli $conn, int $userId, array $scoreData,
     $stmt->execute();
 }
 
-function buildAdaptiveRecommendation(mysqli $conn, int $userId): array
+function buildAdaptiveRecommendation(mysqli $conn, int $userId, ?string $referenceDate = null): array
 {
     $latest = getLatestRecommendationSnapshot($conn, $userId);
 
@@ -78,7 +78,7 @@ function buildAdaptiveRecommendation(mysqli $conn, int $userId): array
         }
     }
 
-    $behaviorData = BehaviorAnalyzer::analyze($conn, $userId);
+    $behaviorData = BehaviorAnalyzer::analyze($conn, $userId, $referenceDate);
     $trendData = TrendAnalyzer::detect($behaviorData);
     $scoreData = ScoreEngine::calculate($behaviorData, $trendData);
     $recommendation = RecommendationEngine::generate($scoreData, $trendData, $behaviorData);
@@ -135,7 +135,7 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
             ];
         }, $todayHabitsRaw),
         'weekly_data' => getMonthlyData($conn, $userId, 7),
-        'adaptive_recommendation' => buildAdaptiveRecommendation($conn, $userId)
+        'adaptive_recommendation' => buildAdaptiveRecommendation($conn, $userId, $userTodayDate)
     ];
 
     if ($view === 'history') {
@@ -160,7 +160,7 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
             'category_stats' => getCategoryStats($conn, $userId),
             'recent_history' => getRecentHistory($conn, $userId, 10, $userCreatedAt),
             'achievements' => $achievements,
-            'adaptive_recommendation' => buildAdaptiveRecommendation($conn, $userId)
+            'adaptive_recommendation' => buildAdaptiveRecommendation($conn, $userId, $userTodayDate)
         ];
 
         return [

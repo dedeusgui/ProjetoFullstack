@@ -2,9 +2,9 @@
 
 class BehaviorAnalyzer
 {
-    public static function analyze(mysqli $conn, int $userId): array
+    public static function analyze(mysqli $conn, int $userId, ?string $referenceDate = null): array
     {
-        $today = new DateTimeImmutable('today');
+        $today = self::resolveReferenceDate($referenceDate);
         $start7 = $today->sub(new DateInterval('P6D'));
         $start30 = $today->sub(new DateInterval('P29D'));
 
@@ -16,7 +16,7 @@ class BehaviorAnalyzer
         $period7 = self::calculatePeriodMetrics($habitRows, $completionsByDate, $start7, $today);
         $period30 = self::calculatePeriodMetrics($habitRows, $completionsByDate, $start30, $today);
 
-        $oldestHabitDate = self::getOldestHabitDate($conn, $userId);
+        $oldestHabitDate = self::getOldestHabitDate($conn, $userId, $today);
         $allTimeExpected = self::calculateExpectedCompletions($habitRows, $oldestHabitDate, $today);
         $allTimeRate = $allTimeExpected > 0
             ? round(($totalCompletionsAllTime / $allTimeExpected) * 100, 2)
@@ -228,7 +228,19 @@ class BehaviorAnalyzer
         return (int) ($row['streak'] ?? 0);
     }
 
-    private static function getOldestHabitDate(mysqli $conn, int $userId): DateTimeImmutable
+    private static function resolveReferenceDate(?string $referenceDate): DateTimeImmutable
+    {
+        if (!empty($referenceDate)) {
+            $parsed = DateTimeImmutable::createFromFormat('Y-m-d', $referenceDate);
+            if ($parsed instanceof DateTimeImmutable) {
+                return $parsed;
+            }
+        }
+
+        return new DateTimeImmutable('today');
+    }
+
+    private static function getOldestHabitDate(mysqli $conn, int $userId, DateTimeImmutable $fallback): DateTimeImmutable
     {
         $stmt = $conn->prepare('SELECT MIN(start_date) AS oldest FROM habits WHERE user_id = ?');
         $stmt->bind_param('i', $userId);
@@ -240,6 +252,6 @@ class BehaviorAnalyzer
             return new DateTimeImmutable($row['oldest']);
         }
 
-        return new DateTimeImmutable('today');
+        return $fallback;
     }
 }

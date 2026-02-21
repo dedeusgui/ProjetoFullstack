@@ -15,7 +15,7 @@ actionRequireCsrf('habits.php');
 
 $userId = (int) getUserId();
 $habitId = (int) ($_POST['habit_id'] ?? $_POST['id'] ?? 0);
-$completionDate = $_POST['completion_date'] ?? date('Y-m-d');
+$completionDate = $_POST['completion_date'] ?? getUserTodayDate($conn, $userId);
 
 if ($habitId <= 0) {
     $_SESSION['error_message'] = 'Hábito inválido.';

@@ -172,7 +172,7 @@ function getUserHabits($conn, $userId) {
     ";
     
     $stmt = $conn->prepare($sql);
-    $today = getAppToday();
+    $today = getUserTodayDate($conn, (int) $userId);
     $stmt->bind_param("si", $today, $userId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -204,7 +204,7 @@ function getArchivedHabits($conn, $userId) {
     ";
 
     $stmt = $conn->prepare($sql);
-    $today = getAppToday();
+    $today = getUserTodayDate($conn, (int) $userId);
     $stmt->bind_param("si", $today, $userId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -236,7 +236,7 @@ function getTodayHabits($conn, $userId, ?string $targetDate = null) {
     ";
     
     $stmt = $conn->prepare($sql);
-    $today = $targetDate ?? getAppToday();
+    $today = $targetDate ?? getUserTodayDate($conn, (int) $userId);
     $stmt->bind_param("si", $today, $userId);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -280,7 +280,7 @@ function getCompletedToday($conn, $userId, ?string $date = null) {
         AND hc.completion_date = ?
         AND h.is_active = 1
     ");
-    $today = $date ?? getAppToday();
+    $today = $date ?? getUserTodayDate($conn, (int) $userId);
     $stmt->bind_param("is", $userId, $today);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -478,7 +478,8 @@ function getCurrentStreak($conn, $userId) {
     }
     
     $streak = 0;
-    $checkDate = new DateTime();
+    $today = getUserTodayDate($conn, (int) $userId);
+    $checkDate = new DateTime($today);
     
     foreach ($dates as $dateStr) {
         $completionDate = new DateTime($dateStr);
@@ -526,17 +527,21 @@ function getTotalCompletions($conn, $userId) {
 
 // Dados do gráfico mensal
 function getMonthlyData($conn, $userId, $days = 30) {
+    $days = max(1, (int) $days);
+    $today = getUserTodayDate($conn, (int) $userId);
+    $startDate = date('Y-m-d', strtotime($today . ' -' . ($days - 1) . ' days'));
+
     $stmt = $conn->prepare("
         SELECT 
             DATE(completion_date) as date,
             COUNT(*) as completed
         FROM habit_completions
         WHERE user_id = ? 
-        AND completion_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+        AND completion_date BETWEEN ? AND ?
         GROUP BY DATE(completion_date)
         ORDER BY date ASC
     ");
-    $stmt->bind_param("ii", $userId, $days);
+    $stmt->bind_param("iss", $userId, $startDate, $today);
     $stmt->execute();
     $result = $stmt->get_result();
     
@@ -555,7 +560,7 @@ function getMonthlyData($conn, $userId, $days = 30) {
     $totalHabits = getTotalHabits($conn, $userId);
     
     for ($i = $days - 1; $i >= 0; $i--) {
-        $date = date('Y-m-d', strtotime("-$i days"));
+        $date = date('Y-m-d', strtotime($today . " -$i days"));
         $day = date('j', strtotime($date));
         
         $monthlyData['labels'][] = $day;
@@ -741,8 +746,12 @@ function mapAchievementIconToBootstrap(string $icon): string {
 
 // Buscar total de hábitos concluídos por data
 function getDailyCompletionsMap($conn, $userId, $days = 365) {
-    $stmt = $conn->prepare("\n        SELECT completion_date, COUNT(DISTINCT habit_id) as completed\n        FROM habit_completions\n        WHERE user_id = ?\n          AND completion_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)\n        GROUP BY completion_date\n    ");
-    $stmt->bind_param("ii", $userId, $days);
+    $days = max(1, (int) $days);
+    $today = getUserTodayDate($conn, (int) $userId);
+    $startDate = date('Y-m-d', strtotime($today . ' -' . ($days - 1) . ' days'));
+
+    $stmt = $conn->prepare("\n        SELECT completion_date, COUNT(DISTINCT habit_id) as completed\n        FROM habit_completions\n        WHERE user_id = ?\n          AND completion_date BETWEEN ? AND ?\n        GROUP BY completion_date\n    ");
+    $stmt->bind_param("iss", $userId, $startDate, $today);
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -756,6 +765,7 @@ function getDailyCompletionsMap($conn, $userId, $days = 365) {
 
 // Maior sequência de dias com todos os hábitos ativos concluídos
 function getPerfectDaysStreak($conn, $userId, $days = 365) {
+    $days = max(1, (int) $days);
     $totalHabits = getTotalHabits($conn, $userId);
     if ($totalHabits <= 0) {
         return 0;
@@ -766,8 +776,9 @@ function getPerfectDaysStreak($conn, $userId, $days = 365) {
     $maxStreak = 0;
     $currentStreak = 0;
 
+    $today = getUserTodayDate($conn, (int) $userId);
     for ($i = $days - 1; $i >= 0; $i--) {
-        $date = date('Y-m-d', strtotime("-$i days"));
+        $date = date('Y-m-d', strtotime($today . " -$i days"));
         $completed = $dailyMap[$date] ?? 0;
 
         if ($completed >= $totalHabits) {
