@@ -29,6 +29,11 @@ function getAppToday(): string {
 
 
 function getUserTodayDate(mysqli $conn, int $userId): string {
+    static $cache = [];
+    if (isset($cache[$userId])) {
+        return $cache[$userId];
+    }
+
     $timezone = 'America/Sao_Paulo';
 
     $stmt = $conn->prepare("SELECT timezone FROM users WHERE id = ? LIMIT 1");
@@ -47,7 +52,8 @@ function getUserTodayDate(mysqli $conn, int $userId): string {
         $now = new DateTime('now', new DateTimeZone('America/Sao_Paulo'));
     }
 
-    return $now->format('Y-m-d');
+    $cache[$userId] = $now->format('Y-m-d');
+    return $cache[$userId];
 }
 
 function normalizeTargetDays(?string $targetDays): array {
@@ -289,7 +295,7 @@ function getCompletionRate($conn, $userId) {
 }
 
 function getCompletionWindowSummary($conn, $userId, int $days = 0): array {
-    $today = getAppToday();
+    $today = getUserTodayDate($conn, (int) $userId);
     $startDate = getCompletionWindowStartDate($conn, $userId, $days, $today);
 
     if ($startDate === null || $startDate > $today) {
@@ -395,7 +401,7 @@ function getCompletionSummaryByRange($conn, $userId, string $startDate, string $
 function getCompletionTrend($conn, $userId, int $windowDays = 7): array {
     $period = max(1, $windowDays);
 
-    $today = getAppToday();
+    $today = getUserTodayDate($conn, (int) $userId);
     $currentEnd = $today;
     $currentStart = getCompletionWindowStartDate($conn, $userId, $period, $currentEnd);
 
@@ -604,19 +610,19 @@ function getUserCreatedAt($conn, $userId): ?string {
 // Histórico recente
 function getRecentHistory($conn, $userId, $days = 10, ?string $userCreatedAt = null) {
     $maxDays = max(1, (int) $days);
+    $today = getUserTodayDate($conn, (int) $userId);
 
     if (!empty($userCreatedAt)) {
         $createdDate = date('Y-m-d', strtotime($userCreatedAt));
-        $todayDate = date('Y-m-d');
-        $diffSeconds = strtotime($todayDate) - strtotime($createdDate);
+        $diffSeconds = strtotime($today) - strtotime($createdDate);
         if ($diffSeconds >= 0) {
             $daysSinceCreation = (int) floor($diffSeconds / 86400) + 1;
             $maxDays = min($maxDays, max(1, $daysSinceCreation));
         }
     }
 
-    $startDate = date('Y-m-d', strtotime('-' . ($maxDays - 1) . ' days'));
-    $endDate = date('Y-m-d');
+    $startDate = date('Y-m-d', strtotime($today . ' -' . ($maxDays - 1) . ' days'));
+    $endDate = $today;
 
     $stmt = $conn->prepare("
         WITH RECURSIVE date_range AS (
