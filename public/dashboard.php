@@ -273,12 +273,12 @@ include_once "includes/header.php";
 
             <div class="stat-card stat-warning">
                 <div class="stat-header">
-                    <span class="stat-label">Taxa de Sucesso</span>
+                    <span class="stat-label">Taxa de Sucesso Hoje</span>
                     <div class="stat-icon">
                         <i class="bi bi-trophy"></i>
                     </div>
                 </div>
-                <h2 class="stat-value"><?php echo (int) ($stats['completion_rate'] ?? 0); ?>%</h2>
+                <h2 class="stat-value"><?php echo (int) ($stats['today_rate'] ?? 0); ?>%</h2>
                 <div class="stat-change <?php echo $completionChangeClass; ?>">
                     <i class="bi <?php echo $completionChangeIcon; ?>"></i>
                     <span><?php echo htmlspecialchars($completionChangeLabel); ?></span>

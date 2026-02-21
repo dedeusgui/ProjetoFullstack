@@ -107,11 +107,16 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
     $overallCompletion = getCompletionWindowSummary($conn, $userId);
     $currentStreak = getCurrentStreak($conn, $userId);
 
+    $todayHabitsRaw = getTodayHabits($conn, $userId, $userTodayDate);
+    $scheduledToday = count($todayHabitsRaw);
+    $todayRate = $scheduledToday > 0 ? (int) round($completedToday / $scheduledToday * 100) : 0;
+
     $dashboardData = [
         'stats' => [
             'total_habits' => $totalHabits,
             'completed_today' => $completedToday,
             'completion_rate' => $completionRate,
+            'today_rate' => $todayRate,
             'completion_change' => $completionTrend,
             'active_days' => getActiveDays($conn, $userId),
             'tracked_days' => (int) ($overallCompletion['days_analyzed'] ?? 0),
@@ -128,7 +133,7 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
                 'goal_unit' => $habit['goal_unit'] ?? '',
                 'completed' => (bool) ($habit['completed_today'] ?? false)
             ];
-        }, getTodayHabits($conn, $userId, $userTodayDate)),
+        }, $todayHabitsRaw),
         'weekly_data' => getMonthlyData($conn, $userId, 7),
         'adaptive_recommendation' => buildAdaptiveRecommendation($conn, $userId)
     ];
