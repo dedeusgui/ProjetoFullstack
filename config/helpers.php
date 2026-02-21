@@ -309,6 +309,16 @@ function getCompletionWindowStartDate($conn, $userId, int $days, string $referen
     $maxDays = max(0, $days);
 
     if ($maxDays === 0) {
+        // Usar a data da primeira conclusão para não penalizar dias
+        // anteriores ao usuário começar a usar a plataforma
+        $stmt = $conn->prepare("SELECT MIN(completion_date) FROM habit_completions WHERE user_id = ?");
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_row();
+        $firstCompletion = $row[0] ?? null;
+        if ($firstCompletion !== null && $firstCompletion > $createdDate) {
+            return $firstCompletion;
+        }
         return $createdDate;
     }
 
