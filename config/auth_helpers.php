@@ -1,26 +1,32 @@
 <?php
-// Iniciar sessão se ainda não foi iniciada
+
+// Start session if it is not active yet.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Verificar se usuário está logado
-function isLoggedIn() {
+function isUserLoggedIn(): bool
+{
     return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
 }
 
-// Obter ID do usuário logado
-function getUserId() {
-    return $_SESSION['user_id'] ?? null;
+function getAuthenticatedUserId(): ?int
+{
+    $userId = $_SESSION['user_id'] ?? null;
+    return $userId !== null ? (int) $userId : null;
 }
 
-// Obter dados do usuário logado
-function getCurrentUser($conn) {
-    if (!isLoggedIn()) {
+function getAuthenticatedUserRecord(mysqli $conn): ?array
+{
+    if (!isUserLoggedIn()) {
         return null;
     }
-    
-    $userId = getUserId();
+
+    $userId = getAuthenticatedUserId();
+    if ($userId === null) {
+        return null;
+    }
+
     static $hasLevelColumn = null;
     static $hasXpColumn = null;
 
@@ -52,15 +58,14 @@ function getCurrentUser($conn) {
         WHERE u.id = ? AND u.is_active = 1
         LIMIT 1
     ");
-    $stmt->bind_param("i", $userId);
+    $stmt->bind_param('i', $userId);
     $stmt->execute();
-    $result = $stmt->get_result();
-    
-    return $result->fetch_assoc();
+
+    return $stmt->get_result()->fetch_assoc() ?: null;
 }
 
-// Fazer login
-function login($userId, $userName, $userEmail) {
+function signInUser(int $userId, string $userName, string $userEmail): void
+{
     session_regenerate_id(true);
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $userName;
@@ -68,32 +73,29 @@ function login($userId, $userName, $userEmail) {
     $_SESSION['logged_in_at'] = time();
 }
 
-// Fazer logout
-function logout() {
+function signOutUser(): void
+{
     session_unset();
     session_destroy();
     header('Location: login.php');
     exit;
 }
 
-// Proteger página (redirecionar se não logado)
-function requireLogin() {
-    if (!isLoggedIn()) {
+function requireAuthenticatedUser(): void
+{
+    if (!isUserLoggedIn()) {
         header('Location: login.php');
         exit;
     }
 }
 
-// Gerar iniciais do nome
-function getInitials($name) {
+function getUserInitials(string $name): string
+{
     $parts = explode(' ', $name);
-    $initials = '';
-    
+
     if (count($parts) >= 2) {
-        $initials = strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));
-    } else {
-        $initials = strtoupper(substr($name, 0, 2));
+        return strtoupper(substr($parts[0], 0, 1) . substr($parts[count($parts) - 1], 0, 1));
     }
-    
-    return $initials;
+
+    return strtoupper(substr($name, 0, 2));
 }

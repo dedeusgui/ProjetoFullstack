@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Recommendation;
+
 class RecommendationEngine
 {
     public static function generate(array $scoreData, array $trendData, array $behaviorData): array

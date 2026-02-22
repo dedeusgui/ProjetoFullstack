@@ -1,7 +1,8 @@
 <?php
 require_once '../config/bootstrap.php';
 bootApp();
-require_once '../app/auth/AuthService.php';
+
+use App\Auth\AuthService;
 
 actionRequirePost('register.php');
 actionRequireCsrf('register.php');
@@ -37,6 +38,6 @@ if (!$user) {
     actionFlashAndRedirect('error_message', 'Erro ao criar conta. Tente novamente.', '../public/register.php');
 }
 
-login($user['id'], $user['name'], $user['email']);
+signInUser($user['id'], $user['name'], $user['email']);
 
 actionRedirect('../public/dashboard.php');

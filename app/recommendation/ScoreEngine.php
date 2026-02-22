@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Recommendation;
+
 class ScoreEngine
 {
     public static function calculate(array $behaviorData, array $trendData): array

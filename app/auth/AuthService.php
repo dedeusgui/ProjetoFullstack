@@ -1,12 +1,14 @@
 <?php
 
-require_once __DIR__ . '/../repository/UserRepository.php';
+namespace App\Auth;
+
+use App\Repository\UserRepository;
 
 class AuthService
 {
     private UserRepository $userRepository;
 
-    public function __construct(mysqli $conn)
+    public function __construct(\mysqli $conn)
     {
         $this->userRepository = new UserRepository($conn);
     }

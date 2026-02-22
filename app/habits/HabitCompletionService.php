@@ -1,10 +1,14 @@
 <?php
 
+namespace App\Habits;
+
+use App\Support\DateFormatter;
+
 class HabitCompletionService
 {
-    private mysqli $conn;
+    private \mysqli $conn;
 
-    public function __construct(mysqli $conn)
+    public function __construct(\mysqli $conn)
     {
         $this->conn = $conn;
     }
@@ -26,7 +30,7 @@ class HabitCompletionService
             return ['success' => false, 'message' => 'Não é possível concluir um hábito arquivado.'];
         }
 
-        if (!isHabitScheduledForDate($habit, $completionDate)) {
+        if (!HabitSchedulePolicy::isScheduledForDate($habit, $completionDate)) {
             return ['success' => false, 'message' => 'Este hábito não está programado para essa data.'];
         }
 
@@ -107,8 +111,8 @@ class HabitCompletionService
         $this->invalidateRecommendationSnapshot($userId);
 
         $nextSearchDate = date('Y-m-d', strtotime($completionDate . ' +1 day'));
-        $nextDueDate = getNextHabitDueDate($habit, $nextSearchDate);
-        $nextDueText = $nextDueDate ? formatDateBr($nextDueDate) : 'sem próxima data';
+        $nextDueDate = HabitSchedulePolicy::getNextDueDate($habit, $nextSearchDate);
+        $nextDueText = $nextDueDate ? DateFormatter::formatBr($nextDueDate) : 'sem próxima data';
 
         return [
             'success' => true,
@@ -120,7 +124,7 @@ class HabitCompletionService
     {
         while ($this->conn->more_results() && $this->conn->next_result()) {
             $result = $this->conn->use_result();
-            if ($result instanceof mysqli_result) {
+            if ($result instanceof \mysqli_result) {
                 $result->free();
             }
         }
@@ -159,7 +163,7 @@ class HabitCompletionService
 
             $this->conn->commit();
             return true;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->conn->rollback();
             return false;
         }
@@ -210,7 +214,7 @@ class HabitCompletionService
 
             $this->conn->commit();
             return true;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->conn->rollback();
             return false;
         }

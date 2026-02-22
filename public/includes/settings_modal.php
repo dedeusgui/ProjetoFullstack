@@ -167,7 +167,7 @@ $textScale = isset($userData['text_scale']) ? (float) $userData['text_scale'] : 
             </div>
 
             <div class="d-flex justify-content-between align-items-center flex-wrap" style="gap: var(--space-sm); margin-top: var(--space-md);">
-                <a href="../actions/export_user_data_csv.php" class="doitly-btn doitly-btn-outline">
+                <a href="../actions/export_user_data_csv_action.php" class="doitly-btn doitly-btn-outline">
                     <i class="bi bi-download"></i>
                     Exportar resumo (CSV)
                 </a>

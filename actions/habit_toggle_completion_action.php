@@ -1,7 +1,8 @@
 <?php
 require_once '../config/bootstrap.php';
 bootApp();
-require_once '../app/habits/HabitCompletionService.php';
+
+use App\Habits\HabitCompletionService;
 
 function redirectBack(): void
 {
@@ -13,7 +14,7 @@ actionRequireLoggedIn();
 actionRequirePost('habits.php');
 actionRequireCsrf('habits.php');
 
-$userId = (int) getUserId();
+$userId = (int) getAuthenticatedUserId();
 $habitId = (int) ($_POST['habit_id'] ?? $_POST['id'] ?? 0);
 $completionDate = $_POST['completion_date'] ?? getUserTodayDate($conn, $userId);
 

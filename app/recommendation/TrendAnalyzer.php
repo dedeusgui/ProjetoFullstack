@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Recommendation;
+
 class TrendAnalyzer
 {
     public static function detect(array $behaviorData): array

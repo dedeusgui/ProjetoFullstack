@@ -126,7 +126,7 @@ public/           → Páginas e interface do usuário
 
 Essa separação garante que as páginas públicas não acessem o banco diretamente, que as regras de negócio fiquem isoladas dos controllers HTTP, e que a troca de implementação de repositório não afete as camadas superiores.
 
-> Documentação detalhada: `ARQUITETURA_SISTEMA.md`
+> Documentação detalhada: `SYSTEM_ARCHITECTURE.md`
 
 ---
 

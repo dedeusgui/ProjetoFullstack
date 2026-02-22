@@ -2,10 +2,12 @@
 require_once '../config/bootstrap.php';
 bootApp();
 
+use App\Achievements\AchievementService;
+
 actionRequireLoggedIn();
 
-$userId = (int) getUserId();
-$userData = getCurrentUser($conn);
+$userId = (int) getAuthenticatedUserId();
+$userData = getAuthenticatedUserRecord($conn);
 
 if (!$userData) {
     actionFlashAndRedirect('error_message', 'Usuário não encontrado para exportação.', '../public/dashboard.php');
@@ -23,7 +25,8 @@ while ($habit = $habitsResult->fetch_assoc()) {
     $habits[] = $habit;
 }
 
-$achievements = getUserAchievements($conn, $userId);
+$achievementService = new AchievementService($conn);
+$achievements = $achievementService->syncUserAchievements($userId);
 $unlockedAchievements = array_values(array_filter($achievements, function ($achievement) {
     return !empty($achievement['unlocked']);
 }));

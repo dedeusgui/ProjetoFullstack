@@ -1,0 +1,13 @@
+{
+  "name": "doitly/projetofullstack",
+  "description": "Projeto de habitos com arquitetura em camadas incremental",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "App\\\\": "app/"
+    },
+    "classmap": [
+      "app/"
+    ]
+  }
+}

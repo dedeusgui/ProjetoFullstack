@@ -13,7 +13,7 @@ function actionRedirectPublic(string $page): void
 
 function actionRequireLoggedIn(): void
 {
-    if (!isLoggedIn()) {
+    if (!isUserLoggedIn()) {
         actionRedirectPublic('login.php');
     }
 }

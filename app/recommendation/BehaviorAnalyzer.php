@@ -1,12 +1,14 @@
 <?php
 
+namespace App\Recommendation;
+
 class BehaviorAnalyzer
 {
-    public static function analyze(mysqli $conn, int $userId, ?string $referenceDate = null): array
+    public static function analyze(\mysqli $conn, int $userId, ?string $referenceDate = null): array
     {
         $today = self::resolveReferenceDate($referenceDate);
-        $start7 = $today->sub(new DateInterval('P6D'));
-        $start30 = $today->sub(new DateInterval('P29D'));
+        $start7 = $today->sub(new \DateInterval('P6D'));
+        $start30 = $today->sub(new \DateInterval('P29D'));
 
         $habitRows = self::getRelevantHabits($conn, $userId, $start30, $today);
         $completionsByDate = self::getCompletionsByDate($conn, $userId, $start30, $today);
@@ -40,7 +42,7 @@ class BehaviorAnalyzer
         ];
     }
 
-    private static function getRelevantHabits(mysqli $conn, int $userId, DateTimeImmutable $start, DateTimeImmutable $end): array
+    private static function getRelevantHabits(\mysqli $conn, int $userId, \DateTimeImmutable $start, \DateTimeImmutable $end): array
     {
         $stmt = $conn->prepare(
             "SELECT id, frequency, target_days, start_date, end_date
@@ -64,7 +66,7 @@ class BehaviorAnalyzer
         return $rows;
     }
 
-    private static function getCompletionsByDate(mysqli $conn, int $userId, DateTimeImmutable $start, DateTimeImmutable $end): array
+    private static function getCompletionsByDate(\mysqli $conn, int $userId, \DateTimeImmutable $start, \DateTimeImmutable $end): array
     {
         $stmt = $conn->prepare(
             "SELECT DATE(completion_date) AS completion_date, COUNT(*) AS completed
@@ -89,7 +91,7 @@ class BehaviorAnalyzer
         return $rows;
     }
 
-    private static function calculatePeriodMetrics(array $habitRows, array $completionsByDate, DateTimeImmutable $start, DateTimeImmutable $end): array
+    private static function calculatePeriodMetrics(array $habitRows, array $completionsByDate, \DateTimeImmutable $start, \DateTimeImmutable $end): array
     {
         $expected = self::calculateExpectedCompletions($habitRows, $start, $end);
         $completed = 0;
@@ -98,7 +100,7 @@ class BehaviorAnalyzer
         while ($cursor <= $end) {
             $key = $cursor->format('Y-m-d');
             $completed += $completionsByDate[$key] ?? 0;
-            $cursor = $cursor->add(new DateInterval('P1D'));
+            $cursor = $cursor->add(new \DateInterval('P1D'));
         }
 
         $days = $start->diff($end)->days + 1;
@@ -112,13 +114,13 @@ class BehaviorAnalyzer
         ];
     }
 
-    private static function calculateExpectedCompletions(array $habitRows, DateTimeImmutable $start, DateTimeImmutable $end): int
+    private static function calculateExpectedCompletions(array $habitRows, \DateTimeImmutable $start, \DateTimeImmutable $end): int
     {
         $expected = 0;
 
         foreach ($habitRows as $habit) {
-            $habitStart = !empty($habit['start_date']) ? new DateTimeImmutable($habit['start_date']) : $start;
-            $habitEnd = !empty($habit['end_date']) ? new DateTimeImmutable($habit['end_date']) : $end;
+            $habitStart = !empty($habit['start_date']) ? new \DateTimeImmutable($habit['start_date']) : $start;
+            $habitEnd = !empty($habit['end_date']) ? new \DateTimeImmutable($habit['end_date']) : $end;
 
             $effectiveStart = $habitStart > $start ? $habitStart : $start;
             $effectiveEnd = $habitEnd < $end ? $habitEnd : $end;
@@ -135,7 +137,7 @@ class BehaviorAnalyzer
                 if (self::isExpectedDay($frequency, $targetDays, $cursor)) {
                     $expected++;
                 }
-                $cursor = $cursor->add(new DateInterval('P1D'));
+                $cursor = $cursor->add(new \DateInterval('P1D'));
             }
         }
 
@@ -156,7 +158,7 @@ class BehaviorAnalyzer
         return array_map('intval', $decoded);
     }
 
-    private static function isExpectedDay(string $frequency, array $targetDays, DateTimeImmutable $day): bool
+    private static function isExpectedDay(string $frequency, array $targetDays, \DateTimeImmutable $day): bool
     {
         if ($frequency === 'daily') {
             return true;
@@ -174,12 +176,12 @@ class BehaviorAnalyzer
         return true;
     }
 
-    private static function calculateConsecutiveFailures(array $completionsByDate, DateTimeImmutable $today, int $maxWindow): int
+    private static function calculateConsecutiveFailures(array $completionsByDate, \DateTimeImmutable $today, int $maxWindow): int
     {
         $failures = 0;
 
         for ($i = 0; $i < $maxWindow; $i++) {
-            $date = $today->sub(new DateInterval('P' . $i . 'D'))->format('Y-m-d');
+            $date = $today->sub(new \DateInterval('P' . $i . 'D'))->format('Y-m-d');
             if (($completionsByDate[$date] ?? 0) > 0) {
                 break;
             }
@@ -189,7 +191,7 @@ class BehaviorAnalyzer
         return $failures;
     }
 
-    private static function buildDailySeries(array $completionsByDate, DateTimeImmutable $start, DateTimeImmutable $end): array
+    private static function buildDailySeries(array $completionsByDate, \DateTimeImmutable $start, \DateTimeImmutable $end): array
     {
         $series = [];
         $cursor = $start;
@@ -200,13 +202,13 @@ class BehaviorAnalyzer
                 'date' => $key,
                 'completed' => $completionsByDate[$key] ?? 0
             ];
-            $cursor = $cursor->add(new DateInterval('P1D'));
+            $cursor = $cursor->add(new \DateInterval('P1D'));
         }
 
         return $series;
     }
 
-    private static function getTotalCompletions(mysqli $conn, int $userId): int
+    private static function getTotalCompletions(\mysqli $conn, int $userId): int
     {
         $stmt = $conn->prepare('SELECT COUNT(*) AS total FROM habit_completions WHERE user_id = ?');
         $stmt->bind_param('i', $userId);
@@ -217,7 +219,7 @@ class BehaviorAnalyzer
         return (int) ($row['total'] ?? 0);
     }
 
-    private static function getCurrentStreak(mysqli $conn, int $userId): int
+    private static function getCurrentStreak(\mysqli $conn, int $userId): int
     {
         $stmt = $conn->prepare('SELECT COALESCE(MAX(current_streak), 0) AS streak FROM habits WHERE user_id = ?');
         $stmt->bind_param('i', $userId);
@@ -228,19 +230,19 @@ class BehaviorAnalyzer
         return (int) ($row['streak'] ?? 0);
     }
 
-    private static function resolveReferenceDate(?string $referenceDate): DateTimeImmutable
+    private static function resolveReferenceDate(?string $referenceDate): \DateTimeImmutable
     {
         if (!empty($referenceDate)) {
-            $parsed = DateTimeImmutable::createFromFormat('Y-m-d', $referenceDate);
-            if ($parsed instanceof DateTimeImmutable) {
+            $parsed = \DateTimeImmutable::createFromFormat('Y-m-d', $referenceDate);
+            if ($parsed instanceof \DateTimeImmutable) {
                 return $parsed;
             }
         }
 
-        return new DateTimeImmutable('today');
+        return new \DateTimeImmutable('today');
     }
 
-    private static function getOldestHabitDate(mysqli $conn, int $userId, DateTimeImmutable $fallback): DateTimeImmutable
+    private static function getOldestHabitDate(\mysqli $conn, int $userId, \DateTimeImmutable $fallback): \DateTimeImmutable
     {
         $stmt = $conn->prepare('SELECT MIN(start_date) AS oldest FROM habits WHERE user_id = ?');
         $stmt->bind_param('i', $userId);
@@ -249,7 +251,7 @@ class BehaviorAnalyzer
         $row = $result->fetch_assoc();
 
         if (!empty($row['oldest'])) {
-            return new DateTimeImmutable($row['oldest']);
+            return new \DateTimeImmutable($row['oldest']);
         }
 
         return $fallback;

@@ -1,36 +1,35 @@
 <?php
 // Proteger página - requer login
 require_once '../config/bootstrap.php';
+
+use App\Api\Internal\StatsApiPayloadBuilder;
+use App\UserProgress\UserProgressService;
 bootApp();
 
-requireLogin();
+requireAuthenticatedUser();
 
 // Configurações da página
 $showRegisterButton = false;
 $hideLoginButton = true;
 
 // Buscar dados do usuário logado
-$userId = getUserId();
-$userData = getCurrentUser($conn);
+$userId = getAuthenticatedUserId();
+$userData = getAuthenticatedUserRecord($conn);
 
 // Se não encontrou usuário, fazer logout
 if (!$userData) {
-    logout();
+    signOutUser();
 }
 
 // Adicionar iniciais ao userData
-$userData['initials'] = getInitials($userData['name']);
+$userData['initials'] = getUserInitials($userData['name']);
 
-$profileSummary = getUserProgressSummary($conn, (int) $userId);
+$userProgressService = new UserProgressService($conn);
+$profileSummary = $userProgressService->refreshUserProgressSummary((int) $userId);
 $userData['level'] = (int) ($profileSummary['level'] ?? 1);
 
 // Carregar dados centralizados pela API (somente via PHP interno)
-if (!defined('DOITLY_INTERNAL_API_CALL')) {
-    define('DOITLY_INTERNAL_API_CALL', true);
-}
-require_once '../actions/api_get_stats.php';
-
-$dashboardPayload = buildStatsApiResponse($conn, (int) $userId, 'dashboard');
+$dashboardPayload = StatsApiPayloadBuilder::build($conn, (int) $userId, 'dashboard');
 $stats = $dashboardPayload['data']['stats'] ?? [];
 $todayHabits = $dashboardPayload['data']['today_habits'] ?? [];
 $weeklyData = $dashboardPayload['data']['weekly_data'] ?? ['labels' => [], 'completed' => [], 'total' => []];
@@ -129,8 +128,8 @@ if (count($weeklyChartLabels) === 0) {
 $monthSummary = [
     'active_days' => (int) ($stats['active_days'] ?? 0),
     'total_days' => max(1, (int) ($stats['tracked_days'] ?? 0)),
-    'best_streak' => getBestStreak($conn, $userId),
-    'total_completions' => getTotalCompletions($conn, $userId)
+    'best_streak' => (int) ($stats['best_streak'] ?? 0),
+    'total_completions' => (int) ($stats['total_completions'] ?? 0)
 ];
 
 $csrfToken = getCsrfToken();
@@ -311,7 +310,7 @@ include_once "includes/header.php";
                             Progresso Semanal
                         </h3>
                         <div class="card-actions">
-                            <a href="../actions/export_user_data_csv.php" class="doitly-btn doitly-btn-sm doitly-btn-ghost" title="Exportar resumo em CSV">
+                            <a href="../actions/export_user_data_csv_action.php" class="doitly-btn doitly-btn-sm doitly-btn-ghost" title="Exportar resumo em CSV">
                                 <i class="bi bi-download"></i>
                             </a>
                         </div>
@@ -341,7 +340,7 @@ include_once "includes/header.php";
                                 <i class="bi bi-graph-up"></i>
                                 Ver Estatísticas
                             </a>
-                            <a href="../actions/export_user_data_csv.php" class="doitly-btn doitly-btn-outline w-100">
+                            <a href="../actions/export_user_data_csv_action.php" class="doitly-btn doitly-btn-outline w-100">
                                 <i class="bi bi-download"></i>
                                 Exportar Dados
                             </a>
@@ -499,7 +498,7 @@ include_once "includes/header.php";
                                             <i class="bi bi-check-circle-fill"></i> Concluído
                                         </button>
                                     <?php else: ?>
-                                        <form method="POST" action="../actions/habit_mark_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
+                                        <form method="POST" action="../actions/habit_toggle_completion_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
                                             <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                             <input type="hidden" name="completion_date" value="<?php echo $userTodayDate; ?>">
                                             <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">

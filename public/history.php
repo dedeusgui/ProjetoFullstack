@@ -1,33 +1,31 @@
 <?php
 // Proteger página - requer login
 require_once '../config/bootstrap.php';
+
+use App\Api\Internal\StatsApiPayloadBuilder;
+use App\UserProgress\UserProgressService;
 bootApp();
 
-requireLogin();
+requireAuthenticatedUser();
 
 // Configurações da página
 $showRegisterButton = false;
 $hideLoginButton = true;
 
 // Buscar dados do usuário logado
-$userId = getUserId();
-$userData = getCurrentUser($conn);
+$userId = getAuthenticatedUserId();
+$userData = getAuthenticatedUserRecord($conn);
 
 // Se não encontrou usuário, fazer logout
 if (!$userData) {
-    logout();
+    signOutUser();
 }
 
 // Adicionar iniciais ao userData
-$userData['initials'] = getInitials($userData['name']);
+$userData['initials'] = getUserInitials($userData['name']);
 
 // Carregar dados centralizados pela API (somente via PHP interno)
-if (!defined('DOITLY_INTERNAL_API_CALL')) {
-    define('DOITLY_INTERNAL_API_CALL', true);
-}
-require_once '../actions/api_get_stats.php';
-
-$historyPayload = buildStatsApiResponse($conn, (int) $userId, 'history');
+$historyPayload = StatsApiPayloadBuilder::build($conn, (int) $userId, 'history');
 $historyData = $historyPayload['data'] ?? [];
 
 $stats = $historyData['stats'] ?? [];
@@ -68,7 +66,8 @@ foreach ($achievements as $achievement) {
     $groupedAchievements[$category][] = $achievement;
 }
 
-$profileSummary = getUserProgressSummary($conn, (int) $userId, $achievements);
+$userProgressService = new UserProgressService($conn);
+$profileSummary = $userProgressService->refreshUserProgressSummary((int) $userId, $achievements);
 $userData['level'] = (int) ($profileSummary['level'] ?? 1);
 
 $achievementCount = (int) ($profileSummary['achievements_count'] ?? count($achievements));
@@ -178,7 +177,7 @@ include_once "includes/header.php";
                     <h1 class="dashboard-title">Histórico e Estatísticas 📊</h1>
                     <p class="dashboard-subtitle">Acompanhe sua evolução e conquistas</p>
                 </div>
-                <a href="../actions/export_user_data_csv.php" class="doitly-btn doitly-btn-secondary">
+                <a href="../actions/export_user_data_csv_action.php" class="doitly-btn doitly-btn-secondary">
                     <i class="bi bi-download"></i>
                     Exportar Dados
                 </a>

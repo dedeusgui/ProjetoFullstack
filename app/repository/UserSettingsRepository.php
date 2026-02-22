@@ -1,10 +1,12 @@
 <?php
 
+namespace App\Repository;
+
 class UserSettingsRepository
 {
-    private mysqli $conn;
+    private \mysqli $conn;
 
-    public function __construct(mysqli $conn)
+    public function __construct(\mysqli $conn)
     {
         $this->conn = $conn;
     }

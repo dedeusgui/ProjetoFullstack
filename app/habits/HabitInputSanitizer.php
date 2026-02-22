@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Habits;
+
 class HabitInputSanitizer
 {
     public static function fromRequest(array $request): array

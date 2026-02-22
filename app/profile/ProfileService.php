@@ -1,15 +1,17 @@
 <?php
 
-require_once __DIR__ . '/../repository/UserRepository.php';
-require_once __DIR__ . '/../repository/UserSettingsRepository.php';
+namespace App\Profile;
+
+use App\Repository\UserRepository;
+use App\Repository\UserSettingsRepository;
 
 class ProfileService
 {
-    private mysqli $conn;
+    private \mysqli $conn;
     private UserRepository $userRepository;
     private UserSettingsRepository $userSettingsRepository;
 
-    public function __construct(mysqli $conn)
+    public function __construct(\mysqli $conn)
     {
         $this->conn = $conn;
         $this->userRepository = new UserRepository($conn);
@@ -55,11 +57,11 @@ class ProfileService
                 : $this->userRepository->updateProfileWithoutPassword($userId, $email, $avatarUrl);
 
             if (!$updated) {
-                throw new Exception('Falha ao atualizar dados básicos do usuário.');
+                throw new \Exception('Falha ao atualizar dados básicos do usuário.');
             }
 
             if (!$this->userSettingsRepository->upsertAppearance($userId, $theme, $primaryColor, $accentColor, $textScale)) {
-                throw new Exception('Falha ao atualizar preferências visuais do usuário.');
+                throw new \Exception('Falha ao atualizar preferências visuais do usuário.');
             }
 
             $this->conn->commit();
@@ -71,7 +73,7 @@ class ProfileService
                     : 'Configurações atualizadas com sucesso!',
                 'email' => $email
             ];
-        } catch (Throwable $exception) {
+        } catch (\Throwable $exception) {
             $this->conn->rollback();
             return ['success' => false, 'message' => 'Não foi possível salvar as configurações. Tente novamente.'];
         }

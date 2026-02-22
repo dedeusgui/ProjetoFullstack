@@ -1,41 +1,47 @@
 <?php 
 // Proteger página - requer login
 require_once '../config/bootstrap.php';
+
+use App\UserProgress\UserProgressService;
+use App\Habits\HabitQueryService;
+
 bootApp();
 
-requireLogin();
+requireAuthenticatedUser();
 
 // Configurações da página
 $showRegisterButton = false;
 $hideLoginButton = true;
 
 // Buscar dados do usuário logado
-$userId = getUserId();
-$userData = getCurrentUser($conn);
+$userId = getAuthenticatedUserId();
+$userData = getAuthenticatedUserRecord($conn);
 $todayDate = getUserTodayDate($conn, $userId);
 
 // Se não encontrou usuário, fazer logout
 if (!$userData) {
-    logout();
+    signOutUser();
 }
 
 // Adicionar iniciais ao userData
-$userData['initials'] = getInitials($userData['name']);
+$userData['initials'] = getUserInitials($userData['name']);
 
-$profileSummary = getUserProgressSummary($conn, (int) $userId);
+$userProgressService = new UserProgressService($conn);
+$habitQueryService = new HabitQueryService($conn);
+$profileSummary = $userProgressService->refreshUserProgressSummary((int) $userId);
 $userData['level'] = (int) ($profileSummary['level'] ?? 1);
 
 // Estatísticas de hábitos
 $stats = [
-    'total_habits' => getTotalHabits($conn, $userId),
-    'active_habits' => getTotalHabits($conn, $userId),
-    'archived_habits' => getArchivedHabitsCount($conn, $userId)
+    'total_habits' => $habitQueryService->getTotalHabits((int) $userId),
+    'active_habits' => $habitQueryService->getTotalHabits((int) $userId),
+    'archived_habits' => $habitQueryService->getArchivedHabitsCount((int) $userId)
 ];
 
 // Buscar hábitos ativos do usuário, hábitos de hoje e arquivados
-$allActiveHabitsRaw = getUserHabits($conn, $userId);
-$habitsRaw = getTodayHabits($conn, $userId, $todayDate);
-$archivedHabitsRaw = getArchivedHabits($conn, $userId);
+$allActiveHabitsRaw = $habitQueryService->getUserHabits((int) $userId);
+$habitsRaw = $habitQueryService->getTodayHabits((int) $userId, $todayDate);
+$archivedHabitsRaw = $habitQueryService->getArchivedHabits((int) $userId);
 
 // Mapear para formato esperado pelo frontend
 $habits = [];
@@ -113,7 +119,7 @@ foreach ($allActiveHabitsRaw as $habitRaw) {
 }
 
 // Buscar todas as categorias para o modal
-$categories = getAllCategories($conn);
+$categories = $habitQueryService->getAllCategories();
 $csrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
 
 include_once "includes/header.php";
@@ -401,7 +407,7 @@ include_once "includes/header.php";
                                 
                                 <!-- Right Side: Actions -->
                                 <div class="d-flex align-items-center gap-sm" style="flex-shrink: 0;">
-                                    <form method="POST" action="../actions/habit_mark_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
+                                    <form method="POST" action="../actions/habit_toggle_completion_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
                                         <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                         <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
                                         <input type="hidden" name="completion_date" value="<?php echo $todayDate; ?>">

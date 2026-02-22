@@ -1,7 +1,8 @@
 <?php
 require_once '../config/bootstrap.php';
 bootApp();
-require_once '../app/auth/AuthService.php';
+
+use App\Auth\AuthService;
 
 actionRequirePost('login.php');
 actionRequireCsrf('login.php');
@@ -26,7 +27,7 @@ if (!$user) {
 }
 
 authClearFailures();
-login($user['id'], $user['name'], $user['email']);
+signInUser($user['id'], $user['name'], $user['email']);
 $authService->updateLastLogin($user['id']);
 
 actionRedirect('../public/dashboard.php');
