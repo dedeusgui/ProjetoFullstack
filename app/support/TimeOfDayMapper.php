@@ -7,7 +7,7 @@ class TimeOfDayMapper
     public static function toDatabase(string $timePt): string
     {
         $map = [
-            'ManhÃ£' => 'morning',
+            'Manhã' => 'morning',
             'Tarde' => 'afternoon',
             'Noite' => 'evening',
         ];
@@ -18,7 +18,7 @@ class TimeOfDayMapper
     public static function toDisplay(string $timeEn): string
     {
         $map = [
-            'morning' => 'ManhÃ£',
+            'morning' => 'Manhã',
             'afternoon' => 'Tarde',
             'evening' => 'Noite',
             'anytime' => 'Qualquer',

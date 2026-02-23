@@ -1,8 +1,10 @@
 <?php
 
 use App\Achievements\AchievementService;
+use App\Habits\HabitQueryService;
 use App\Habits\HabitSchedulePolicy;
 use App\Repository\CategoryRepository;
+use App\Stats\StatsQueryService;
 use App\Support\DateFormatter;
 use App\Support\TimeOfDayMapper;
 use App\UserProgress\UserProgressService;
@@ -26,6 +28,9 @@ function getAppToday(): string {
 
 
 function getUserTodayDate(mysqli $conn, int $userId): string {
+    $service = new StatsQueryService($conn);
+    return $service->getUserTodayDate($userId);
+
     static $cache = [];
     if (isset($cache[$userId])) {
         return $cache[$userId];
@@ -78,6 +83,9 @@ function getCategoryIdByName($conn, $categoryName) {
 
 // Buscar todos os hábitos do usuário
 function getUserHabits($conn, $userId) {
+    $service = new HabitQueryService($conn);
+    return $service->getUserHabits((int) $userId);
+
     $sql = "
         SELECT 
             h.*,
@@ -110,6 +118,9 @@ function getUserHabits($conn, $userId) {
 }
 
 function getArchivedHabits($conn, $userId) {
+    $service = new HabitQueryService($conn);
+    return $service->getArchivedHabits((int) $userId);
+
     $sql = "
         SELECT 
             h.*,
@@ -143,6 +154,9 @@ function getArchivedHabits($conn, $userId) {
 
 // Buscar hábitos de hoje
 function getTodayHabits($conn, $userId, ?string $targetDate = null) {
+    $service = new HabitQueryService($conn);
+    return $service->getTodayHabits((int) $userId, $targetDate);
+
     $sql = "
         SELECT 
             h.*,
@@ -177,6 +191,9 @@ function getTodayHabits($conn, $userId, ?string $targetDate = null) {
 
 // Total de hábitos ativos
 function getTotalHabits($conn, $userId) {
+    $service = new HabitQueryService($conn);
+    return $service->getTotalHabits((int) $userId);
+
     $stmt = $conn->prepare("SELECT COUNT(*) as total FROM habits WHERE user_id = ? AND is_active = 1 AND archived_at IS NULL");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
@@ -186,6 +203,9 @@ function getTotalHabits($conn, $userId) {
 }
 
 function getArchivedHabitsCount($conn, $userId) {
+    $service = new HabitQueryService($conn);
+    return $service->getArchivedHabitsCount((int) $userId);
+
     $stmt = $conn->prepare("SELECT COUNT(*) as total FROM habits WHERE user_id = ? AND archived_at IS NOT NULL");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
@@ -196,6 +216,9 @@ function getArchivedHabitsCount($conn, $userId) {
 
 // Hábitos concluídos hoje
 function getCompletedToday($conn, $userId, ?string $date = null) {
+    $service = new StatsQueryService($conn);
+    return $service->getCompletedToday((int) $userId, $date);
+
     $stmt = $conn->prepare("
         SELECT COUNT(DISTINCT hc.habit_id) as total
         FROM habit_completions hc
@@ -214,11 +237,17 @@ function getCompletedToday($conn, $userId, ?string $date = null) {
 
 // Taxa de conclusão (histórico completo do usuário)
 function getCompletionRate($conn, $userId) {
+    $service = new StatsQueryService($conn);
+    return $service->getCompletionRate((int) $userId);
+
     $summary = getCompletionWindowSummary($conn, $userId);
     return (int) ($summary['rate'] ?? 0);
 }
 
 function getCompletionWindowSummary($conn, $userId, int $days = 0): array {
+    $service = new StatsQueryService($conn);
+    return $service->getCompletionWindowSummary((int) $userId, $days);
+
     $today = getUserTodayDate($conn, (int) $userId);
     $startDate = getCompletionWindowStartDate($conn, $userId, $days, $today);
 
@@ -323,6 +352,9 @@ function getCompletionSummaryByRange($conn, $userId, string $startDate, string $
 }
 
 function getCompletionTrend($conn, $userId, int $windowDays = 7): array {
+    $service = new StatsQueryService($conn);
+    return $service->getCompletionTrend((int) $userId, $windowDays);
+
     $period = max(1, $windowDays);
 
     $today = getUserTodayDate($conn, (int) $userId);
@@ -368,6 +400,9 @@ function getCompletionTrend($conn, $userId, int $windowDays = 7): array {
 
 
 function getActiveDays($conn, $userId): int {
+    $service = new StatsQueryService($conn);
+    return $service->getActiveDays((int) $userId);
+
     $stmt = $conn->prepare("
         SELECT COUNT(DISTINCT completion_date) AS total
         FROM habit_completions
@@ -382,6 +417,9 @@ function getActiveDays($conn, $userId): int {
 
 // Sequência atual (streak)
 function getCurrentStreak($conn, $userId) {
+    $service = new StatsQueryService($conn);
+    return $service->getCurrentStreak((int) $userId);
+
     $stmt = $conn->prepare("
         SELECT DISTINCT completion_date 
         FROM habit_completions 
@@ -423,6 +461,9 @@ function getCurrentStreak($conn, $userId) {
 
 // Melhor sequência
 function getBestStreak($conn, $userId) {
+    $service = new StatsQueryService($conn);
+    return $service->getBestStreak((int) $userId);
+
     $stmt = $conn->prepare("
         SELECT COALESCE(MAX(longest_streak), 0) as best_streak
         FROM habits
@@ -437,6 +478,9 @@ function getBestStreak($conn, $userId) {
 
 // Total de conclusões
 function getTotalCompletions($conn, $userId) {
+    $service = new StatsQueryService($conn);
+    return $service->getTotalCompletions((int) $userId);
+
     $stmt = $conn->prepare("
         SELECT COUNT(*) as total 
         FROM habit_completions 
@@ -451,6 +495,9 @@ function getTotalCompletions($conn, $userId) {
 
 // Dados do gráfico mensal
 function getMonthlyData($conn, $userId, $days = 30) {
+    $service = new StatsQueryService($conn);
+    return $service->getMonthlyData((int) $userId, (int) $days);
+
     $days = max(1, (int) $days);
     $today = getUserTodayDate($conn, (int) $userId);
     $startDate = date('Y-m-d', strtotime($today . ' -' . ($days - 1) . ' days'));
@@ -497,6 +544,9 @@ function getMonthlyData($conn, $userId, $days = 30) {
 
 // Estatísticas por categoria
 function getCategoryStats($conn, $userId) {
+    $service = new StatsQueryService($conn);
+    return $service->getCategoryStats((int) $userId);
+
     $stmt = $conn->prepare("
         SELECT 
             c.name as category,
@@ -527,6 +577,9 @@ function getCategoryStats($conn, $userId) {
 
 // Histórico recente
 function getUserCreatedAt($conn, $userId): ?string {
+    $service = new StatsQueryService($conn);
+    return $service->getUserCreatedAt((int) $userId);
+
     $stmt = $conn->prepare("SELECT created_at FROM users WHERE id = ? LIMIT 1");
     $stmt->bind_param("i", $userId);
     $stmt->execute();
@@ -538,6 +591,9 @@ function getUserCreatedAt($conn, $userId): ?string {
 
 // Histórico recente
 function getRecentHistory($conn, $userId, $days = 10, ?string $userCreatedAt = null) {
+    $service = new StatsQueryService($conn);
+    return $service->getRecentHistory((int) $userId, (int) $days, $userCreatedAt);
+
     $maxDays = max(1, (int) $days);
     $today = getUserTodayDate($conn, (int) $userId);
 
@@ -620,6 +676,9 @@ function getRecentHistory($conn, $userId, $days = 10, ?string $userCreatedAt = n
 
 // Buscar todas as categorias
 function getAllCategories($conn) {
+    $service = new HabitQueryService($conn);
+    return $service->getAllCategories();
+
     $result = $conn->query("SELECT * FROM categories ORDER BY name ASC");
     
     $categories = [];

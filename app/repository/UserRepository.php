@@ -55,6 +55,20 @@ class UserRepository
         $stmt->execute();
     }
 
+    public function findTimezoneById(int $userId): ?string
+    {
+        $stmt = $this->conn->prepare('SELECT timezone FROM users WHERE id = ? LIMIT 1');
+        if (!$stmt) {
+            return null;
+        }
+
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+
+        return !empty($row['timezone']) ? (string) $row['timezone'] : null;
+    }
+
     public function findPasswordHashById(int $userId): ?string
     {
         $stmt = $this->conn->prepare('SELECT password FROM users WHERE id = ? LIMIT 1');

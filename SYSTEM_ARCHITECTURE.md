@@ -161,6 +161,11 @@ Progress in this area:
 - `config/app_helpers.php` delegates achievements/progress functions to services via compatibility wrappers
 - Core pages/actions now call explicit methods (`syncUserAchievements`, `refreshUserProgressSummary`)
 - Dashboard payload now includes `best_streak` and `total_completions`, removing duplicate page queries
+- Stats/Habits read paths now have explicit query repositories:
+  - `App\Repository\StatsRepository`
+  - `App\Repository\HabitQueryRepository`
+- `StatsQueryService` and `HabitQueryService` now orchestrate repository-backed reads (instead of being only helper facades)
+- `public/habits.php` now consumes a page-ready payload from `App\Api\Internal\HabitsApiPayloadBuilder`
 
 ## Coding Standards (Project Rules)
 
@@ -184,6 +189,39 @@ Progress in this area:
 - `Repository`:
   - SQL and persistence only
   - no HTTP concerns
+
+## Stats + Habits Ownership Matrix (Current Target)
+
+- `public/dashboard.php`, `public/history.php`, `public/habits.php`
+  - Render UI only
+  - Consume prepared payloads
+  - No query orchestration or row-shaping loops for domain data
+
+- `App\Api\Internal\StatsApiPayloadBuilder`, `App\Api\Internal\HabitsApiPayloadBuilder`
+  - Build page/API payloads and view-model arrays
+  - Map internal rows to UI/API-friendly shapes
+  - Orchestrate app services (no direct SQL)
+
+- `App\Stats\StatsQueryService`, `App\Habits\HabitQueryService`
+  - Domain/application read orchestration
+  - Compose repositories + policies (timezone, schedule, ranges)
+  - No HTTP concerns
+
+- `App\Repository\StatsRepository`, `App\Repository\HabitQueryRepository`
+  - SQL queries for stats/history/habit reads
+  - Return DB-oriented rows/aggregates only
+
+- `config/app_helpers.php`
+  - Transitional compatibility wrappers only
+  - Must delegate to services/repositories for migrated paths
+
+## Boundary Enforcement Rules (Stats + Habits)
+
+- `public/*` pages should prefer internal payload builders over direct helper query calls
+- `public/*` must not assemble domain payloads from raw SQL rows
+- `actions/*` must not add new domain SQL; route through `app/*`
+- `config/app_helpers.php` may keep wrappers temporarily, but no new SQL/business logic should be added
+- Any intentional temporary violation must be listed in the manual exceptions table below
 
 ## Naming Rules
 - Classes: `PascalCase`
@@ -220,6 +258,14 @@ These are the highest-priority remaining issues:
 
 4. User-facing routes are only partially normalized
 - core action names were improved, but a full naming audit is still pending if desired
+
+## Manual Boundary Exceptions (Strict Tracking)
+
+| ID | File | Violation Type | Why It Exists | Target Layer | Removal Trigger | Status |
+|---|---|---|---|---|---|---|
+| BE-001 | `config/app_helpers.php` | Legacy SQL/helper implementations still present below compatibility wrappers | Kept temporarily to reduce risk while migrating call sites incrementally | `App\Stats\*`, `App\Habits\*`, repositories | Delete dead legacy helper bodies after all callers are migrated and verified | `open` |
+| BE-002 | `actions/export_user_data_csv_action.php` | Direct SQL inside action | Export flow has not been moved to a dedicated export/query service yet | `App\Export\*` or repository-backed service | Refactor export action to service/repository in Export/Profile slice (or opportunistic follow-up) | `open` |
+| BE-003 | `App\Api\Internal\StatsApiPayloadBuilder` | Recommendation snapshot SQL inside payload builder | Recommendation snapshot repository/service not extracted yet | `App\Repository\Recommendation*` / recommendation service | Extract recommendation snapshot persistence/query into repository | `open` |
 
 ## Next Refactor Roadmap (Recommended Sequence)
 

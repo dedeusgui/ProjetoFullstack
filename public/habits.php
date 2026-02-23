@@ -2,8 +2,8 @@
 // Proteger página - requer login
 require_once '../config/bootstrap.php';
 
+use App\Api\Internal\HabitsApiPayloadBuilder;
 use App\UserProgress\UserProgressService;
-use App\Habits\HabitQueryService;
 
 bootApp();
 
@@ -16,7 +16,6 @@ $hideLoginButton = true;
 // Buscar dados do usuário logado
 $userId = getAuthenticatedUserId();
 $userData = getAuthenticatedUserRecord($conn);
-$todayDate = getUserTodayDate($conn, $userId);
 
 // Se não encontrou usuário, fazer logout
 if (!$userData) {
@@ -27,99 +26,22 @@ if (!$userData) {
 $userData['initials'] = getUserInitials($userData['name']);
 
 $userProgressService = new UserProgressService($conn);
-$habitQueryService = new HabitQueryService($conn);
 $profileSummary = $userProgressService->refreshUserProgressSummary((int) $userId);
 $userData['level'] = (int) ($profileSummary['level'] ?? 1);
 
 // Estatísticas de hábitos
-$stats = [
-    'total_habits' => $habitQueryService->getTotalHabits((int) $userId),
-    'active_habits' => $habitQueryService->getTotalHabits((int) $userId),
-    'archived_habits' => $habitQueryService->getArchivedHabitsCount((int) $userId)
+$habitsPagePayload = HabitsApiPayloadBuilder::build($conn, (int) $userId, 'page');
+$habitsPageData = $habitsPagePayload['data'] ?? [];
+$todayDate = (string) ($habitsPageData['today_date'] ?? date('Y-m-d'));
+$stats = $habitsPageData['stats'] ?? [
+    'total_habits' => 0,
+    'active_habits' => 0,
+    'archived_habits' => 0
 ];
-
-// Buscar hábitos ativos do usuário, hábitos de hoje e arquivados
-$allActiveHabitsRaw = $habitQueryService->getUserHabits((int) $userId);
-$habitsRaw = $habitQueryService->getTodayHabits((int) $userId, $todayDate);
-$archivedHabitsRaw = $habitQueryService->getArchivedHabits((int) $userId);
-
-// Mapear para formato esperado pelo frontend
-$habits = [];
-foreach ($habitsRaw as $habit) {
-    $habits[] = [
-        'id' => $habit['id'],
-        'name' => $habit['title'],
-        'description' => $habit['description'] ?? '',
-        'category' => $habit['category_name'] ?? 'Sem categoria',
-        'time' => mapTimeOfDayReverse($habit['time_of_day']),
-        'color' => $habit['color'] ?? '#4a74ff',
-        'streak' => $habit['current_streak'],
-        'completed_today' => (bool)$habit['completed_today'],
-        'created_at' => $habit['created_at'],
-        'frequency' => $habit['frequency'] ?? 'daily',
-        'target_days' => normalizeTargetDays($habit['target_days'] ?? null),
-        'goal_type' => $habit['goal_type'] ?? 'completion',
-        'goal_value' => (int)($habit['goal_value'] ?? 1),
-        'goal_unit' => $habit['goal_unit'] ?? '',
-        'can_complete_today' => isHabitScheduledForDate($habit, $todayDate) && !(bool)$habit['completed_today'],
-        'next_due_date' => getNextHabitDueDate($habit, (bool)$habit['completed_today'] ? date('Y-m-d', strtotime($todayDate . ' +1 day')) : $todayDate)
-    ];
-}
-
-$archivedHabits = [];
-foreach ($archivedHabitsRaw as $habit) {
-    $archivedHabits[] = [
-        'id' => $habit['id'],
-        'name' => $habit['title'],
-        'category' => $habit['category_name'] ?? 'Sem categoria',
-        'archived_at' => $habit['archived_at']
-    ];
-}
-
-
-$weekDaysMeta = [
-    1 => 'Segunda',
-    2 => 'Terça',
-    3 => 'Quarta',
-    4 => 'Quinta',
-    5 => 'Sexta',
-    6 => 'Sábado',
-    0 => 'Domingo'
-];
-
-$habitsByWeekDay = [];
-foreach ($weekDaysMeta as $weekDayIndex => $weekDayLabel) {
-    $habitsByWeekDay[$weekDayIndex] = [
-        'label' => $weekDayLabel,
-        'habits' => []
-    ];
-}
-
-foreach ($allActiveHabitsRaw as $habitRaw) {
-    $habit = [
-        'id' => $habitRaw['id'],
-        'name' => $habitRaw['title'],
-        'frequency' => $habitRaw['frequency'] ?? 'daily',
-        'target_days' => normalizeTargetDays($habitRaw['target_days'] ?? null)
-    ];
-    $frequency = $habit['frequency'] ?? 'daily';
-    if ($frequency === 'daily') {
-        foreach (array_keys($habitsByWeekDay) as $weekDayIndex) {
-            $habitsByWeekDay[$weekDayIndex]['habits'][] = $habit;
-        }
-        continue;
-    }
-
-    $targetDays = $habit['target_days'] ?? [];
-    foreach ($targetDays as $weekDayIndex) {
-        if (isset($habitsByWeekDay[$weekDayIndex])) {
-            $habitsByWeekDay[$weekDayIndex]['habits'][] = $habit;
-        }
-    }
-}
-
-// Buscar todas as categorias para o modal
-$categories = $habitQueryService->getAllCategories();
+$habits = $habitsPageData['habits'] ?? [];
+$archivedHabits = $habitsPageData['archived_habits'] ?? [];
+$habitsByWeekDay = $habitsPageData['habits_by_week_day'] ?? [];
+$categories = $habitsPageData['categories'] ?? [];
 $csrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
 
 include_once "includes/header.php";
