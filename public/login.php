@@ -57,14 +57,6 @@ include_once "includes/header.php";
                 </div>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="rememberMe" name="rememberMe">
-                    <label class="form-check-label text-secondary" for="rememberMe">Lembrar-me</label>
-                </div>
-
-            </div>
-
             <button type="submit" class="doitly-btn w-100 mb-3">
                 <span>Entrar</span>
                 <i class="bi bi-arrow-right"></i>

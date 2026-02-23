@@ -13,6 +13,7 @@ class StatsApiPayloadBuilder
 {
     public static function build(\mysqli $conn, int $userId, string $view = 'dashboard'): array
     {
+        $view = self::normalizeView($view);
         $statsQueryService = new StatsQueryService($conn);
         $achievementService = new AchievementService($conn);
 
@@ -94,6 +95,14 @@ class StatsApiPayloadBuilder
             'generated_at' => date('c'),
             'data' => $dashboardData
         ];
+    }
+
+    private static function normalizeView(string $view): string
+    {
+        $view = trim($view);
+        $allowedViews = ['dashboard', 'history'];
+
+        return in_array($view, $allowedViews, true) ? $view : 'dashboard';
     }
 
     private static function buildAdaptiveRecommendation(\mysqli $conn, int $userId, ?string $referenceDate = null): array

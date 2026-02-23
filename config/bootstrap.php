@@ -9,6 +9,11 @@
  */
 function bootApp(bool $loadDatabase = true): void
 {
+    require_once __DIR__ . '/security_helpers.php';
+
+    appSendSecurityHeaders();
+    appConfigureSessionCookieParams();
+
     if (session_status() === PHP_SESSION_NONE) {
         session_start();
     }

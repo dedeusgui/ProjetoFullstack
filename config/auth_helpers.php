@@ -1,10 +1,5 @@
 <?php
 
-// Start session if it is not active yet.
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 function isUserLoggedIn(): bool
 {
     return isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);

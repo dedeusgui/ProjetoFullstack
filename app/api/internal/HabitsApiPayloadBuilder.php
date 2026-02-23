@@ -9,6 +9,7 @@ class HabitsApiPayloadBuilder
 {
     public static function build(\mysqli $conn, int $userId, string $scope = 'all'): array
     {
+        $scope = self::normalizeScope($scope);
         $habitQueryService = new HabitQueryService($conn);
 
         $response = [
@@ -109,6 +110,14 @@ class HabitsApiPayloadBuilder
         ];
 
         return $response;
+    }
+
+    private static function normalizeScope(string $scope): string
+    {
+        $scope = trim($scope);
+        $allowedScopes = ['all', 'today', 'page'];
+
+        return in_array($scope, $allowedScopes, true) ? $scope : 'all';
     }
 
     private static function mapHabitRowToBasePayload(array $habit): array
