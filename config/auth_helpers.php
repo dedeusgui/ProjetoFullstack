@@ -77,14 +77,14 @@ function signOutUser(): void
 {
     session_unset();
     session_destroy();
-    header('Location: login.php');
+    header('Location: ../public/login.php');
     exit;
 }
 
 function requireAuthenticatedUser(): void
 {
     if (!isUserLoggedIn()) {
-        header('Location: login.php');
+        header('Location: ../public/login.php');
         exit;
     }
 }
