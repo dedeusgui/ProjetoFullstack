@@ -3,6 +3,7 @@
 require_once '../config/bootstrap.php';
 
 use App\Api\Internal\StatsApiPayloadBuilder;
+use App\Support\UserLocalDateResolver;
 use App\UserProgress\UserProgressService;
 bootApp();
 
@@ -133,7 +134,8 @@ $monthSummary = [
 ];
 
 $csrfToken = getCsrfToken();
-$userTodayDate = getUserTodayDate($conn, (int) $userId);
+$userLocalDateResolver = new UserLocalDateResolver($conn);
+$userTodayDate = $userLocalDateResolver->getTodayDateForUser((int) $userId);
 
 include_once "includes/header.php";
 ?>

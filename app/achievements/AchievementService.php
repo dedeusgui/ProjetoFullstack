@@ -2,13 +2,17 @@
 
 namespace App\Achievements;
 
+use App\Support\UserLocalDateResolver;
+
 class AchievementService
 {
     private \mysqli $conn;
+    private UserLocalDateResolver $userLocalDateResolver;
 
     public function __construct(\mysqli $conn)
     {
         $this->conn = $conn;
+        $this->userLocalDateResolver = new UserLocalDateResolver($conn);
     }
 
     public function getUserAchievements(int $userId): array
@@ -280,29 +284,6 @@ class AchievementService
 
     private function getUserTodayDate(int $userId): string
     {
-        static $cache = [];
-        if (isset($cache[$userId])) {
-            return $cache[$userId];
-        }
-
-        $timezone = 'America/Sao_Paulo';
-        $stmt = $this->conn->prepare("SELECT timezone FROM users WHERE id = ? LIMIT 1");
-        if ($stmt) {
-            $stmt->bind_param('i', $userId);
-            $stmt->execute();
-            $row = $stmt->get_result()->fetch_assoc();
-            if (!empty($row['timezone'])) {
-                $timezone = (string) $row['timezone'];
-            }
-        }
-
-        try {
-            $now = new \DateTime('now', new \DateTimeZone($timezone));
-        } catch (\Throwable $e) {
-            $now = new \DateTime('now', new \DateTimeZone('America/Sao_Paulo'));
-        }
-
-        $cache[$userId] = $now->format('Y-m-d');
-        return $cache[$userId];
+        return $this->userLocalDateResolver->getTodayDateForUser($userId);
     }
 }

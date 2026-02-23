@@ -3,6 +3,7 @@ require_once '../config/bootstrap.php';
 bootApp();
 
 use App\Habits\HabitCompletionService;
+use App\Support\UserLocalDateResolver;
 
 function redirectBack(): void
 {
@@ -16,7 +17,8 @@ actionRequireCsrf('habits.php');
 
 $userId = (int) getAuthenticatedUserId();
 $habitId = (int) ($_POST['habit_id'] ?? $_POST['id'] ?? 0);
-$completionDate = $_POST['completion_date'] ?? getUserTodayDate($conn, $userId);
+$userLocalDateResolver = new UserLocalDateResolver($conn);
+$completionDate = $_POST['completion_date'] ?? $userLocalDateResolver->getTodayDateForUser($userId);
 
 if ($habitId <= 0) {
     $_SESSION['error_message'] = 'Hábito inválido.';

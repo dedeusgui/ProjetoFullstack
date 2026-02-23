@@ -10,24 +10,6 @@ class HabitsApiPayloadBuilder
     public static function build(\mysqli $conn, int $userId, string $scope = 'all'): array
     {
         $habitQueryService = new HabitQueryService($conn);
-        $mapHabit = static function (array $habit): array {
-            return [
-                'id' => (int) $habit['id'],
-                'name' => $habit['title'],
-                'description' => $habit['description'] ?? '',
-                'category' => $habit['category_name'] ?? 'Sem categoria',
-                'time' => mapTimeOfDayReverse($habit['time_of_day'] ?? 'anytime'),
-                'color' => $habit['color'] ?? '#4a74ff',
-                'streak' => (int) ($habit['current_streak'] ?? 0),
-                'completed_today' => (bool) ($habit['completed_today'] ?? false),
-                'created_at' => $habit['created_at'] ?? null,
-                'frequency' => $habit['frequency'] ?? 'daily',
-                'goal_type' => $habit['goal_type'] ?? 'completion',
-                'goal_value' => (int) ($habit['goal_value'] ?? 1),
-                'goal_unit' => $habit['goal_unit'] ?? '',
-                'target_days' => normalizeTargetDays($habit['target_days'] ?? null)
-            ];
-        };
 
         $response = [
             'success' => true,
@@ -37,7 +19,7 @@ class HabitsApiPayloadBuilder
 
         if ($scope === 'today') {
             $todayHabitsRaw = $habitQueryService->getTodayHabits($userId, $habitQueryService->getUserTodayDate($userId));
-            $todayHabits = array_map($mapHabit, $todayHabitsRaw);
+            $todayHabits = array_map([self::class, 'mapHabitRowToBasePayload'], $todayHabitsRaw);
 
             $response['data'] = [
                 'count' => count($todayHabits),
@@ -53,40 +35,12 @@ class HabitsApiPayloadBuilder
             $todayHabitsRaw = $habitQueryService->getTodayHabits($userId, $todayDate);
             $archivedHabitsRaw = $habitQueryService->getArchivedHabits($userId);
 
-            $todayHabits = array_map(static function (array $habit) use ($todayDate): array {
-                $completedToday = (bool) ($habit['completed_today'] ?? false);
-                $nextBaseDate = $completedToday
-                    ? date('Y-m-d', strtotime($todayDate . ' +1 day'))
-                    : $todayDate;
+            $todayHabits = array_map(
+                static fn(array $habit): array => self::mapHabitRowToPagePayload($habit, $todayDate),
+                $todayHabitsRaw
+            );
 
-                return [
-                    'id' => (int) $habit['id'],
-                    'name' => $habit['title'],
-                    'description' => $habit['description'] ?? '',
-                    'category' => $habit['category_name'] ?? 'Sem categoria',
-                    'time' => mapTimeOfDayReverse($habit['time_of_day'] ?? 'anytime'),
-                    'color' => $habit['color'] ?? '#4a74ff',
-                    'streak' => (int) ($habit['current_streak'] ?? 0),
-                    'completed_today' => $completedToday,
-                    'created_at' => $habit['created_at'] ?? null,
-                    'frequency' => $habit['frequency'] ?? 'daily',
-                    'target_days' => HabitSchedulePolicy::normalizeTargetDays($habit['target_days'] ?? null),
-                    'goal_type' => $habit['goal_type'] ?? 'completion',
-                    'goal_value' => (int) ($habit['goal_value'] ?? 1),
-                    'goal_unit' => $habit['goal_unit'] ?? '',
-                    'can_complete_today' => HabitSchedulePolicy::isScheduledForDate($habit, $todayDate) && !$completedToday,
-                    'next_due_date' => HabitSchedulePolicy::getNextDueDate($habit, $nextBaseDate, $todayDate),
-                ];
-            }, $todayHabitsRaw);
-
-            $archivedHabits = array_map(static function (array $habit): array {
-                return [
-                    'id' => (int) $habit['id'],
-                    'name' => $habit['title'],
-                    'category' => $habit['category_name'] ?? 'Sem categoria',
-                    'archived_at' => $habit['archived_at'] ?? null,
-                ];
-            }, $archivedHabitsRaw);
+            $archivedHabits = array_map([self::class, 'mapArchivedHabitRowToPayload'], $archivedHabitsRaw);
 
             $weekDaysMeta = [
                 1 => 'Segunda',
@@ -128,11 +82,13 @@ class HabitsApiPayloadBuilder
                 }
             }
 
+            $totalHabits = $habitQueryService->getTotalHabits($userId);
+
             $response['data'] = [
                 'today_date' => $todayDate,
                 'stats' => [
-                    'total_habits' => $habitQueryService->getTotalHabits($userId),
-                    'active_habits' => $habitQueryService->getTotalHabits($userId),
+                    'total_habits' => $totalHabits,
+                    'active_habits' => $totalHabits,
                     'archived_habits' => $habitQueryService->getArchivedHabitsCount($userId),
                 ],
                 'habits' => $todayHabits,
@@ -145,7 +101,7 @@ class HabitsApiPayloadBuilder
         }
 
         $habitsRaw = $habitQueryService->getUserHabits($userId);
-        $habits = array_map($mapHabit, $habitsRaw);
+        $habits = array_map([self::class, 'mapHabitRowToBasePayload'], $habitsRaw);
 
         $response['data'] = [
             'count' => count($habits),
@@ -153,5 +109,49 @@ class HabitsApiPayloadBuilder
         ];
 
         return $response;
+    }
+
+    private static function mapHabitRowToBasePayload(array $habit): array
+    {
+        return [
+            'id' => (int) $habit['id'],
+            'name' => $habit['title'],
+            'description' => $habit['description'] ?? '',
+            'category' => $habit['category_name'] ?? 'Sem categoria',
+            'time' => mapTimeOfDayReverse($habit['time_of_day'] ?? 'anytime'),
+            'color' => $habit['color'] ?? '#4a74ff',
+            'streak' => (int) ($habit['current_streak'] ?? 0),
+            'completed_today' => (bool) ($habit['completed_today'] ?? false),
+            'created_at' => $habit['created_at'] ?? null,
+            'frequency' => $habit['frequency'] ?? 'daily',
+            'goal_type' => $habit['goal_type'] ?? 'completion',
+            'goal_value' => (int) ($habit['goal_value'] ?? 1),
+            'goal_unit' => $habit['goal_unit'] ?? '',
+            'target_days' => HabitSchedulePolicy::normalizeTargetDays($habit['target_days'] ?? null),
+        ];
+    }
+
+    private static function mapHabitRowToPagePayload(array $habit, string $todayDate): array
+    {
+        $payload = self::mapHabitRowToBasePayload($habit);
+        $completedToday = (bool) ($payload['completed_today'] ?? false);
+        $nextBaseDate = $completedToday
+            ? date('Y-m-d', strtotime($todayDate . ' +1 day'))
+            : $todayDate;
+
+        $payload['can_complete_today'] = HabitSchedulePolicy::isScheduledForDate($habit, $todayDate) && !$completedToday;
+        $payload['next_due_date'] = HabitSchedulePolicy::getNextDueDate($habit, $nextBaseDate, $todayDate);
+
+        return $payload;
+    }
+
+    private static function mapArchivedHabitRowToPayload(array $habit): array
+    {
+        return [
+            'id' => (int) $habit['id'],
+            'name' => $habit['title'],
+            'category' => $habit['category_name'] ?? 'Sem categoria',
+            'archived_at' => $habit['archived_at'] ?? null,
+        ];
     }
 }

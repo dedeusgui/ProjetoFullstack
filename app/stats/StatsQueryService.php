@@ -5,40 +5,26 @@ namespace App\Stats;
 use App\Habits\HabitSchedulePolicy;
 use App\Repository\HabitQueryRepository;
 use App\Repository\StatsRepository;
-use App\Repository\UserRepository;
+use App\Support\UserLocalDateResolver;
 
 class StatsQueryService
 {
     private \mysqli $conn;
     private StatsRepository $statsRepository;
     private HabitQueryRepository $habitQueryRepository;
-    private UserRepository $userRepository;
+    private UserLocalDateResolver $userLocalDateResolver;
 
     public function __construct(\mysqli $conn)
     {
         $this->conn = $conn;
         $this->statsRepository = new StatsRepository($conn);
         $this->habitQueryRepository = new HabitQueryRepository($conn);
-        $this->userRepository = new UserRepository($conn);
+        $this->userLocalDateResolver = new UserLocalDateResolver($conn);
     }
 
     public function getUserTodayDate(int $userId): string
     {
-        static $cache = [];
-        if (isset($cache[$userId])) {
-            return $cache[$userId];
-        }
-
-        $timezone = $this->userRepository->findTimezoneById($userId) ?? 'America/Sao_Paulo';
-
-        try {
-            $now = new \DateTime('now', new \DateTimeZone($timezone));
-        } catch (\Throwable $e) {
-            $now = new \DateTime('now', new \DateTimeZone('America/Sao_Paulo'));
-        }
-
-        $cache[$userId] = $now->format('Y-m-d');
-        return $cache[$userId];
+        return $this->userLocalDateResolver->getTodayDateForUser($userId);
     }
 
     public function getTotalHabits(int $userId): int
