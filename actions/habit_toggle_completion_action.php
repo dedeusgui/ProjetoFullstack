@@ -45,7 +45,7 @@ try {
     $completionDate = $_POST['completion_date'] ?? $userLocalDateResolver->getTodayDateForUser($userId);
 
     if ($habitId <= 0) {
-        $_SESSION['error_message'] = 'HÃ¡bito invÃ¡lido.';
+        $_SESSION['error_message'] = 'Hábito inválido.';
         redirectBack();
     }
 

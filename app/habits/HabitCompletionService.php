@@ -44,7 +44,7 @@ class HabitCompletionService
             if (\function_exists('appLogThrowable')) {
                 \appLogThrowable($exception, ['service' => 'HabitCompletionService::toggleCompletion']);
             }
-            return ['success' => false, 'message' => 'Erro ao processar conclusÃ£o do hÃ¡bito. Tente novamente.'];
+            return ['success' => false, 'message' => 'Erro ao processar conclusão do hábito. Tente novamente.'];
         }
     }
 

@@ -1,0 +1,59 @@
+# .editorconfig — Configuração de estilo de código do projeto Doitly
+# https://editorconfig.org
+
+root = true
+
+# ─────────────────────────────────────────────
+# Padrão para todos os arquivos
+# ─────────────────────────────────────────────
+[*]
+charset = utf-8
+end_of_line = crlf
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# ─────────────────────────────────────────────
+# PHP
+# ─────────────────────────────────────────────
+[*.php]
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+# ─────────────────────────────────────────────
+# JavaScript e JSON
+# ─────────────────────────────────────────────
+[*.{js,json}]
+indent_size = 2
+
+# ─────────────────────────────────────────────
+# CSS
+# ─────────────────────────────────────────────
+[*.css]
+indent_size = 2
+
+# ─────────────────────────────────────────────
+# HTML e templates PHP mistos
+# ─────────────────────────────────────────────
+[*.{html,htm}]
+indent_size = 2
+
+# ─────────────────────────────────────────────
+# SQL
+# ─────────────────────────────────────────────
+[*.sql]
+indent_size = 2
+
+# ─────────────────────────────────────────────
+# Markdown (sem remover trailing spaces — usados para quebra de linha)
+# ─────────────────────────────────────────────
+[*.md]
+trim_trailing_whitespace = false
+
+# ─────────────────────────────────────────────
+# YAML e configurações
+# ─────────────────────────────────────────────
+[*.{yml,yaml}]
+indent_size = 2

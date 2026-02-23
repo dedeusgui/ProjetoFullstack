@@ -40,7 +40,7 @@ function bootApp(bool $loadDatabase = true): void
 
                 $candidates = [
                     $baseDir . $relativePath,
-                    // Compatibilidade com estrutura atual (pastas minÃºsculas)
+                    // Compatibilidade com estrutura atual (pastas minúsculas)
                     $baseDir . strtolower($relativePath),
                 ];
 
