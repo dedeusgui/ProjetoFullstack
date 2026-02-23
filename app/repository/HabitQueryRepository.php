@@ -4,6 +4,8 @@ namespace App\Repository;
 
 class HabitQueryRepository
 {
+    use InteractsWithDatabase;
+
     private \mysqli $conn;
 
     public function __construct(\mysqli $conn)
@@ -30,11 +32,11 @@ class HabitQueryRepository
             ORDER BY h.created_at DESC
         ";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->prepareOrFail($sql);
         $stmt->bind_param('si', $date, $userId);
-        $stmt->execute();
+        $this->executeOrFail($stmt);
 
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $this->getResultOrFail($stmt)->fetch_all(MYSQLI_ASSOC);
     }
 
     public function findArchivedHabitsWithCompletionOnDate(int $userId, string $date): array
@@ -56,11 +58,11 @@ class HabitQueryRepository
             ORDER BY h.archived_at DESC
         ";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->prepareOrFail($sql);
         $stmt->bind_param('si', $date, $userId);
-        $stmt->execute();
+        $this->executeOrFail($stmt);
 
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $this->getResultOrFail($stmt)->fetch_all(MYSQLI_ASSOC);
     }
 
     public function findActiveHabitsOrderedForDay(int $userId, string $date): array
@@ -81,40 +83,36 @@ class HabitQueryRepository
             ORDER BY h.time_of_day, h.title
         ";
 
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->prepareOrFail($sql);
         $stmt->bind_param('si', $date, $userId);
-        $stmt->execute();
+        $this->executeOrFail($stmt);
 
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $this->getResultOrFail($stmt)->fetch_all(MYSQLI_ASSOC);
     }
 
     public function countActiveHabits(int $userId): int
     {
-        $stmt = $this->conn->prepare('SELECT COUNT(*) AS total FROM habits WHERE user_id = ? AND is_active = 1 AND archived_at IS NULL');
+        $stmt = $this->prepareOrFail('SELECT COUNT(*) AS total FROM habits WHERE user_id = ? AND is_active = 1 AND archived_at IS NULL');
         $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc() ?: [];
 
         return (int) ($row['total'] ?? 0);
     }
 
     public function countArchivedHabits(int $userId): int
     {
-        $stmt = $this->conn->prepare('SELECT COUNT(*) AS total FROM habits WHERE user_id = ? AND archived_at IS NOT NULL');
+        $stmt = $this->prepareOrFail('SELECT COUNT(*) AS total FROM habits WHERE user_id = ? AND archived_at IS NOT NULL');
         $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc() ?: [];
 
         return (int) ($row['total'] ?? 0);
     }
 
     public function findAllCategories(): array
     {
-        $result = $this->conn->query('SELECT * FROM categories ORDER BY name ASC');
-        if (!$result) {
-            return [];
-        }
-
+        $result = $this->queryOrFail('SELECT * FROM categories ORDER BY name ASC');
         return $result->fetch_all(MYSQLI_ASSOC);
     }
 }

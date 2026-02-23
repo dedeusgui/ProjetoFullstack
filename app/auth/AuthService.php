@@ -39,6 +39,12 @@ class AuthService
         $name = trim($name);
         $email = $this->normalizeEmail($email);
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+        if (!is_string($passwordHash) || $passwordHash === '') {
+            if (\function_exists('appLogMessage')) {
+                \appLogMessage('Password hash generation failed', ['service' => 'AuthService::register']);
+            }
+            return null;
+        }
 
         $userId = $this->userRepository->createUser($name, $email, $passwordHash);
         if ($userId === null) {

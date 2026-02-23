@@ -52,7 +52,9 @@ function bootApp(bool $loadDatabase = true): void
 
     require_once __DIR__ . '/auth_helpers.php';
     require_once __DIR__ . '/app_helpers.php';
+    require_once __DIR__ . '/error_helpers.php';
     require_once __DIR__ . '/action_helpers.php';
+    initAppErrorHandling();
 
     if ($loadDatabase) {
         global $conn;

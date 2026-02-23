@@ -4,6 +4,7 @@ bootApp();
 
 use App\Achievements\AchievementService;
 
+actionRunWithErrorHandling(static function () use ($conn): void {
 actionRequireLoggedIn();
 
 $userId = (int) getAuthenticatedUserId();
@@ -105,3 +106,4 @@ if (count($unlockedAchievements) === 0) {
 
 fclose($output);
 exit;
+}, 'dashboard.php');

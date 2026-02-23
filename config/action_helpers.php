@@ -6,6 +6,16 @@ function actionRedirect(string $path): void
     exit;
 }
 
+function actionCurrentRequestId(): string
+{
+    return appRequestId();
+}
+
+function actionIsJsonRequest(): bool
+{
+    return appIsJsonRequest();
+}
+
 function actionRedirectPublic(string $page): void
 {
     actionRedirect('../public/' . ltrim($page, '/'));
@@ -39,6 +49,59 @@ function actionFlashAndRedirect(string $sessionKey, string $message, string $pat
 {
     $_SESSION[$sessionKey] = $message;
     actionRedirect($path);
+}
+
+function actionJsonResponse(array $payload, int $statusCode = 200): void
+{
+    if (!headers_sent()) {
+        http_response_code($statusCode);
+        header('Content-Type: application/json; charset=utf-8');
+    }
+
+    echo json_encode($payload, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+function actionJsonError(string $message, int $statusCode = 500, string $errorCode = 'internal_error', array $extra = []): void
+{
+    $payload = array_merge([
+        'success' => false,
+        'message' => $message,
+        'error_code' => $errorCode,
+        'request_id' => actionCurrentRequestId(),
+    ], $extra);
+
+    actionJsonResponse($payload, $statusCode);
+}
+
+function actionHandleUnexpectedThrowable(\Throwable $exception, string $fallbackPublicPage = 'dashboard.php'): void
+{
+    appLogThrowable($exception);
+
+    if (actionIsJsonRequest()) {
+        actionJsonError('Ocorreu um erro interno. Tente novamente.', 500, 'internal_error');
+    }
+
+    actionFlashAndRedirect('error_message', 'Ocorreu um erro inesperado. Tente novamente.', '../public/' . ltrim($fallbackPublicPage, '/'));
+}
+
+function actionRunWithErrorHandling(callable $callback, string $fallbackPublicPage = 'dashboard.php'): void
+{
+    try {
+        $callback();
+    } catch (\Throwable $exception) {
+        actionHandleUnexpectedThrowable($exception, $fallbackPublicPage);
+    }
+}
+
+function actionRunApi(callable $callback): void
+{
+    try {
+        $callback();
+    } catch (\Throwable $exception) {
+        appLogThrowable($exception);
+        actionJsonError('Ocorreu um erro interno. Tente novamente.', 500, 'internal_error');
+    }
 }
 
 

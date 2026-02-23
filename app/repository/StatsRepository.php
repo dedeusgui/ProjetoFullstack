@@ -4,6 +4,8 @@ namespace App\Repository;
 
 class StatsRepository
 {
+    use InteractsWithDatabase;
+
     private \mysqli $conn;
 
     public function __construct(\mysqli $conn)
@@ -13,7 +15,7 @@ class StatsRepository
 
     public function countCompletedHabitsOnDate(int $userId, string $date): int
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT COUNT(DISTINCT hc.habit_id) AS total
             FROM habit_completions hc
             INNER JOIN habits h ON hc.habit_id = h.id
@@ -22,35 +24,35 @@ class StatsRepository
               AND h.is_active = 1
         ");
         $stmt->bind_param('is', $userId, $date);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc() ?: [];
 
         return (int) ($row['total'] ?? 0);
     }
 
     public function findUserCreatedAt(int $userId): ?string
     {
-        $stmt = $this->conn->prepare('SELECT created_at FROM users WHERE id = ? LIMIT 1');
+        $stmt = $this->prepareOrFail('SELECT created_at FROM users WHERE id = ? LIMIT 1');
         $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc();
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc();
 
         return $row['created_at'] ?? null;
     }
 
     public function findFirstCompletionDate(int $userId): ?string
     {
-        $stmt = $this->conn->prepare('SELECT MIN(completion_date) AS first_completion_date FROM habit_completions WHERE user_id = ?');
+        $stmt = $this->prepareOrFail('SELECT MIN(completion_date) AS first_completion_date FROM habit_completions WHERE user_id = ?');
         $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc() ?: [];
 
         return $row['first_completion_date'] ?? null;
     }
 
     public function findHabitsForCompletionWindow(int $userId, string $startDate, string $endDate): array
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT id, frequency, target_days, start_date, end_date, created_at, archived_at
             FROM habits
             WHERE user_id = ?
@@ -59,14 +61,14 @@ class StatsRepository
               AND (archived_at IS NULL OR DATE(archived_at) > ?)
         ");
         $stmt->bind_param('iss', $userId, $endDate, $startDate);
-        $stmt->execute();
+        $this->executeOrFail($stmt);
 
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $this->getResultOrFail($stmt)->fetch_all(MYSQLI_ASSOC);
     }
 
     public function countCompletedHabitOccurrencesInRange(int $userId, string $startDate, string $endDate): int
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT COUNT(DISTINCT CONCAT(hc.habit_id, '|', hc.completion_date)) AS completed
             FROM habit_completions hc
             INNER JOIN habits h ON h.id = hc.habit_id AND h.user_id = hc.user_id
@@ -77,72 +79,72 @@ class StatsRepository
               AND (h.archived_at IS NULL OR hc.completion_date < DATE(h.archived_at))
         ");
         $stmt->bind_param('iss', $userId, $startDate, $endDate);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc() ?: [];
 
         return (int) ($row['completed'] ?? 0);
     }
 
     public function countActiveDays(int $userId): int
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT COUNT(DISTINCT completion_date) AS total
             FROM habit_completions
             WHERE user_id = ?
         ");
         $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc() ?: [];
 
         return (int) ($row['total'] ?? 0);
     }
 
     public function findDistinctCompletionDatesDesc(int $userId): array
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT DISTINCT completion_date
             FROM habit_completions
             WHERE user_id = ?
             ORDER BY completion_date DESC
         ");
         $stmt->bind_param('i', $userId);
-        $stmt->execute();
+        $this->executeOrFail($stmt);
 
-        $rows = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        $rows = $this->getResultOrFail($stmt)->fetch_all(MYSQLI_ASSOC);
         return array_map(static fn(array $row): string => (string) $row['completion_date'], $rows);
     }
 
     public function findBestStreak(int $userId): int
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT COALESCE(MAX(longest_streak), 0) AS best_streak
             FROM habits
             WHERE user_id = ? AND is_active = 1
         ");
         $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc() ?: [];
 
         return (int) ($row['best_streak'] ?? 0);
     }
 
     public function countTotalCompletions(int $userId): int
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT COUNT(*) AS total
             FROM habit_completions
             WHERE user_id = ?
         ");
         $stmt->bind_param('i', $userId);
-        $stmt->execute();
-        $row = $stmt->get_result()->fetch_assoc() ?: [];
+        $this->executeOrFail($stmt);
+        $row = $this->getResultOrFail($stmt)->fetch_assoc() ?: [];
 
         return (int) ($row['total'] ?? 0);
     }
 
     public function findDailyCompletionCounts(int $userId, string $startDate, string $endDate): array
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT DATE(completion_date) AS date, COUNT(*) AS completed
             FROM habit_completions
             WHERE user_id = ?
@@ -151,14 +153,14 @@ class StatsRepository
             ORDER BY date ASC
         ");
         $stmt->bind_param('iss', $userId, $startDate, $endDate);
-        $stmt->execute();
+        $this->executeOrFail($stmt);
 
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $this->getResultOrFail($stmt)->fetch_all(MYSQLI_ASSOC);
     }
 
     public function findCategoryStats(int $userId): array
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             SELECT
                 c.name AS category,
                 COUNT(hc.id) AS total,
@@ -175,14 +177,14 @@ class StatsRepository
             ORDER BY total DESC
         ");
         $stmt->bind_param('ii', $userId, $userId);
-        $stmt->execute();
+        $this->executeOrFail($stmt);
 
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $this->getResultOrFail($stmt)->fetch_all(MYSQLI_ASSOC);
     }
 
     public function findRecentHistory(int $userId, string $startDate, string $endDate): array
     {
-        $stmt = $this->conn->prepare("
+        $stmt = $this->prepareOrFail("
             WITH RECURSIVE date_range AS (
                 SELECT ? AS day
                 UNION ALL
@@ -230,8 +232,8 @@ class StatsRepository
             ORDER BY dr.day DESC
         ");
         $stmt->bind_param('ssisississ', $startDate, $endDate, $userId, $startDate, $userId, $startDate, $endDate, $userId, $startDate, $endDate);
-        $stmt->execute();
+        $this->executeOrFail($stmt);
 
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+        return $this->getResultOrFail($stmt)->fetch_all(MYSQLI_ASSOC);
     }
 }

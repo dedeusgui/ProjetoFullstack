@@ -4,6 +4,8 @@ namespace App\Repository;
 
 class UserSettingsRepository
 {
+    use InteractsWithDatabase;
+
     private \mysqli $conn;
 
     public function __construct(\mysqli $conn)
@@ -13,7 +15,7 @@ class UserSettingsRepository
 
     public function upsertAppearance(int $userId, string $theme, string $primaryColor, string $accentColor, float $textScale): bool
     {
-        $stmt = $this->conn->prepare(
+        $stmt = $this->prepareOrFail(
             'INSERT INTO user_settings (user_id, theme, primary_color, accent_color, text_scale)
              VALUES (?, ?, ?, ?, ?)
              ON DUPLICATE KEY UPDATE
@@ -25,6 +27,7 @@ class UserSettingsRepository
         );
         $stmt->bind_param('isssd', $userId, $theme, $primaryColor, $accentColor, $textScale);
 
-        return $stmt->execute();
+        $this->executeOrFail($stmt);
+        return true;
     }
 }

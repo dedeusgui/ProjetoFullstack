@@ -11,19 +11,14 @@ function buildHabitsApiResponse(mysqli $conn, int $userId, string $scope = 'all'
 }
 
 if (!defined('DOITLY_INTERNAL_API_CALL')) {
-    header('Content-Type: application/json; charset=utf-8');
+    actionRunApi(static function () use ($conn): void {
+        if (!isUserLoggedIn()) {
+            actionJsonError('UsuÃ¡rio nÃ£o autenticado.', 401, 'unauthorized');
+        }
 
-    if (!isUserLoggedIn()) {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Usuário não autenticado.'
-        ]);
-        exit;
-    }
+        $userId = (int) getAuthenticatedUserId();
+        $scope = $_GET['scope'] ?? 'all';
 
-    $userId = (int) getAuthenticatedUserId();
-    $scope = $_GET['scope'] ?? 'all';
-
-    echo json_encode(buildHabitsApiResponse($conn, $userId, $scope));
+        actionJsonResponse(buildHabitsApiResponse($conn, $userId, $scope));
+    });
 }

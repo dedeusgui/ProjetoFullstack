@@ -11,19 +11,14 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
 }
 
 if (!defined('DOITLY_INTERNAL_API_CALL')) {
-    header('Content-Type: application/json; charset=utf-8');
+    actionRunApi(static function () use ($conn): void {
+        if (!isUserLoggedIn()) {
+            actionJsonError('UsuÃ¡rio nÃ£o autenticado.', 401, 'unauthorized');
+        }
 
-    if (!isUserLoggedIn()) {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Usuário não autenticado.'
-        ]);
-        exit;
-    }
+        $userId = (int) getAuthenticatedUserId();
+        $view = $_GET['view'] ?? 'dashboard';
 
-    $userId = (int) getAuthenticatedUserId();
-    $view = $_GET['view'] ?? 'dashboard';
-
-    echo json_encode(buildStatsApiResponse($conn, $userId, $view));
+        actionJsonResponse(buildStatsApiResponse($conn, $userId, $view));
+    });
 }

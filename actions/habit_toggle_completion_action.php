@@ -34,26 +34,32 @@ function redirectBack(): void
     actionRedirect($path . $query);
 }
 
-actionRequireLoggedIn();
-actionRequirePost('habits.php');
-actionRequireCsrf('habits.php');
+try {
+    actionRequireLoggedIn();
+    actionRequirePost('habits.php');
+    actionRequireCsrf('habits.php');
 
-$userId = (int) getAuthenticatedUserId();
-$habitId = (int) ($_POST['habit_id'] ?? $_POST['id'] ?? 0);
-$userLocalDateResolver = new UserLocalDateResolver($conn);
-$completionDate = $_POST['completion_date'] ?? $userLocalDateResolver->getTodayDateForUser($userId);
+    $userId = (int) getAuthenticatedUserId();
+    $habitId = (int) ($_POST['habit_id'] ?? $_POST['id'] ?? 0);
+    $userLocalDateResolver = new UserLocalDateResolver($conn);
+    $completionDate = $_POST['completion_date'] ?? $userLocalDateResolver->getTodayDateForUser($userId);
 
-if ($habitId <= 0) {
-    $_SESSION['error_message'] = 'Hábito inválido.';
+    if ($habitId <= 0) {
+        $_SESSION['error_message'] = 'HÃ¡bito invÃ¡lido.';
+        redirectBack();
+    }
+
+    $notes = $_POST['notes'] ?? null;
+    $mood = $_POST['mood'] ?? null;
+    $valueAchieved = isset($_POST['value_achieved']) ? (float) $_POST['value_achieved'] : null;
+
+    $habitCompletionService = new HabitCompletionService($conn);
+    $result = $habitCompletionService->toggleCompletion($habitId, $userId, $completionDate, $valueAchieved, $notes, $mood);
+
+    $_SESSION[$result['success'] ? 'success_message' : 'error_message'] = $result['message'];
+    redirectBack();
+} catch (\Throwable $exception) {
+    appLogThrowable($exception, ['action' => 'habit_toggle_completion_action']);
+    $_SESSION['error_message'] = 'Ocorreu um erro inesperado. Tente novamente.';
     redirectBack();
 }
-
-$notes = $_POST['notes'] ?? null;
-$mood = $_POST['mood'] ?? null;
-$valueAchieved = isset($_POST['value_achieved']) ? (float) $_POST['value_achieved'] : null;
-
-$habitCompletionService = new HabitCompletionService($conn);
-$result = $habitCompletionService->toggleCompletion($habitId, $userId, $completionDate, $valueAchieved, $notes, $mood);
-
-$_SESSION[$result['success'] ? 'success_message' : 'error_message'] = $result['message'];
-redirectBack();

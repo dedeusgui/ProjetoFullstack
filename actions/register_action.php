@@ -4,8 +4,9 @@ bootApp();
 
 use App\Auth\AuthService;
 
-actionRequirePost('register.php');
-actionRequireCsrf('register.php');
+actionRunWithErrorHandling(static function () use ($conn): void {
+    actionRequirePost('register.php');
+    actionRequireCsrf('register.php');
 
 $name = trim($_POST['name'] ?? '');
 $email = strtolower(trim($_POST['email'] ?? ''));
@@ -40,4 +41,5 @@ if (!$user) {
 
 signInUser($user['id'], $user['name'], $user['email']);
 
-actionRedirect('../public/dashboard.php');
+    actionRedirect('../public/dashboard.php');
+}, 'register.php');

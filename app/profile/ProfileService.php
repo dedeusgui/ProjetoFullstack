@@ -74,14 +74,27 @@ class ProfileService
                 'email' => $email
             ];
         } catch (\Throwable $exception) {
-            $this->conn->rollback();
+            try {
+                $this->conn->rollback();
+            } catch (\Throwable $rollbackException) {
+            }
+            if (\function_exists('appLogThrowable')) {
+                \appLogThrowable($exception, ['service' => 'ProfileService::updateProfile']);
+            }
             return ['success' => false, 'message' => 'Não foi possível salvar as configurações. Tente novamente.'];
         }
     }
 
     public function resetAppearance(int $userId): array
     {
-        $ok = $this->userSettingsRepository->upsertAppearance($userId, 'light', '#4A74FF', '#59D186', 1.00);
+        try {
+            $ok = $this->userSettingsRepository->upsertAppearance($userId, 'light', '#4A74FF', '#59D186', 1.00);
+        } catch (\Throwable $exception) {
+            if (\function_exists('appLogThrowable')) {
+                \appLogThrowable($exception, ['service' => 'ProfileService::resetAppearance']);
+            }
+            $ok = false;
+        }
 
         if ($ok) {
             return ['success' => true, 'message' => 'Aparência restaurada para o padrão do site.'];

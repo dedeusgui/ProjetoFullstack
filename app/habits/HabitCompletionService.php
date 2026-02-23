@@ -21,6 +21,7 @@ class HabitCompletionService
         ?string $notes,
         ?string $mood
     ): array {
+        try {
         $habit = $this->fetchHabitForUser($habitId, $userId);
         if (!$habit) {
             return ['success' => false, 'message' => 'Você não tem permissão para modificar este hábito.'];
@@ -39,6 +40,12 @@ class HabitCompletionService
         }
 
         return $this->addCompletion($habit, $habitId, $userId, $completionDate, $valueAchieved, $notes, $mood);
+        } catch (\Throwable $exception) {
+            if (\function_exists('appLogThrowable')) {
+                \appLogThrowable($exception, ['service' => 'HabitCompletionService::toggleCompletion']);
+            }
+            return ['success' => false, 'message' => 'Erro ao processar conclusÃ£o do hÃ¡bito. Tente novamente.'];
+        }
     }
 
     private function fetchHabitForUser(int $habitId, int $userId): ?array
@@ -164,7 +171,13 @@ class HabitCompletionService
             $this->conn->commit();
             return true;
         } catch (\Throwable $e) {
-            $this->conn->rollback();
+            try {
+                $this->conn->rollback();
+            } catch (\Throwable $rollbackException) {
+            }
+            if (\function_exists('appLogThrowable')) {
+                \appLogThrowable($e, ['service' => 'HabitCompletionService::uncompleteHabitFallback']);
+            }
             return false;
         }
     }
@@ -215,7 +228,13 @@ class HabitCompletionService
             $this->conn->commit();
             return true;
         } catch (\Throwable $e) {
-            $this->conn->rollback();
+            try {
+                $this->conn->rollback();
+            } catch (\Throwable $rollbackException) {
+            }
+            if (\function_exists('appLogThrowable')) {
+                \appLogThrowable($e, ['service' => 'HabitCompletionService::completeHabitFallback']);
+            }
             return false;
         }
     }
