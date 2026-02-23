@@ -248,10 +248,9 @@ Melhorias planejadas com base no estado atual do projeto:
 | 1 | Wizard de boas-vindas (onboarding) no primeiro login | 🔲 Pendente |
 | 2 | Notificações in-app com toasts modernos | 🔲 Pendente |
 | 3 | Indicador visual de força de senha no cadastro | 🔲 Pendente |
-| 4 | Fluxo real de confirmação de e-mail | 🔲 Pendente |
-| 5 | Micro-animação ao concluir hábito (confetti / check animado) | 🔲 Pendente |
-| 6 | Página dedicada de conquistas (`achievements.php`) | 🔲 Pendente |
-| 7 | Favoritos e lembretes avançados para hábitos prioritários | 🔲 Pendente |
+| 4 | Micro-animação ao concluir hábito (confetti / check animado) | 🔲 Pendente |
+| 5 | Página dedicada de conquistas (`achievements.php`) | 🔲 Pendente |
+| 6 | Favoritos e lembretes avançados para hábitos prioritários | 🔲 Pendente |
 
 > O campo `email_verified` já existe no banco de dados, aguardando implementação do fluxo de confirmação.
 
