@@ -7,8 +7,31 @@ use App\Support\UserLocalDateResolver;
 
 function redirectBack(): void
 {
-    $referer = $_SERVER['HTTP_REFERER'] ?? '../public/habits.php';
-    actionRedirect($referer);
+    $fallback = '../public/habits.php';
+    $referer = $_SERVER['HTTP_REFERER'] ?? '';
+
+    if (!is_string($referer) || $referer === '') {
+        actionRedirect($fallback);
+    }
+
+    $parts = parse_url($referer);
+    if ($parts === false) {
+        actionRedirect($fallback);
+    }
+
+    $path = (string) ($parts['path'] ?? '');
+    if ($path === '' || $path[0] !== '/' || str_contains($path, "\r") || str_contains($path, "\n")) {
+        actionRedirect($fallback);
+    }
+
+    $requestHost = strtolower((string) ($_SERVER['HTTP_HOST'] ?? ''));
+    $refererHost = strtolower((string) ($parts['host'] ?? ''));
+    if ($refererHost !== '' && $requestHost !== '' && !hash_equals($requestHost, $refererHost)) {
+        actionRedirect($fallback);
+    }
+
+    $query = isset($parts['query']) ? '?' . $parts['query'] : '';
+    actionRedirect($path . $query);
 }
 
 actionRequireLoggedIn();

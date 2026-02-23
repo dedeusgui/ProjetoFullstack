@@ -24,6 +24,10 @@ if (!$userData) {
 
 // Adicionar iniciais ao userData
 $userData['initials'] = getUserInitials($userData['name']);
+$rawUserName = trim((string) ($userData['name'] ?? ''));
+$nameParts = preg_split('/\s+/', $rawUserName);
+$firstName = (is_array($nameParts) && !empty($nameParts[0])) ? $nameParts[0] : 'Usuario';
+$firstNameEscaped = htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8');
 
 $userProgressService = new UserProgressService($conn);
 $profileSummary = $userProgressService->refreshUserProgressSummary((int) $userId);
@@ -222,7 +226,7 @@ include_once "includes/header.php";
             <div class="alert alert-success alert-success-theme"
                 style="margin-bottom: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-medium);">
                 <i class="bi bi-check-circle"></i>
-                <?php echo $_SESSION['success_message'];
+                <?php echo htmlspecialchars((string) $_SESSION['success_message'], ENT_QUOTES, 'UTF-8');
                 unset($_SESSION['success_message']); ?>
             </div>
         <?php endif; ?>
@@ -231,14 +235,14 @@ include_once "includes/header.php";
             <div class="alert alert-danger alert-danger-theme"
                 style="margin-bottom: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-medium);">
                 <i class="bi bi-exclamation-triangle"></i>
-                <?php echo $_SESSION['error_message'];
+                <?php echo htmlspecialchars((string) $_SESSION['error_message'], ENT_QUOTES, 'UTF-8');
                 unset($_SESSION['error_message']); ?>
             </div>
         <?php endif; ?>
 
         <!-- Header -->
         <div class="dashboard-header">
-            <h1 class="dashboard-title">Bem-vindo de volta, <?php echo explode(' ', $userData['name'])[0]; ?>! 👋</h1>
+            <h1 class="dashboard-title">Bem-vindo de volta, <?php echo $firstNameEscaped; ?>! 👋</h1>
             <p class="dashboard-subtitle">Aqui está um resumo do seu progresso hoje</p>
         </div>
 

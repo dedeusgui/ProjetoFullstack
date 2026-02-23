@@ -5,6 +5,7 @@ $currentTheme = ($userData['theme'] ?? 'light') === 'dark' ? 'dark' : 'light';
 $primaryColor = $userData['primary_color'] ?? '#4a74ff';
 $accentColor = $userData['accent_color'] ?? '#59d186';
 $textScale = isset($userData['text_scale']) ? (float) $userData['text_scale'] : 1.00;
+$settingsCsrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
 ?>
 
 <div id="settingsModalOverlay" aria-hidden="true"
@@ -28,6 +29,7 @@ $textScale = isset($userData['text_scale']) ? (float) $userData['text_scale'] : 
         <form method="POST" action="../actions/update_profile_action.php" class="d-flex flex-column gap-md">
             <input type="hidden" name="return_to"
                 value="<?php echo htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo $settingsCsrfToken; ?>">
             <input type="hidden" name="theme" id="settingsThemeInput"
                 value="<?php echo htmlspecialchars($currentTheme, ENT_QUOTES, 'UTF-8'); ?>">
 
@@ -185,6 +187,7 @@ $textScale = isset($userData['text_scale']) ? (float) $userData['text_scale'] : 
         <form id="resetAppearanceForm" method="POST" action="../actions/reset_appearance_action.php" style="display:none;">
             <input type="hidden" name="return_to"
                 value="<?php echo htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8'); ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo $settingsCsrfToken; ?>">
         </form>
     </div>
 </div>

@@ -11,7 +11,9 @@ $conn = new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME, DB_PORT);
 
 // Verificar conexão
 if ($conn->connect_error) {
-    die('Erro de conexão: ' . $conn->connect_error);
+    error_log('Database connection failed: ' . $conn->connect_error);
+    http_response_code(500);
+    exit('Erro interno de conexao com o banco de dados.');
 }
 
 // Definir charset para UTF-8

@@ -8,6 +8,7 @@ actionRequireLoggedIn();
 $allowedReturnPages = ['dashboard.php', 'habits.php', 'history.php'];
 $redirectPath = actionResolveReturnPath($allowedReturnPages, 'dashboard.php');
 actionRequirePost('dashboard.php');
+actionRequireCsrf('dashboard.php');
 
 $userId = (int) getAuthenticatedUserId();
 $profileService = new ProfileService($conn);

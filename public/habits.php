@@ -126,13 +126,13 @@ include_once "includes/header.php";
         <!-- Mensagens de Sucesso/Erro -->
         <?php if (isset($_SESSION['success_message'])): ?>
             <div class="alert alert-success alert-success-theme" style="margin-bottom: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-medium);">
-                <i class="bi bi-check-circle"></i> <?php echo $_SESSION['success_message']; unset($_SESSION['success_message']); ?>
+                <i class="bi bi-check-circle"></i> <?php echo htmlspecialchars((string) $_SESSION['success_message'], ENT_QUOTES, 'UTF-8'); unset($_SESSION['success_message']); ?>
             </div>
         <?php endif; ?>
         
         <?php if (isset($_SESSION['error_message'])): ?>
             <div class="alert alert-danger alert-danger-theme" style="margin-bottom: var(--space-lg); padding: var(--space-md); border-radius: var(--radius-medium);">
-                <i class="bi bi-exclamation-triangle"></i> <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
+                <i class="bi bi-exclamation-triangle"></i> <?php echo htmlspecialchars((string) $_SESSION['error_message'], ENT_QUOTES, 'UTF-8'); unset($_SESSION['error_message']); ?>
             </div>
         <?php endif; ?>
 
