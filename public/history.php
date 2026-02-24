@@ -186,7 +186,7 @@ include_once "includes/header.php";
                 </h3>
                 <span class="doitly-badge doitly-badge-warning">Nível <?php echo $currentLevel; ?></span>
             </div>
-            <div class="card-body" style="display:grid; grid-template-columns: 2fr 1fr; gap: var(--space-lg);">
+            <div class="card-body history-progress-rewards-grid" style="display:grid; grid-template-columns: 2fr 1fr; gap: var(--space-lg);">
                 <div>
                     <p style="margin-bottom: 8px; color: var(--text-secondary);">
                         XP total: <strong style="color: var(--text-primary);"><?php echo $totalXp; ?></strong> ·
@@ -204,7 +204,7 @@ include_once "includes/header.php";
                             <small style="color: var(--text-tertiary);">Conclua suas primeiras conquistas para ganhar XP.</small>
                         <?php else: ?>
                             <?php foreach ($recentRewards as $reward): ?>
-                                <small style="display:flex; justify-content:space-between; gap:8px;">
+                                <small class="history-reward-row" style="display:flex; justify-content:space-between; gap:8px;">
                                     <span><?php echo htmlspecialchars($reward['name'], ENT_QUOTES, 'UTF-8'); ?></span>
                                     <span style="color: var(--accent-gold);">+<?php echo (int) ($reward['points'] ?? 0); ?> XP</span>
                                 </small>
@@ -285,7 +285,7 @@ include_once "includes/header.php";
                             Progresso Mensal
                         </h3>
                         <div class="card-actions">
-                            <select class="doitly-input" style="width: auto; padding: 8px 12px; font-size: 0.875rem;">
+                            <select class="doitly-input history-range-select" style="width: auto; padding: 8px 12px; font-size: 0.875rem;">
                                 <option>Últimos 30 dias</option>
                                 <option>Últimos 60 dias</option>
                                 <option>Últimos 90 dias</option>
@@ -342,7 +342,7 @@ include_once "includes/header.php";
                             </span>
                         </div>
                     </div>
-                    <div class="card-body" style="max-height: 70vh; overflow-y: auto;">
+                    <div class="card-body history-achievements-body" style="max-height: 70vh; overflow-y: auto;">
                         <div class="d-flex flex-column gap-md">
                             <?php foreach ($groupedAchievements as $category => $categoryAchievements): ?>
                                 <div>
@@ -415,7 +415,7 @@ include_once "includes/header.php";
                         </h3>
                     </div>
                     <div class="card-body">
-                        <div class="d-flex flex-column gap-sm" style="max-height: 260px; overflow-y: auto;">
+                        <div class="d-flex flex-column gap-sm history-recent-list" style="max-height: 260px; overflow-y: auto;">
                             <?php foreach ($recentHistory as $day): ?>
                                 <div
                                     style="display: flex; align-items: center; justify-content: space-between; padding: var(--space-sm) var(--space-md); background: var(--glass-bg-light); border-radius: var(--radius-small); border-left: 4px solid <?php echo $day['percentage'] >= 80 ? 'var(--accent-green)' : ($day['percentage'] >= 50 ? 'var(--accent-gold)' : 'var(--accent-red)'); ?>;">
@@ -459,8 +459,8 @@ include_once "includes/header.php";
                         </h3>
                     </div>
                     <div class="card-body">
-                        <div style="overflow-x: auto;">
-                            <table style="width: 100%; border-collapse: collapse;">
+                        <div class="history-table-wrap" style="overflow-x: auto;">
+                            <table class="history-category-table" style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="border-bottom: var(--border-light);">
                                         <th
@@ -749,7 +749,45 @@ include_once "includes/header.php";
         background: var(--glass-bg-light);
     }
 
+    .history-progress-rewards-grid {
+        align-items: start;
+    }
+
+    .history-reward-row {
+        align-items: center;
+    }
+
+    .history-table-wrap {
+        padding-bottom: 2px;
+    }
+
     @media (max-width: 768px) {
+        .history-progress-rewards-grid {
+            grid-template-columns: 1fr !important;
+            gap: var(--space-md) !important;
+        }
+
+        .history-reward-row {
+            flex-wrap: wrap;
+            justify-content: flex-start !important;
+        }
+
+        .history-range-select {
+            width: 100% !important;
+        }
+
+        .history-achievements-body {
+            max-height: none !important;
+        }
+
+        .history-recent-list {
+            max-height: none !important;
+        }
+
+        .history-category-table {
+            min-width: 540px;
+        }
+
         table {
             font-size: 0.875rem;
         }
@@ -757,6 +795,12 @@ include_once "includes/header.php";
         table th,
         table td {
             padding: var(--space-sm) !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .history-category-table {
+            min-width: 500px;
         }
     }
 </style>

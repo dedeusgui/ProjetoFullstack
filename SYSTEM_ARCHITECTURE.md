@@ -29,11 +29,13 @@ Responsibilities:
 - Render pages and UI fragments
 - Read prepared data from internal builders/services
 - Submit forms to `actions/*`
+- Own page composition and responsive behavior (CSS/layout), without moving business logic into views
 
 Rules:
 - Must not import `actions/*` as libraries
 - Should avoid SQL and heavy business logic
 - Can use helper wrappers during migration, but new logic should go to `app/*`
+- Prefer shared internal layout styles (`public/assets/css/dashboard.css`) for dashboard/habits/history responsive fixes before adding page-local inline styles
 
 ### `actions/`
 

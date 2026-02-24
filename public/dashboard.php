@@ -486,7 +486,7 @@ include_once "includes/header.php";
                                             <i class="bi bi-check-circle-fill"></i> Concluído
                                         </button>
                                     <?php else: ?>
-                                        <form method="POST" action="../actions/habit_toggle_completion_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
+                                        <form method="POST" action="../actions/habit_toggle_completion_action.php" class="habit-completion-form" style="display: inline-flex; align-items: center; gap: 6px;">
                                             <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                             <input type="hidden" name="completion_date" value="<?php echo $userTodayDate; ?>">
                                             <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
@@ -669,5 +669,29 @@ include_once "includes/header.php";
         }, 5000);
     });
 </script>
+
+<style>
+@media (max-width: 768px) {
+    .dashboard-content .habit-item > .doitly-btn,
+    .dashboard-content .habit-item > form {
+        width: 100%;
+    }
+
+    .dashboard-content .habit-item > form.habit-completion-form {
+        display: flex !important;
+        flex-wrap: wrap;
+        gap: var(--space-xs) !important;
+    }
+
+    .dashboard-content .habit-item > form.habit-completion-form .doitly-input[type="number"] {
+        width: 100% !important;
+        min-width: 0;
+    }
+
+    .dashboard-content .habit-item > form.habit-completion-form .doitly-btn {
+        width: 100%;
+    }
+}
+</style>
 
 <?php include_once "includes/footer.php"; ?>

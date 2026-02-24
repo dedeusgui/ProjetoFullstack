@@ -5,23 +5,38 @@
 
 /* ===== LAYOUT PRINCIPAL ===== */
 .dashboard-wrapper {
+  --dashboard-sidebar-width: 280px;
   display: flex;
+  align-items: stretch;
   min-height: calc(100vh - 80px); /* Altura total menos navbar */
   background: var(--bg-body);
   position: relative;
 }
 
-/* ===== SIDEBAR ===== */
-.dashboard-sidebar {
-  width: 280px;
+.dashboard-wrapper::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: -28px;
+  width: var(--dashboard-sidebar-width);
   background: var(--glass-bg-strong);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border-right: var(--border-light);
+  pointer-events: none;
+}
+
+/* ===== SIDEBAR ===== */
+.dashboard-sidebar {
+  width: var(--dashboard-sidebar-width);
+  background: transparent;
+  border-right: none;
   padding: var(--space-xl) 0;
   position: sticky;
+  align-self: flex-start;
   top: 80px; /* Altura da navbar */
-  height: calc(100vh - 80px);
+  min-height: calc(100vh - 80px);
   overflow-y: auto;
   transition: var(--transition);
   z-index: var(--z-sticky);
@@ -231,6 +246,8 @@
   flex: 1;
   padding: var(--space-xl);
   overflow-x: hidden;
+  position: relative;
+  z-index: 1;
 }
 
 /* Dashboard Header */
@@ -466,8 +483,12 @@
 
 /* Tablet */
 @media (max-width: 1024px) {
+  .dashboard-wrapper {
+    --dashboard-sidebar-width: 240px;
+  }
+
   .dashboard-sidebar {
-    width: 240px;
+    width: var(--dashboard-sidebar-width);
   }
 
   .dashboard-content {
@@ -483,13 +504,21 @@
 
 /* Mobile */
 @media (max-width: 768px) {
+  .dashboard-wrapper::before {
+    content: none;
+  }
+
   .dashboard-wrapper {
     flex-direction: column;
   }
 
   .dashboard-sidebar {
     width: 100%;
+    background: var(--glass-bg-strong);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
     height: auto;
+    min-height: 0;
     position: static;
     border-right: none;
     border-bottom: var(--border-light);
@@ -539,6 +568,41 @@
   .dashboard-card {
     padding: var(--space-lg);
   }
+
+  .card-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+
+  .card-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .dashboard-content .habit-item .habit-item-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .dashboard-content .habit-item .habit-completion-form {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+  }
+
+  .dashboard-content .habit-item .habit-completion-form .doitly-input[type="number"] {
+    width: 100% !important;
+    min-width: 0;
+  }
+
+  .dashboard-content .habit-item .habit-completion-form .doitly-btn,
+  .dashboard-content .habit-item .habit-item-actions > .doitly-btn,
+  .dashboard-content .habit-item .habit-item-actions > form {
+    width: 100%;
+  }
 }
 
 /* Small Mobile */
@@ -572,6 +636,19 @@
 
 .dashboard-content > * {
   animation: slideInRight 0.4s ease-out;
+}
+
+/* Internal app pages already have a full-height wrapper; remove the global footer gap */
+body:has(.dashboard-wrapper) .doitly-footer {
+  margin-top: 0;
+  position: relative;
+  z-index: 2;
+}
+
+@media (max-width: 768px) {
+  .dashboard-wrapper::before {
+    bottom: 0;
+  }
 }
 
 /* Stagger animation for stats */

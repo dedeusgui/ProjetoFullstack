@@ -85,6 +85,7 @@ O Doitly foi desenvolvido como projeto fullstack por [Ismael Gomes](https://gith
 - Gráfico de progresso semanal
 - Lista de hábitos do dia com marcação direta
 - Recomendações adaptativas baseadas no comportamento do usuário
+- Layout interno otimizado para mobile (dashboard, hábitos e histórico)
 
 ### Gerenciamento de Hábitos
 - CRUD completo de hábitos
@@ -93,6 +94,7 @@ O Doitly foi desenvolvido como projeto fullstack por [Ismael Gomes](https://gith
 - Metas por tipo: `completion`, `quantity` e `duration`
 - Arquivamento e restauração de hábitos
 - Filtros por busca, categoria e horário
+- Melhor usabilidade em telas pequenas (filtros, cards e modal responsivo)
 
 ### Histórico e Gamificação
 - Métricas gerais de desempenho histórico
@@ -120,7 +122,7 @@ O projeto segue uma arquitetura em camadas bem definida, separando responsabilid
 public/           → Páginas e interface do usuário
   └── actions/    → Entrada HTTP (requisições mutáveis)
         └── app/  → Regras de domínio e serviços
-              └── app/repository/ + config/conexao.php  → Persistência
+              └── app/repository/ + config/database.php  → Persistência
                     └── sql/doitly_unified.sql           → Banco de dados
 ```
 
@@ -142,7 +144,7 @@ ProjetoFullstack/
 │   ├── recommendation/       # Motor de recomendações adaptativas
 │   └── repository/           # Acesso ao banco de dados (DAOs)
 ├── config/
-│   └── conexao.php           # Configuração e conexão com o banco
+│   └── database.php          # Configuração e conexão com o banco
 ├── public/
 │   ├── assets/
 │   │   ├── css/              # Estilos globais e design system
@@ -198,7 +200,7 @@ A conexão usa variáveis de ambiente com fallback automático. Configure confor
 | `DB_NAME` | `doitly`    | Nome do banco de dados |
 | `DB_PORT` | `3306`      | Porta de conexão |
 
-Arquivo de configuração: `config/conexao.php`
+Arquivo de configuração: `config/database.php`
 
 ### 4. Executar o projeto
 
@@ -224,18 +226,18 @@ http://localhost/ProjetoFullstack/public/
 | `actions/habit_create_action.php` | POST | Criação de hábito |
 | `actions/habit_update_action.php` | POST | Edição de hábito |
 | `actions/habit_delete_action.php` | POST | Exclusão de hábito |
-| `actions/habit_mark_action.php` | POST | Marcar hábito como concluído |
+| `actions/habit_toggle_completion_action.php` | POST | Marcar/desmarcar conclusão de hábito |
 | `actions/habit_archive_action.php` | POST | Arquivar / restaurar hábito |
 | `actions/update_profile_action.php` | POST | Atualização de perfil |
 | `actions/reset_appearance_action.php` | POST | Resetar configurações visuais |
-| `actions/export_user_data_csv.php` | GET | Exportar dados do usuário em CSV |
+| `actions/export_user_data_csv_action.php` | GET | Exportar dados do usuário em CSV |
 
 ### APIs (leitura)
 
 | Endpoint | Método | Descrição |
 |---|---|---|
-| `actions/api_get_habits.php` | GET | Listagem de hábitos do usuário |
-| `actions/api_get_stats.php` | GET | Estatísticas e métricas do usuário |
+| `actions/api_habits_get.php` | GET | Listagem de hábitos do usuário |
+| `actions/api_stats_get.php` | GET | Estatísticas e métricas do usuário |
 
 ---
 

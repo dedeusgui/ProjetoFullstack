@@ -195,8 +195,8 @@ include_once "includes/header.php";
         <!-- Filters -->
         <div class="dashboard-card" style="margin-bottom: var(--space-lg);">
             <div class="card-body">
-                <div class="d-flex gap-md align-items-center" style="flex-wrap: wrap;">
-                    <div style="flex: 1; min-width: 200px;">
+                <div class="d-flex gap-md align-items-center habits-filters-row" style="flex-wrap: wrap;">
+                    <div class="habits-filter-field habits-filter-search" style="flex: 1; min-width: 200px;">
                         <input 
                             type="text" 
                             class="doitly-input" 
@@ -205,7 +205,7 @@ include_once "includes/header.php";
                             onkeyup="filterHabits()"
                         />
                     </div>
-                    <div style="min-width: 180px;">
+                    <div class="habits-filter-field" style="min-width: 180px;">
                         <select class="doitly-input" id="categoryFilter" onchange="filterHabits()">
                             <option value="">Todas as categorias</option>
                             <?php foreach ($categories as $cat): ?>
@@ -213,7 +213,7 @@ include_once "includes/header.php";
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div style="min-width: 150px;">
+                    <div class="habits-filter-field" style="min-width: 150px;">
                         <select class="doitly-input" id="timeFilter" onchange="filterHabits()">
                             <option value="">Todos os horários</option>
                             <option value="Manhã">☀️ Manhã</option>
@@ -310,8 +310,8 @@ include_once "includes/header.php";
                                 </div>
                                 
                                 <!-- Right Side: Actions -->
-                                <div class="d-flex align-items-center gap-sm" style="flex-shrink: 0;">
-                                    <form method="POST" action="../actions/habit_toggle_completion_action.php" style="display: inline-flex; align-items: center; gap: 6px;">
+                                <div class="d-flex align-items-center gap-sm habit-item-actions" style="flex-shrink: 0;">
+                                    <form method="POST" action="../actions/habit_toggle_completion_action.php" class="habit-completion-form" style="display: inline-flex; align-items: center; gap: 6px;">
                                         <input type="hidden" name="csrf_token" value="<?php echo $csrfToken; ?>">
                                         <input type="hidden" name="habit_id" value="<?php echo $habit['id']; ?>">
                                         <input type="hidden" name="completion_date" value="<?php echo $todayDate; ?>">
@@ -383,7 +383,7 @@ include_once "includes/header.php";
                 <div class="d-flex flex-column gap-md">
                     <?php foreach ($habitsByWeekDay as $weekDayData): ?>
                         <div class="habit-item" style="align-items: flex-start;">
-                            <div style="min-width: 140px;">
+                            <div class="weekday-summary-label" style="min-width: 140px;">
                                 <strong><?php echo $weekDayData['label']; ?></strong>
                                 <small class="text-secondary d-block"><?php echo count($weekDayData['habits']); ?> hábitos</small>
                             </div>
@@ -443,9 +443,9 @@ include_once "includes/header.php";
 <?php include_once "includes/profile_modal.php"; ?>
 
 <!-- Modal: Criar/Editar Hábito -->
-<div id="habitModal" style="display: none; position: fixed; inset: 0; background: var(--overlay-backdrop); backdrop-filter: blur(4px); z-index: 1000; padding: var(--space-lg); overflow-y: auto;">
-    <div style="max-width: 600px; margin: 40px auto; background: var(--bg-light); border-radius: var(--radius-large); padding: var(--space-xl); box-shadow: var(--shadow-strong);">
-        <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--space-lg);">
+<div id="habitModal" class="habit-modal-overlay" style="display: none; position: fixed; inset: 0; background: var(--overlay-backdrop); backdrop-filter: blur(4px); z-index: 1000; padding: var(--space-lg); overflow-y: auto;">
+    <div class="habit-modal-panel" style="max-width: 600px; margin: 40px auto; background: var(--bg-light); border-radius: var(--radius-large); padding: var(--space-xl); box-shadow: var(--shadow-strong);">
+        <div class="d-flex justify-content-between align-items-center habit-modal-header" style="margin-bottom: var(--space-lg);">
             <h2 style="margin: 0; font-size: 1.5rem;" id="modalTitle">
                 <i class="bi bi-plus-circle"></i> Novo Hábito
             </h2>
@@ -576,7 +576,7 @@ include_once "includes/header.php";
                 </div>
             </div>
 
-            <div class="d-flex gap-md">
+            <div class="d-flex gap-md habit-modal-actions">
                 <button type="button" class="doitly-btn doitly-btn-secondary flex-grow-1" onclick="closeHabitModal()">
                     Cancelar
                 </button>
@@ -597,6 +597,34 @@ include_once "includes/header.php";
 <style>
 .habit-card {
     transition: all 0.3s ease;
+}
+
+.habits-filters-row {
+    align-items: stretch !important;
+}
+
+.habits-filter-field {
+    min-width: 0 !important;
+}
+
+.habits-filter-field .doitly-input {
+    width: 100%;
+}
+
+.habit-item-actions {
+    min-width: 0;
+}
+
+.habit-completion-form {
+    min-width: 0;
+}
+
+.habit-completion-form .doitly-input[type="number"] {
+    min-width: 0;
+}
+
+.habit-modal-panel {
+    width: min(600px, calc(100vw - 2rem));
 }
 
 .weekday-grid {
@@ -669,14 +697,96 @@ include_once "includes/header.php";
 }
 
 @media (max-width: 768px) {
+    .habits-filters-row {
+        gap: var(--space-sm) !important;
+    }
+
+    .habits-filter-field,
+    .habits-filter-search {
+        width: 100%;
+        flex: 1 1 100% !important;
+    }
+
+    .habits-filters-row > .doitly-btn {
+        width: 100%;
+    }
+
     .habit-item {
         flex-direction: column;
         align-items: stretch !important;
+        gap: var(--space-sm);
     }
     
     .habit-item > div:last-child {
         justify-content: flex-start;
         margin-top: var(--space-sm);
+    }
+
+    .habit-item-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: var(--space-xs) !important;
+    }
+
+    .habit-item-actions > .doitly-btn,
+    .habit-item-actions > form {
+        width: 100%;
+    }
+
+    .habit-completion-form {
+        display: flex !important;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: var(--space-xs) !important;
+    }
+
+    .habit-completion-form .doitly-input[type="number"] {
+        width: 100% !important;
+    }
+
+    .habit-completion-form .doitly-btn {
+        width: 100%;
+    }
+
+    .weekday-summary-label {
+        min-width: 0 !important;
+        width: 100%;
+    }
+
+    .weekday-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .habit-modal-overlay {
+        padding: var(--space-sm) !important;
+    }
+
+    .habit-modal-panel {
+        width: 100%;
+        margin: 8px auto !important;
+        padding: var(--space-lg) !important;
+        border-radius: var(--radius-medium) !important;
+    }
+
+    .habit-modal-header {
+        align-items: flex-start !important;
+        gap: var(--space-sm);
+    }
+
+    .habit-modal-header h2 {
+        font-size: 1.125rem !important;
+        line-height: 1.3;
+    }
+
+    .habit-modal-actions {
+        flex-direction: column;
+        gap: var(--space-sm) !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .weekday-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 }
 </style>
