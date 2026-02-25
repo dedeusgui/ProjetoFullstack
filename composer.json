@@ -2,12 +2,34 @@
   "name": "doitly/projetofullstack",
   "description": "Projeto de habitos com arquitetura em camadas incremental",
   "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.2"
+  },
   "autoload": {
     "psr-4": {
-      "App\\\\": "app/"
+      "App\\": "app/"
     },
-    "classmap": [
-      "app/"
+    "files": [
+      "config/security_helpers.php",
+      "config/auth_helpers.php",
+      "config/error_helpers.php",
+      "config/action_helpers.php",
+      "config/app_helpers.php"
+    ]
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "platform-check": true
+  },
+  "scripts": {
+    "composer:validate": "composer validate --strict --no-check-publish",
+    "autoload:dump": "composer dump-autoload -o",
+    "autoload:check": "composer dump-autoload -o --strict-psr --strict-ambiguous",
+    "qa": [
+      "@composer:validate",
+      "@autoload:check"
     ]
   }
 }

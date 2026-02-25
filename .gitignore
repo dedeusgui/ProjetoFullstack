@@ -1,0 +1,40 @@
+# Dependencies
+/vendor/
+/composer.phar
+
+# Environment / local config
+/.env
+/.env.*
+!/.env.example
+!/.env.*.example
+
+# Logs / runtime files
+*.log
+*.tmp
+*.temp
+*.cache
+/.phpunit.result.cache
+/php_errors.log
+/error_log
+
+# Test / coverage outputs
+/coverage/
+/.coverage/
+
+# IDE / editor
+/.idea/
+/.vscode/
+*.code-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Archives / exports generated locally
+*.zip
+*.tar
+*.gz
+*.rar
+*.csv.tmp
+
