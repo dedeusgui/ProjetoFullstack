@@ -206,3 +206,37 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Apply the handbook verification matrix in upcoming `OBJ-003` coverage expansion work and continue recording evidence in feature/worklog docs
+
+---
+
+## 2026-02-25 - Add Root AGENTS.md Operating Guide
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Create a root `AGENTS.md` that guides coding agents on what to use in the project for each task type, with repo-specific boundaries and verification expectations
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Added a concise, repo-grounded operating guide for AI agents that routes work to the correct layers and docs
+  - Reduced agent guesswork by centralizing task routing + verification + docs update expectations in one file
+- Work completed:
+  - Added root `AGENTS.md` with start-here reading order, repo map, task routing examples, boundary rules, verification commands, docs update rules, and handoff expectations
+  - Validated `AGENTS.md` canonical doc references exist
+  - Validated `AGENTS.md` verification command names against `composer.json` scripts
+  - Updated docs-system progress and current status to reflect the addition
+- Files changed:
+  - `AGENTS.md`
+  - `docs/STATUS.md`
+  - `docs/WORKLOG.md`
+  - `docs/features/docs-system/progress.md`
+- Decisions made (link ADRs if any):
+  - No new ADR; `AGENTS.md` is an operational guide aligned to existing docs-system and engineering-handbook decisions
+- Verification performed (exact commands + key results):
+  - PowerShell check of `AGENTS.md` canonical path references -> OK (all referenced docs exist)
+  - PowerShell check of `AGENTS.md` command references vs `composer.json` scripts -> OK (`qa`, `test`, `test:unit`, `test:action`, `test:db:reset`)
+- Tests/checks intentionally not run (and why):
+  - `composer qa` / `composer test` not rerun for this change (docs-only addition; command names were validated directly against `composer.json`)
+- Blockers / risks:
+  - `AGENTS.md` must stay aligned with future folder moves, command changes, and workflow updates
+- Objective impact: `on-track`
+- Next objective step:
+  - Use `AGENTS.md` in upcoming implementation sessions and refine only if repeated ambiguity appears

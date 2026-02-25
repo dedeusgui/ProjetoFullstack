@@ -15,6 +15,7 @@
 - Root architecture doc moved into `docs/architecture/system-architecture.md`
 - Added engineering handbook with clean code, SOLID, review, and verification standards
 - Updated templates and workflow docs to capture verification evidence and risks
+- Added root `AGENTS.md` to guide AI agents on task routing, boundaries, verification, and required docs updates
 
 ## In Progress
 
@@ -32,9 +33,13 @@
   - PowerShell markdown relative-link scan across `*.md` files (no broken relative links found)
   - `composer qa`
   - `composer test`
+  - PowerShell validation of `AGENTS.md` canonical doc paths
+  - PowerShell validation of `AGENTS.md` command references against `composer.json`
 - Key results:
   - `composer qa` -> OK (`23 tests`, `47 assertions`)
   - `composer test` -> OK (`32 tests`, `90 assertions`)
+  - `AGENTS.md` path references -> OK
+  - `AGENTS.md` command references -> OK
 
 ## Next Actions
 

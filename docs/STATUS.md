@@ -27,6 +27,7 @@
 
 ## Recently Completed
 
+- Added root `AGENTS.md` agent operating guide (task routing, boundaries, verification, docs update rules)
 - Unified engineering documentation under `docs/` (root `README.md` remains GitHub-facing)
 - Moved architecture narrative to `docs/architecture/system-architecture.md`
 - Added `docs/standards/engineering-handbook.md` with clean code/SOLID/review/verification standards
