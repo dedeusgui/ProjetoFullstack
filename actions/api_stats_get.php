@@ -3,6 +3,8 @@
 require_once '../config/bootstrap.php';
 bootApp();
 
+use App\Actions\Api\ApiQueryParamNormalizer;
+use App\Actions\Api\StatsApiGetActionHandler;
 use App\Api\Internal\StatsApiPayloadBuilder;
 
 function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashboard'): array
@@ -12,21 +14,12 @@ function buildStatsApiResponse(mysqli $conn, int $userId, string $view = 'dashbo
 
 function resolveStatsApiView($view): string
 {
-    $view = is_string($view) ? trim($view) : '';
-    $allowedViews = ['dashboard', 'history'];
-
-    return in_array($view, $allowedViews, true) ? $view : 'dashboard';
+    return ApiQueryParamNormalizer::normalizeStatsView($view);
 }
 
 if (!defined('DOITLY_INTERNAL_API_CALL')) {
     actionRunApi(static function () use ($conn): void {
-        if (!isUserLoggedIn()) {
-            actionJsonError('Usuario nao autenticado.', 401, 'unauthorized');
-        }
-
-        $userId = (int) getAuthenticatedUserId();
-        $view = resolveStatsApiView($_GET['view'] ?? 'dashboard');
-
-        actionJsonResponse(buildStatsApiResponse($conn, $userId, $view));
+        $handler = new StatsApiGetActionHandler();
+        actionApplyResponse($handler->handle($conn, $_GET, $_SERVER, $_SESSION));
     });
 }

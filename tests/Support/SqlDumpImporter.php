@@ -60,19 +60,37 @@ final class SqlDumpImporter
                     continue;
                 }
 
-                if (!$conn->query($normalized)) {
+                try {
+                    if (!$conn->query($normalized)) {
+                        throw new \RuntimeException(
+                            'Failed SQL import statement: ' . $conn->error . PHP_EOL . self::preview($normalized)
+                        );
+                    }
+                } catch (\Throwable $exception) {
                     throw new \RuntimeException(
-                        'Failed SQL import statement: ' . $conn->error . PHP_EOL . self::preview($normalized)
+                        'Failed SQL import statement: ' . $exception->getMessage() . PHP_EOL . self::preview($normalized),
+                        0,
+                        $exception
                     );
                 }
             }
 
             if (trim($buffer) !== '') {
                 $normalized = self::normalizeStatement(trim($buffer), $databaseName);
-                if ($normalized !== '' && !$conn->query($normalized)) {
-                    throw new \RuntimeException(
-                        'Failed trailing SQL import statement: ' . $conn->error . PHP_EOL . self::preview($normalized)
-                    );
+                if ($normalized !== '') {
+                    try {
+                        if (!$conn->query($normalized)) {
+                            throw new \RuntimeException(
+                                'Failed trailing SQL import statement: ' . $conn->error . PHP_EOL . self::preview($normalized)
+                            );
+                        }
+                    } catch (\Throwable $exception) {
+                        throw new \RuntimeException(
+                            'Failed trailing SQL import statement: ' . $exception->getMessage() . PHP_EOL . self::preview($normalized),
+                            0,
+                            $exception
+                        );
+                    }
                 }
             }
         } finally {
@@ -105,15 +123,18 @@ final class SqlDumpImporter
         $statement = preg_replace('/DEFINER=`[^`]+`@`[^`]+`\s+/i', '', $statement) ?? $statement;
 
         if (preg_match('/^CREATE\s+DATABASE\s+/i', $statement) === 1) {
-            return 'CREATE DATABASE IF NOT EXISTS `' . $databaseName . '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci';
+            // TestDatabase::resetSchema() already creates the target database and selects it.
+            // Replaying dump-level CREATE DATABASE statements is unnecessary and can be flaky
+            // across MariaDB/XAMPP configurations.
+            return '';
         }
 
         if (preg_match('/^USE\s+`[^`]+`$/i', $statement) === 1) {
-            return 'USE `' . $databaseName . '`';
+            return '';
         }
 
         if (preg_match('/^USE\s+[a-zA-Z0-9_]+$/i', $statement) === 1) {
-            return 'USE `' . $databaseName . '`';
+            return '';
         }
 
         return $statement;

@@ -22,6 +22,7 @@
 ## Active Work
 
 - Expand test coverage beyond first-wave habit flow (auth/API/stats)
+- Phase 2A API/stats coverage validated locally (handlers + payload builders + stats/habits query-service tests)
 - Continue standardizing action patterns where it helps testability
 - Use the engineering handbook verification/review workflow consistently in future sessions
 
@@ -42,6 +43,14 @@
 - Added MySQL test DB reset/import tooling (`scripts/test_db_reset.php`, `tests/Support/*`)
 - Refactored first-wave habit actions into testable handlers (`app/Actions/Habits/*`)
 - Added initial unit + action tests for habit flow and pure logic classes
+- Implemented Phase 2A test slice scaffolding for API/stats coverage:
+  - extracted `actions/api_stats_get.php` / `actions/api_habits_get.php` to handler-based JSON responses
+  - added API normalizer + unit tests
+  - added and validated DB-backed action tests for API handlers/payload builders/query services
+- Hardened test DB reset/import support for local MariaDB/XAMPP behavior:
+  - close shared connection before test DB drop/create
+  - ignore dump-level `CREATE DATABASE` / `USE` statements in importer
+  - include failing SQL preview in importer errors
 
 ## Current Blockers
 
@@ -50,7 +59,6 @@
 
 ## Next Recommended Step
 
-1. Start `OBJ-003` coverage expansion (auth actions or API endpoints as next slice)
-2. Create/update a feature workspace for the next coverage milestone (include verification strategy)
-3. Add tests + run the required commands from `docs/standards/engineering-handbook.md`
-4. Record progress and verification evidence in `docs/WORKLOG.md` and `docs/features/testing-rollout/progress.md`
+1. Continue `OBJ-003` with `Phase 2B` auth coverage (service + login/register/logout actions)
+2. Keep DB-backed suite runs sequential because `Action` tests share/reset `doitly_test`
+3. Record outcomes and verification evidence in `docs/WORKLOG.md` and `docs/features/testing-rollout/progress.md`

@@ -40,6 +40,11 @@ final class TestDatabase
 
     public function resetSchema(): void
     {
+        if ($this->connection instanceof \mysqli) {
+            $this->connection->close();
+            $this->connection = null;
+        }
+
         $serverConn = $this->connectToServer();
         $dbName = $this->databaseName;
 

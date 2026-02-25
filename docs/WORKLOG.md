@@ -240,3 +240,108 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Use `AGENTS.md` in upcoming implementation sessions and refine only if repeated ambiguity appears
+
+---
+
+## 2026-02-25 - Phase 2A API/Stats Test Slice Implementation (Partial Validation)
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Implement `OBJ-003` Phase 2A coverage slice (API handlers + API payload builders + stats/habits query-service tests) and validate what is possible in the current environment
+- Objectives advanced: `OBJ-003`
+- Progress toward objectives:
+  - Implemented the planned Phase 2A API/stats test slice scaffolding and test files
+  - Added handler-based seams for API JSON endpoints to enable PHPUnit action tests without direct `header()/exit` coupling
+  - Completed unit-level verification; DB-backed action validation is blocked by local MySQL availability in this session
+- Work completed:
+  - Added `App\Actions\Api\StatsApiGetActionHandler` and `App\Actions\Api\HabitsApiGetActionHandler`
+  - Added `App\Actions\Api\ApiQueryParamNormalizer` for `view`/`scope` normalization
+  - Rewired `actions/api_stats_get.php` and `actions/api_habits_get.php` to delegate to handlers and `actionApplyResponse(...)`
+  - Added unit tests for API param normalization
+  - Added action/integration test files for:
+    - API handlers (`stats`, `habits`)
+    - API payload builders (`StatsApiPayloadBuilder`, `HabitsApiPayloadBuilder`)
+    - `StatsQueryService`
+    - `HabitQueryService`
+  - Updated testing rollout progress and project status docs with verification blocker/context
+- Files changed:
+  - `actions/api_stats_get.php`
+  - `actions/api_habits_get.php`
+  - `app/Actions/Api/ApiQueryParamNormalizer.php`
+  - `app/Actions/Api/StatsApiGetActionHandler.php`
+  - `app/Actions/Api/HabitsApiGetActionHandler.php`
+  - `tests/Unit/Actions/Api/ApiQueryParamNormalizerTest.php`
+  - `tests/Action/Api/StatsApiGetActionHandlerTest.php`
+  - `tests/Action/Api/HabitsApiGetActionHandlerTest.php`
+  - `tests/Action/Api/StatsApiPayloadBuilderTest.php`
+  - `tests/Action/Api/HabitsApiPayloadBuilderTest.php`
+  - `tests/Action/Stats/StatsQueryServiceTest.php`
+  - `tests/Action/Habits/HabitQueryServiceTest.php`
+  - `docs/features/testing-rollout/progress.md`
+  - `docs/STATUS.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No new ADR; reused the existing action-handler + `ActionResponse` pattern to make JSON API actions testable
+- Verification performed (exact commands + key results):
+  - `php -l app/Actions/Api/ApiQueryParamNormalizer.php; php -l app/Actions/Api/StatsApiGetActionHandler.php; php -l app/Actions/Api/HabitsApiGetActionHandler.php; php -l actions/api_stats_get.php; php -l actions/api_habits_get.php; php -l tests/Unit/Actions/Api/ApiQueryParamNormalizerTest.php; php -l tests/Action/Api/StatsApiGetActionHandlerTest.php; php -l tests/Action/Api/HabitsApiGetActionHandlerTest.php; php -l tests/Action/Api/StatsApiPayloadBuilderTest.php; php -l tests/Action/Api/HabitsApiPayloadBuilderTest.php; php -l tests/Action/Stats/StatsQueryServiceTest.php; php -l tests/Action/Habits/HabitQueryServiceTest.php` -> OK (no syntax errors)
+  - `php vendor/bin/phpunit --configuration phpunit.xml --testsuite Unit --filter ApiQueryParamNormalizerTest` -> OK (`2 tests`, `10 assertions`)
+  - `php vendor/bin/phpunit --configuration phpunit.xml tests/Action/Api/StatsApiGetActionHandlerTest.php` -> failed at test DB bootstrap (`mysqli_sql_exception`, connection refused)
+  - `composer test:unit` -> OK (`25 tests`, `57 assertions`)
+  - `composer qa` -> OK (Composer validate + autoload check + `25 tests`, `57 assertions`)
+  - `composer test:action` -> failed before running action assertions (`7` test classes erroring at `tests/Support/TestDatabase.php` due MySQL connection refused)
+  - `composer test` -> unit tests passed, action suite failed at the same DB bootstrap step (`32 tests`, `57 assertions`, `7 errors`)
+- Tests/checks intentionally not run (and why):
+  - `composer test:db:reset` not run in this session after code changes because MySQL was already unreachable and `Action` suite bootstrap showed the same connection-refused blocker
+- Blockers / risks:
+  - Local MySQL/MariaDB is unavailable in this session (connection refused), so all DB-backed Phase 2A tests are unvalidated end-to-end
+  - New DB-backed assertions may still need fixture or expectation adjustments once MySQL is restored
+- Objective impact: `on-track` (implementation completed; validation partially blocked by environment)
+- Next objective step:
+  - Restore MySQL, rerun `composer test:action` and `composer test`, fix any failing Phase 2A assertions, then continue with `Phase 2B` auth coverage
+
+---
+
+## 2026-02-25 - Phase 2A Validation Completion + Test DB Reset Hardening
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Complete local validation for the Phase 2A API/stats test slice after MySQL was brought online and resolve test DB reset/import issues observed during validation
+- Objectives advanced: `OBJ-003`
+- Progress toward objectives:
+  - Phase 2A coverage slice is now fully validated locally
+  - Test DB reset/import flow is more robust on local MariaDB/XAMPP
+- Work completed:
+  - Fixed `StatsQueryServiceTest` stable-trend fixture to avoid first-completion window clamping affecting the intended branch
+  - Updated `TestDatabase::resetSchema()` to close the shared DB connection before dropping/recreating `doitly_test`
+  - Updated `SqlDumpImporter` to ignore dump-level `CREATE DATABASE`/`USE` statements (reset already selects DB)
+  - Added SQL preview context to `SqlDumpImporter` error wrapping for faster diagnosis
+  - Re-ran DB reset and all PHPUnit suites successfully (sequentially)
+- Files changed:
+  - `tests/Action/Stats/StatsQueryServiceTest.php`
+  - `tests/Support/TestDatabase.php`
+  - `tests/Support/SqlDumpImporter.php`
+  - `docs/STATUS.md`
+  - `docs/WORKLOG.md`
+  - `docs/features/testing-rollout/progress.md`
+- Decisions made (link ADRs if any):
+  - No new ADR; test infrastructure behavior was hardened within the current testing strategy
+  - Validation note: DB-backed suite commands must run sequentially because they share/reset the same `doitly_test` database
+- Verification performed (exact commands + key results):
+  - `netstat -ano | findstr :3306` -> MySQL listening on `3306`
+  - `Test-NetConnection -ComputerName localhost -Port 3306` -> `TcpTestSucceeded : True`
+  - `composer test:db:reset` -> OK (`Test database reset completed: doitly_test`)
+  - `php -l tests/Action/Stats/StatsQueryServiceTest.php` -> OK
+  - `php vendor/bin/phpunit --configuration phpunit.xml --testsuite Action --filter testCompletionTrendReturnsStableStatus` -> OK
+  - `php -l tests/Support/TestDatabase.php` -> OK
+  - `php -l tests/Support/SqlDumpImporter.php` -> OK
+  - `composer test:action` -> OK (`44 tests`, `227 assertions`)
+  - `composer test` -> OK (`69 tests`, `284 assertions`)
+  - `composer qa` -> OK (Composer validate + autoload check + `25 tests`, `57 assertions`)
+- Tests/checks intentionally not run (and why):
+  - None; required and recommended checks for this change type were run
+- Blockers / risks:
+  - No active blocker for Phase 2A
+  - Future risk remains in later coverage phases (auth and additional procedural action extraction)
+- Objective impact: `on-track`
+- Next objective step:
+  - Start `Phase 2B` auth flow coverage and follow sequential DB-backed verification (`composer test:db:reset` -> `composer test:action` -> `composer test`)
