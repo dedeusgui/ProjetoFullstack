@@ -15,6 +15,15 @@
 
 - ...
 
+## Verification Evidence
+
+- Commands run:
+- Key results:
+
+## Open Risks / Debt
+
+- ...
+
 ## Objective Impact
 
 - `OBJ-xxx`: on-track / at-risk / blocked (brief reason)
@@ -22,4 +31,3 @@
 ## Next Actions
 
 1. ...
-

@@ -1,4 +1,17 @@
-# Development Conventions
+# Development Conventions (Repo-Specific)
+
+This file covers implementation conventions specific to this repository.
+
+Use `docs/standards/engineering-handbook.md` for project-wide quality policy:
+- clean code expectations
+- SOLID guidance
+- review checklist
+- verification/test gates
+- definition of done
+
+## Scope of This File
+
+Keep this document limited to repo-specific patterns and migration conventions. Do not duplicate generic engineering standards here.
 
 ## Loading Pattern (Composer Autoload vs `require_once`)
 
@@ -27,4 +40,4 @@ This is not inherently inconsistent because:
 - Use objective IDs (`OBJ-xxx`) in worklogs and feature progress
 - Create ADRs for cross-cutting decisions
 - Update `STATUS.md` at the end of meaningful sessions
-
+- Use `docs/README.md` canonical source map before adding a new top-level doc

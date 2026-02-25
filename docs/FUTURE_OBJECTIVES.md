@@ -56,12 +56,14 @@ This file tracks strategic objectives and provides IDs used in `docs/WORKLOG.md`
 ## OBJ-004 - Build a Single-Source Development Documentation System
 
 - Status: `in_progress`
+- Current note: `docs/` is now the canonical engineering documentation workspace (including architecture and a unified engineering handbook). Remaining work is sustained usage and freshness across sessions.
 - Why it matters: Reduces context loss and improves handoff quality across sessions.
 - Success criteria:
   - `docs/` hub exists with navigation and usage rules
   - session worklog + objective tracking are active
   - ADRs are indexed and linked
   - feature workspaces and templates exist
+  - engineering quality standards and verification gates are documented and discoverable
 - Target window: Immediate
 - Related features/ADRs:
   - `docs/features/docs-system/spec.md`

@@ -23,10 +23,14 @@
 
 - Expand test coverage beyond first-wave habit flow (auth/API/stats)
 - Continue standardizing action patterns where it helps testability
-- Keep docs/worklog/feature progress updated at session end
+- Use the engineering handbook verification/review workflow consistently in future sessions
 
 ## Recently Completed
 
+- Unified engineering documentation under `docs/` (root `README.md` remains GitHub-facing)
+- Moved architecture narrative to `docs/architecture/system-architecture.md`
+- Added `docs/standards/engineering-handbook.md` with clean code/SOLID/review/verification standards
+- Updated docs templates/workflow to include verification evidence and risk tracking
 - Local PHP CLI upgrade verified (`php -v` -> PHP 8.5.0)
 - Enabled missing PHP extensions required by tooling/tests (`openssl`, `mbstring`, `curl`, `mysqli`, `pdo_mysql`)
 - Installed Composer dev dependencies (including PHPUnit)
@@ -46,6 +50,6 @@
 ## Next Recommended Step
 
 1. Start `OBJ-003` coverage expansion (auth actions or API endpoints as next slice)
-2. Create/update a feature workspace for the next coverage milestone
-3. Add tests + run `composer test`
-4. Record progress in `docs/WORKLOG.md` and `docs/features/testing-rollout/progress.md`
+2. Create/update a feature workspace for the next coverage milestone (include verification strategy)
+3. Add tests + run the required commands from `docs/standards/engineering-handbook.md`
+4. Record progress and verification evidence in `docs/WORKLOG.md` and `docs/features/testing-rollout/progress.md`

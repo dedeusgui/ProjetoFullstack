@@ -2,6 +2,10 @@
 
 This document describes the **current architecture**, the **standards adopted in the refactor**, and the **next steps** to keep the codebase organized, maintainable, and ready for larger features (including a future recommendation-system upgrade and API-first evolution).
 
+This is the canonical architecture boundary document for the project.
+
+For project-wide engineering quality policy (clean code, SOLID guidance, review checklist, verification gates, and definition of done), use `docs/standards/engineering-handbook.md`. Keep this file focused on architecture boundaries, ownership, and refactor direction.
+
 ## Goals
 
 - Keep the current monolith stable and easy to maintain

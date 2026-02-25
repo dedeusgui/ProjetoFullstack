@@ -158,3 +158,51 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Begin `OBJ-003` expansion with auth or API endpoint coverage and keep documenting per session
+
+---
+
+## 2026-02-25 - Docs Unification and Engineering Handbook
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Centralize engineering documentation under `docs/`, move architecture docs into `docs/architecture/`, and add a canonical engineering handbook with clean code/review/verification standards
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - `docs/` is now the canonical engineering documentation source (root `README.md` remains GitHub-facing only)
+  - Quality standards, SOLID guidance, review checklist, and verification gates are now documented in one handbook
+- Work completed:
+  - Moved root architecture narrative to `docs/architecture/system-architecture.md`
+  - Added `docs/standards/engineering-handbook.md`
+  - Updated docs hub, contributor workflow, conventions, status/objectives, and docs-system feature docs
+  - Updated documentation templates to require verification evidence and risk tracking
+  - Rewrote root `README.md` as product + quickstart + engineering docs links
+- Files changed:
+  - `README.md`
+  - `SYSTEM_ARCHITECTURE.md` (moved to `docs/architecture/system-architecture.md`)
+  - `docs/README.md`
+  - `docs/CONTRIBUTING_DEV.md`
+  - `docs/context/development-conventions.md`
+  - `docs/architecture/system-architecture.md`
+  - `docs/standards/engineering-handbook.md`
+  - `docs/STATUS.md`
+  - `docs/FUTURE_OBJECTIVES.md`
+  - `docs/features/docs-system/spec.md`
+  - `docs/features/docs-system/progress.md`
+  - `docs/features/docs-system/acceptance-checklist.md`
+  - `docs/templates/feature-spec-template.md`
+  - `docs/templates/feature-progress-template.md`
+  - `docs/templates/session-log-entry-template.md`
+- Decisions made (link ADRs if any):
+  - No new ADR; this is an implementation/hardening pass within the existing docs-system decision (`docs/ADR/ADR-0001-docs-system-and-progress-logging.md`)
+- Verification performed (exact commands + key results):
+  - PowerShell markdown relative-link scan across `*.md` files -> no broken relative links detected
+  - `composer qa` -> OK (`23 tests`, `47 assertions`)
+  - `composer test` -> OK (`32 tests`, `90 assertions`)
+- Tests/checks intentionally not run (and why):
+  - No runtime code-specific smoke tests (docs-only change)
+- Blockers / risks:
+  - `OBJ-004` still depends on consistent team usage across future sessions
+  - Handbook and architecture docs may need refinement as new modules are introduced
+- Objective impact: `on-track`
+- Next objective step:
+  - Apply the handbook verification matrix in upcoming `OBJ-003` coverage expansion work and continue recording evidence in feature/worklog docs
