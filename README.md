@@ -24,6 +24,7 @@
 - [Arquitetura](#arquitetura)
 - [Estrutura de Pastas](#estrutura-de-pastas)
 - [Instalação](#instalação)
+- [Testes](#testes)
 - [Endpoints](#endpoints)
 - [Roadmap](#roadmap)
 - [Contribuindo](#contribuindo)
@@ -52,6 +53,7 @@ O Doitly foi desenvolvido como projeto fullstack por [Ismael Gomes](https://gith
 ## Tecnologias
 
 ### Frontend
+
 - HTML5 + CSS3 (Design System próprio)
 - Bootstrap 5.3.2 + Bootstrap Icons
 - JavaScript Vanilla
@@ -59,12 +61,14 @@ O Doitly foi desenvolvido como projeto fullstack por [Ismael Gomes](https://gith
 - [AOS](https://michalsnik.github.io/aos/) — Animate On Scroll
 
 ### Backend
+
 - PHP 8.0+
 - MySQL / MariaDB via MySQLi
 - Sessões PHP nativas
 - Arquitetura em camadas: `public` → `actions` → `app` → `repository`
 
 ### Banco de Dados
+
 - Script unificado: `sql/doitly_unified.sql`
 - Stored procedures para conclusão de hábitos e estatísticas
 - Views para consultas agregadas
@@ -75,12 +79,14 @@ O Doitly foi desenvolvido como projeto fullstack por [Ismael Gomes](https://gith
 ## Funcionalidades
 
 ### Autenticação e Conta
+
 - Cadastro com validações server-side
 - Login com proteção CSRF e rate limit de tentativas
 - Sessão autenticada e logout seguro
 - Atualização de perfil: e-mail, avatar e senha
 
 ### Dashboard
+
 - Resumo diário: hábitos ativos, concluídos, taxa de conclusão e streak
 - Gráfico de progresso semanal
 - Lista de hábitos do dia com marcação direta
@@ -88,6 +94,7 @@ O Doitly foi desenvolvido como projeto fullstack por [Ismael Gomes](https://gith
 - Layout interno otimizado para mobile (dashboard, hábitos e histórico)
 
 ### Gerenciamento de Hábitos
+
 - CRUD completo de hábitos
 - Frequências: `daily`, `weekly` e `custom`
 - Seleção de dias da semana por hábito
@@ -97,6 +104,7 @@ O Doitly foi desenvolvido como projeto fullstack por [Ismael Gomes](https://gith
 - Melhor usabilidade em telas pequenas (filtros, cards e modal responsivo)
 
 ### Histórico e Gamificação
+
 - Métricas gerais de desempenho histórico
 - Gráficos mensais e por categoria
 - Hub de conquistas com progresso, raridade e XP
@@ -104,10 +112,12 @@ O Doitly foi desenvolvido como projeto fullstack por [Ismael Gomes](https://gith
 - Histórico recente de atividade
 
 ### Configurações e Exportação
+
 - Personalização de tema (cor primária, secundária e escala de texto)
 - Exportação do resumo do usuário em CSV
 
 ### Landing Page
+
 - Página pública de apresentação do produto
 - Seções de benefícios, recursos, FAQ e CTA
 - Layout responsivo com animações
@@ -192,13 +202,13 @@ Ou importe manualmente pelo phpMyAdmin caso esteja usando o XAMPP.
 
 A conexão usa variáveis de ambiente com fallback automático. Configure conforme necessário:
 
-| Variável  | Padrão      | Descrição |
-|-----------|-------------|-----------|
+| Variável  | Padrão      | Descrição              |
+| --------- | ----------- | ---------------------- |
 | `DB_HOST` | `localhost` | Host do banco de dados |
-| `DB_USER` | `root`      | Usuário do banco |
-| `DB_PASS` | _(vazio)_   | Senha do banco |
+| `DB_USER` | `root`      | Usuário do banco       |
+| `DB_PASS` | _(vazio)_   | Senha do banco         |
 | `DB_NAME` | `doitly`    | Nome do banco de dados |
-| `DB_PORT` | `3306`      | Porta de conexão |
+| `DB_PORT` | `3306`      | Porta de conexão       |
 
 Arquivo de configuração: `config/database.php`
 
@@ -214,30 +224,84 @@ http://localhost/ProjetoFullstack/public/
 
 ---
 
+## Testes
+
+### Pré-requisitos
+
+- PHP CLI 8.2+
+- MySQL/MariaDB em execução
+- Composer
+- Banco de teste dedicado (padrão: `doitly_test`)
+
+### Setup inicial
+
+1. Instale as dependências (incluindo dev):
+
+```bash
+composer install
+```
+
+2. Configure credenciais do MySQL via variáveis de ambiente, se necessario:
+
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USER`
+- `DB_PASS`
+- `DB_NAME` (use um banco dedicado ao rodar testes)
+- `TEST_DB_NAME` (opcional; sobrescreve o banco de teste)
+
+3. Recrie o esquema de teste:
+
+```bash
+composer test:db:reset
+```
+
+### Executar
+
+```bash
+composer test
+composer test:unit
+composer test:action
+```
+
+### Observações
+
+- Os testes de action usam MySQL real com reset de schema e fixtures.
+- Não execute testes apontando para o banco principal `doitly`.
+- Os entrypoints HTTP em `actions/*.php` foram mantidos; a logica testavel esta em handlers em `app/Actions/`.
+
+### Troubleshooting
+
+- `vendor/autoload.php` ausente: execute `composer install`.
+- Falha de conexao MySQL: revise `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASS`.
+- Erro ao recriar schema: confirme permissão para `DROP/CREATE DATABASE` no banco de teste.
+
+---
+
 ## Endpoints
 
 ### Actions (mutações)
 
-| Endpoint | Método | Descrição |
-|---|---|---|
-| `actions/login_action.php` | POST | Autenticação de usuário |
-| `actions/register_action.php` | POST | Cadastro de novo usuário |
-| `actions/logout_action.php` | POST | Encerramento de sessão |
-| `actions/habit_create_action.php` | POST | Criação de hábito |
-| `actions/habit_update_action.php` | POST | Edição de hábito |
-| `actions/habit_delete_action.php` | POST | Exclusão de hábito |
-| `actions/habit_toggle_completion_action.php` | POST | Marcar/desmarcar conclusão de hábito |
-| `actions/habit_archive_action.php` | POST | Arquivar / restaurar hábito |
-| `actions/update_profile_action.php` | POST | Atualização de perfil |
-| `actions/reset_appearance_action.php` | POST | Resetar configurações visuais |
-| `actions/export_user_data_csv_action.php` | GET | Exportar dados do usuário em CSV |
+| Endpoint                                     | Método | Descrição                            |
+| -------------------------------------------- | ------ | ------------------------------------ |
+| `actions/login_action.php`                   | POST   | Autenticação de usuário              |
+| `actions/register_action.php`                | POST   | Cadastro de novo usuário             |
+| `actions/logout_action.php`                  | POST   | Encerramento de sessão               |
+| `actions/habit_create_action.php`            | POST   | Criação de hábito                    |
+| `actions/habit_update_action.php`            | POST   | Edição de hábito                     |
+| `actions/habit_delete_action.php`            | POST   | Exclusão de hábito                   |
+| `actions/habit_toggle_completion_action.php` | POST   | Marcar/desmarcar conclusão de hábito |
+| `actions/habit_archive_action.php`           | POST   | Arquivar / restaurar hábito          |
+| `actions/update_profile_action.php`          | POST   | Atualização de perfil                |
+| `actions/reset_appearance_action.php`        | POST   | Resetar configurações visuais        |
+| `actions/export_user_data_csv_action.php`    | GET    | Exportar dados do usuário em CSV     |
 
 ### APIs (leitura)
 
-| Endpoint | Método | Descrição |
-|---|---|---|
-| `actions/api_habits_get.php` | GET | Listagem de hábitos do usuário |
-| `actions/api_stats_get.php` | GET | Estatísticas e métricas do usuário |
+| Endpoint                     | Método | Descrição                          |
+| ---------------------------- | ------ | ---------------------------------- |
+| `actions/api_habits_get.php` | GET    | Listagem de hábitos do usuário     |
+| `actions/api_stats_get.php`  | GET    | Estatísticas e métricas do usuário |
 
 ---
 
@@ -245,14 +309,14 @@ http://localhost/ProjetoFullstack/public/
 
 Melhorias planejadas com base no estado atual do projeto:
 
-| # | Funcionalidade | Status |
-|---|---|---|
-| 1 | Wizard de boas-vindas (onboarding) no primeiro login | 🔲 Pendente |
-| 2 | Notificações in-app com toasts modernos | 🔲 Pendente |
-| 3 | Indicador visual de força de senha no cadastro | 🔲 Pendente |
-| 4 | Micro-animação ao concluir hábito (confetti / check animado) | 🔲 Pendente |
-| 5 | Página dedicada de conquistas (`achievements.php`) | 🔲 Pendente |
-| 6 | Favoritos e lembretes avançados para hábitos prioritários | 🔲 Pendente |
+| #   | Funcionalidade                                               | Status      |
+| --- | ------------------------------------------------------------ | ----------- |
+| 1   | Wizard de boas-vindas (onboarding) no primeiro login         | 🔲 Pendente |
+| 2   | Notificações in-app com toasts modernos                      | 🔲 Pendente |
+| 3   | Indicador visual de força de senha no cadastro               | 🔲 Pendente |
+| 4   | Micro-animação ao concluir hábito (confetti / check animado) | 🔲 Pendente |
+| 5   | Página dedicada de conquistas (`achievements.php`)           | 🔲 Pendente |
+| 6   | Favoritos e lembretes avançados para hábitos prioritários    | 🔲 Pendente |
 
 > O campo `email_verified` já existe no banco de dados, aguardando implementação do fluxo de confirmação.
 
@@ -279,8 +343,8 @@ Contribuições são bem-vindas! Para contribuir:
 Desenvolvido com dedicação por:
 
 | [<img src="https://avatars.githubusercontent.com/u/200134059?v=4" width=100><br>**Ismael Gomes (Rex)**](https://github.com/rex23js) | [<img src="https://avatars.githubusercontent.com/u/202681712?v=4" width=100><br>**Guilherme de Deus**](https://github.com/dedeusgui) |
-|:---:|:---:|
-| [![GitHub](https://img.shields.io/badge/GitHub-rex23js-181717?style=flat&logo=github)](https://github.com/rex23js) | [![GitHub](https://img.shields.io/badge/GitHub-dedeusgui-181717?style=flat&logo=github)](https://github.com/dedeusgui) |
+| :---------------------------------------------------------------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------------------------------------------------: |
+|         [![GitHub](https://img.shields.io/badge/GitHub-rex23js-181717?style=flat&logo=github)](https://github.com/rex23js)          |        [![GitHub](https://img.shields.io/badge/GitHub-dedeusgui-181717?style=flat&logo=github)](https://github.com/dedeusgui)        |
 
 </div>
 

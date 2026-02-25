@@ -1,5 +1,7 @@
 <?php
 
+use App\Actions\ActionResponse;
+
 function actionRedirect(string $path): void
 {
     header('Location: ' . $path);
@@ -49,6 +51,23 @@ function actionFlashAndRedirect(string $sessionKey, string $message, string $pat
 {
     $_SESSION[$sessionKey] = $message;
     actionRedirect($path);
+}
+
+function actionApplyResponse(ActionResponse $response): void
+{
+    if ($response->isRedirect()) {
+        foreach ($response->getFlash() as $key => $message) {
+            $_SESSION[(string) $key] = (string) $message;
+        }
+
+        actionRedirect($response->getRedirectPath() ?? '../public/dashboard.php');
+    }
+
+    if ($response->isJson()) {
+        actionJsonResponse($response->getPayload(), $response->getStatusCode());
+    }
+
+    throw new RuntimeException('Tipo de resposta de ação não suportado.');
 }
 
 function actionJsonResponse(array $payload, int $statusCode = 200): void

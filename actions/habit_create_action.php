@@ -2,20 +2,9 @@
 require_once '../config/bootstrap.php';
 bootApp();
 
-use App\Habits\HabitCommandService;
+use App\Actions\Habits\HabitCreateActionHandler;
 
 actionRunWithErrorHandling(static function () use ($conn): void {
-    actionRequireLoggedIn();
-    actionRequirePost('habits.php');
-    actionRequireCsrf('habits.php');
-
-    $userId = (int) getAuthenticatedUserId();
-    $habitCommandService = new HabitCommandService($conn);
-    $result = $habitCommandService->create($userId, $_POST);
-
-    actionFlashAndRedirect(
-        $result['success'] ? 'success_message' : 'error_message',
-        $result['message'],
-        '../public/habits.php'
-    );
+    $handler = new HabitCreateActionHandler();
+    actionApplyResponse($handler->handle($conn, $_POST, $_SERVER, $_SESSION));
 }, 'habits.php');
