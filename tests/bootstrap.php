@@ -8,10 +8,10 @@ if (!defined('APP_TESTING')) {
 
 date_default_timezone_set('UTC');
 
-$_SERVER = is_array($_SERVER) ? $_SERVER : [];
-$_POST = is_array($_POST) ? $_POST : [];
-$_GET = is_array($_GET) ? $_GET : [];
-$_SESSION = is_array($_SESSION) ? $_SESSION : [];
+$_SERVER = (isset($_SERVER) && is_array($_SERVER)) ? $_SERVER : [];
+$_POST = (isset($_POST) && is_array($_POST)) ? $_POST : [];
+$_GET = (isset($_GET) && is_array($_GET)) ? $_GET : [];
+$_SESSION = (isset($_SESSION) && is_array($_SESSION)) ? $_SESSION : [];
 
 $autoload = dirname(__DIR__) . '/vendor/autoload.php';
 if (!file_exists($autoload)) {

@@ -35,7 +35,7 @@ final class HabitActionHandlersTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertArrayHasKey('error_message', $_SESSION);
+        self::assertArrayHasKey('error_message', $response->getFlash());
         self::assertCount(0, $this->db()->fetchAll('SELECT id FROM habits'));
     }
 
@@ -54,7 +54,7 @@ final class HabitActionHandlersTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertSame('Habito criado com sucesso!', $_SESSION['success_message'] ?? null);
+        self::assertSame('Habito criado com sucesso!', $response->getFlash()['success_message'] ?? null);
 
         $habit = $this->db()->fetchOne('SELECT user_id, title, frequency, time_of_day FROM habits LIMIT 1');
         self::assertNotNull($habit);
@@ -83,7 +83,7 @@ final class HabitActionHandlersTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertSame('Voce nao tem permissao para editar este habito.', $_SESSION['error_message'] ?? null);
+        self::assertSame('Voce nao tem permissao para editar este habito.', $response->getFlash()['error_message'] ?? null);
 
         $habit = $this->db()->fetchOne('SELECT title FROM habits WHERE id = ' . (int) $habitId);
         self::assertSame('Owner Habit', $habit['title'] ?? null);
@@ -121,7 +121,7 @@ final class HabitActionHandlersTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertSame('Habito atualizado com sucesso!', $_SESSION['success_message'] ?? null);
+        self::assertSame('Habito atualizado com sucesso!', $response->getFlash()['success_message'] ?? null);
 
         $habit = $this->db()->fetchOne('SELECT title, frequency, target_days, time_of_day FROM habits WHERE id = ' . (int) $habitId);
         self::assertSame('Updated Habit', $habit['title'] ?? null);
@@ -156,12 +156,12 @@ final class HabitActionHandlersTest extends ActionTestCase
 
         $responseAdd = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
         $this->assertRedirect($responseAdd, '/public/habits.php?tab=today');
-        self::assertArrayHasKey('success_message', $_SESSION);
+        self::assertArrayHasKey('success_message', $responseAdd->getFlash());
         self::assertSame('1', (string) ($this->db()->fetchOne('SELECT COUNT(*) AS c FROM habit_completions')['c'] ?? '0'));
 
         $responseRemove = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
         $this->assertRedirect($responseRemove, '/public/habits.php?tab=today');
-        self::assertArrayHasKey('success_message', $_SESSION);
+        self::assertArrayHasKey('success_message', $responseRemove->getFlash());
         self::assertSame('0', (string) ($this->db()->fetchOne('SELECT COUNT(*) AS c FROM habit_completions')['c'] ?? '1'));
     }
 
@@ -192,7 +192,7 @@ final class HabitActionHandlersTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '/public/habits.php');
-        self::assertArrayHasKey('error_message', $_SESSION);
+        self::assertArrayHasKey('error_message', $response->getFlash());
         self::assertSame('0', (string) ($this->db()->fetchOne('SELECT COUNT(*) AS c FROM habit_completions')['c'] ?? '1'));
     }
 
@@ -223,7 +223,7 @@ final class HabitActionHandlersTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '/public/habits.php');
-        self::assertArrayHasKey('error_message', $_SESSION);
+        self::assertArrayHasKey('error_message', $response->getFlash());
     }
 
     public function testToggleFallsBackToDefaultRedirectForExternalReferer(): void
@@ -248,7 +248,7 @@ final class HabitActionHandlersTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertSame('Habito invalido.', $_SESSION['error_message'] ?? null);
+        self::assertSame('Habito invalido.', $response->getFlash()['error_message'] ?? null);
     }
 
     private function validCreatePayload(): array

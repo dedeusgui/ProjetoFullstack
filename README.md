@@ -26,6 +26,7 @@
 - [Instalação](#instalação)
 - [Testes](#testes)
 - [Endpoints](#endpoints)
+- [Development Docs (Engineering)](#development-docs-engineering)
 - [Roadmap](#roadmap)
 - [Contribuindo](#contribuindo)
 - [Autores](#autores)
@@ -302,6 +303,17 @@ composer test:action
 | ---------------------------- | ------ | ---------------------------------- |
 | `actions/api_habits_get.php` | GET    | Listagem de hábitos do usuário     |
 | `actions/api_stats_get.php`  | GET    | Estatísticas e métricas do usuário |
+
+---
+
+## Development Docs (Engineering)
+
+For development progress, technical decisions, feature workspaces, and runbooks, use:
+
+- `docs/README.md` (hub)
+- `docs/STATUS.md` (current state + blockers)
+- `docs/FUTURE_OBJECTIVES.md` (strategic objectives tracked in session logs)
+- `docs/WORKLOG.md` (append-only development sessions)
 
 ---
 
