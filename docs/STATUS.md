@@ -8,7 +8,7 @@
 
 ### On-Track
 
-- `OBJ-003` Expand coverage execution/validation (Phase 2A/2B validated locally; ready for Phase 2C)
+- `OBJ-003` Expand coverage execution/validation (Phase 2A/2B/2C validated locally; ready for Phase 2D)
 - `OBJ-004` Development documentation system and handoff process
 
 ### Completed
@@ -21,8 +21,8 @@
 
 ## Active Work
 
-- Expand test coverage beyond first-wave habit flow (Phase 2A/2B completed; Phase 2C next)
-- Phase 2A API/stats and Phase 2B auth coverage validated locally (handler-based action tests + service integration tests)
+- Expand test coverage beyond first-wave habit flow (Phase 2A/2B/2C completed; Phase 2D next)
+- Phase 2A API/stats, Phase 2B auth, and Phase 2C habits coverage validated locally (handler-based action tests + service integration tests)
 - Continue standardizing action patterns where it helps testability
 - Use the engineering handbook verification/review workflow consistently in future sessions
 
@@ -56,6 +56,11 @@
   - added `AuthService` DB-backed integration tests
   - added auth handler tests (login/register/logout branches, rate-limit state, session mutations)
   - verified `composer test:db:reset`, `composer test:action`, `composer test`, and `composer qa`
+- Implemented and validated `OBJ-003` Phase 2C habits coverage:
+  - extracted `habit_delete_action.php` and `habit_archive_action.php` to handler-based adapters
+  - added DB-backed tests for `HabitCommandService`, `HabitCompletionService`, and `HabitAccessService`
+  - added delete/archive handler tests (including `id` alias and archive/restore dispatch)
+  - verified `composer test:db:reset`, `composer test:action`, `composer test`, and `composer qa`
 
 ## Current Blockers
 
@@ -64,6 +69,6 @@
 
 ## Next Recommended Step
 
-1. Continue `OBJ-003` with `Phase 2C` habit command/completion/access + delete/archive action coverage
+1. Continue `OBJ-003` with `Phase 2D` profile/settings/export coverage
 2. Keep DB-backed suite runs sequential because `Action` tests share/reset `doitly_test`
 3. Record outcomes and verification evidence in `docs/WORKLOG.md` and `docs/features/testing-rollout/progress.md`

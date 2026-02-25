@@ -413,3 +413,80 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Continue `OBJ-003` with `Phase 2C` habit command/completion/access services and delete/archive action coverage
+
+---
+
+## 2026-02-25 - Phase 2C Habits Coverage (Services + Delete/Archive Handlers)
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Implement `OBJ-003` Phase 2C coverage for habit command/completion/access services and delete/archive action handlers
+- Objectives advanced: `OBJ-003`
+- Progress toward objectives:
+  - Completed the planned Phase 2C habits coverage slice
+  - Extended handler/adaptor action coverage to habit delete/archive flows
+  - Added DB-backed service tests for command/completion/access behavior and key edge cases
+- Work completed:
+  - Added `App\Actions\Habits\HabitDeleteActionHandler` and `HabitArchiveActionHandler`
+  - Refactored `actions/habit_delete_action.php` and `actions/habit_archive_action.php` into thin adapters using `actionApplyResponse(...)`
+  - Added DB-backed tests for `HabitCommandService`:
+    - invalid category handling
+    - create normalization/preparation defaults
+    - delete unauthorized/success
+    - archive/restore success
+    - invalid habit id guard
+  - Added DB-backed tests for `HabitCompletionService`:
+    - toggle create/remove completion paths
+    - unauthorized/unscheduled/archived/value-required error branches
+    - recommendation snapshot invalidation (`user_recommendations`) representative checks
+  - Added DB-backed tests for `HabitAccessService` ownership checks
+  - Added delete/archive action handler tests, including delete `id` alias and archive/restore operation dispatch
+  - Updated rollout status/progress/spec docs for Phase 2C completion and Phase 2D next step
+- Files changed:
+  - `actions/habit_delete_action.php`
+  - `actions/habit_archive_action.php`
+  - `app/Actions/Habits/HabitDeleteActionHandler.php`
+  - `app/Actions/Habits/HabitArchiveActionHandler.php`
+  - `tests/Action/Habits/HabitCommandServiceTest.php`
+  - `tests/Action/Habits/HabitCompletionServiceTest.php`
+  - `tests/Action/Habits/HabitAccessServiceTest.php`
+  - `tests/Action/Habits/HabitDeleteActionHandlerTest.php`
+  - `tests/Action/Habits/HabitArchiveActionHandlerTest.php`
+  - `docs/features/testing-rollout/progress.md`
+  - `docs/features/testing-rollout/spec.md`
+  - `docs/STATUS.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No new ADR; reused ADR-0002 handler/adaptor + `ActionResponse` pattern for delete/archive actions
+  - Kept DB-backed tests sequential for reliable schema reset because `Action` suite shares `doitly_test`
+  - Adjusted one completion-service remove-toggle fixture to align aggregate counters with a pre-inserted completion row (`total_completions = 1`)
+- Verification performed (exact commands + key results):
+  - `php -l app\Actions\Habits\HabitDeleteActionHandler.php` -> OK
+  - `php -l app\Actions\Habits\HabitArchiveActionHandler.php` -> OK
+  - `php -l actions\habit_delete_action.php` -> OK
+  - `php -l actions\habit_archive_action.php` -> OK
+  - `php -l tests\Action\Habits\HabitCommandServiceTest.php` -> OK
+  - `php -l tests\Action\Habits\HabitCompletionServiceTest.php` -> OK
+  - `php -l tests\Action\Habits\HabitAccessServiceTest.php` -> OK
+  - `php -l tests\Action\Habits\HabitDeleteActionHandlerTest.php` -> OK
+  - `php -l tests\Action\Habits\HabitArchiveActionHandlerTest.php` -> OK
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Habits\HabitCommandServiceTest.php` -> failed once (`2` assertion failures), then test expectations corrected to match sanitizer behavior and null assertion bug fixed
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Habits\HabitCommandServiceTest.php` -> OK (`6 tests`, `30 assertions`)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Habits\HabitCompletionServiceTest.php` -> failed once (`1` failure) due fixture aggregate mismatch causing underflow during uncomplete; test fixture updated
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Habits\HabitCompletionServiceTest.php` -> OK (`6 tests`, `14 assertions`)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Habits\HabitAccessServiceTest.php` + `HabitDeleteActionHandlerTest.php` + `HabitArchiveActionHandlerTest.php` (parallel exploratory run) -> DB reset collision on shared `doitly_test` (`Can't create database ... exists`) for two classes; rerun sequentially per repo guidance
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Habits\HabitAccessServiceTest.php` -> OK (`2 tests`, `3 assertions`)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Habits\HabitDeleteActionHandlerTest.php` -> OK (`3 tests`, `10 assertions`)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Habits\HabitArchiveActionHandlerTest.php` -> OK (`3 tests`, `14 assertions`)
+  - `composer test:db:reset` -> OK (`Test database reset completed: doitly_test`)
+  - `composer test:action` -> OK (`88 tests`, `388 assertions`)
+  - `composer test` -> OK (`113 tests`, `445 assertions`)
+  - `composer qa` -> OK (Composer validate + autoload check + `25 tests`, `57 assertions`)
+- Tests/checks intentionally not run (and why):
+  - None; required and recommended checks for this change type were run
+- Blockers / risks:
+  - No active blocker for Phase 2C
+  - Fallback branches in `HabitCompletionService` (`complete/uncomplete` stored procedure fallback paths) remain lightly covered because they are difficult to deterministically trigger without manipulating DB procedures
+- Objective impact: `on-track`
+- Next objective step:
+  - Continue `OBJ-003` with `Phase 2D` profile/settings/export flow coverage
