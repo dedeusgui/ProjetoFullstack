@@ -8,7 +8,7 @@
 
 ### On-Track
 
-- `OBJ-003` Expand coverage execution/validation (Phase 2A/2B/2C validated locally; ready for Phase 2D)
+- `OBJ-003` Expand coverage execution/validation (Phase 2A/2B/2C/2D/2E validated locally; ready for Phase 2F)
 - `OBJ-004` Development documentation system and handoff process
 
 ### Completed
@@ -21,8 +21,8 @@
 
 ## Active Work
 
-- Expand test coverage beyond first-wave habit flow (Phase 2A/2B/2C completed; Phase 2D next)
-- Phase 2A API/stats, Phase 2B auth, and Phase 2C habits coverage validated locally (handler-based action tests + service integration tests)
+- Expand test coverage beyond first-wave habit flow (Phase 2A/2B/2C/2D/2E completed; Phase 2F next)
+- Phase 2A API/stats, Phase 2B auth, Phase 2C habits, Phase 2D profile/export, and Phase 2E repository/support/recommendation coverage validated locally
 - Continue standardizing action patterns where it helps testability
 - Use the engineering handbook verification/review workflow consistently in future sessions
 
@@ -61,6 +61,16 @@
   - added DB-backed tests for `HabitCommandService`, `HabitCompletionService`, and `HabitAccessService`
   - added delete/archive handler tests (including `id` alias and archive/restore dispatch)
   - verified `composer test:db:reset`, `composer test:action`, `composer test`, and `composer qa`
+- Implemented and validated `OBJ-003` Phase 2D profile/settings/export coverage:
+  - extracted `update_profile`, `reset_appearance`, and `export_user_data_csv` actions to handler-based adapters
+  - added CSV response support (`ActionResponse::csv` + `actionApplyResponse` handling)
+  - added `UserDataCsvExportService` and DB-backed tests for `ProfileService` + profile/export handlers
+  - verified `composer test:db:reset`, `composer test:action`, `composer test`, and `composer qa`
+- Implemented and validated `OBJ-003` Phase 2E repository/support/recommendation/achievement/progress coverage:
+  - added repository contract tests for core repositories (`Category`, `User`, `UserSettings`, `Habit`, `HabitQuery`, `Stats`)
+  - added support/value-object tests (`ActionResponse`, `DateFormatter`, `RequestContext`, `UserLocalDateResolver`)
+  - added representative tests for `BehaviorAnalyzer`, `RecommendationEngine`, `AchievementService`, and `UserProgressService`
+  - verified `composer test:db:reset`, `composer test:action`, `composer test`, and `composer qa`
 
 ## Current Blockers
 
@@ -69,6 +79,6 @@
 
 ## Next Recommended Step
 
-1. Continue `OBJ-003` with `Phase 2D` profile/settings/export coverage
+1. Continue `OBJ-003` with `Phase 2F` helper cleanup/testing (legacy/global-coupled helpers and remaining low-priority gaps)
 2. Keep DB-backed suite runs sequential because `Action` tests share/reset `doitly_test`
 3. Record outcomes and verification evidence in `docs/WORKLOG.md` and `docs/features/testing-rollout/progress.md`

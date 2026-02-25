@@ -1,7 +1,7 @@
 # Testing Rollout Progress
 
 - Related Objectives: `OBJ-001`, `OBJ-002`, `OBJ-003`
-- Current status: phase_2c_validated
+- Current status: phase_2e_validated
 
 ## Completed
 
@@ -46,6 +46,25 @@
   - `composer test:action` -> OK (`88 tests`, `388 assertions`)
   - `composer test` -> OK (`113 tests`, `445 assertions`)
   - `composer qa` -> OK (`25 tests`, `57 assertions`)
+- Phase 2D profile/settings/export coverage implemented and validated locally:
+  - extracted profile/update/reset/export actions into handlers with `ActionResponse`
+  - added CSV response support to `ActionResponse` / `actionApplyResponse(...)` for testable export actions
+  - extracted CSV generation/query orchestration into `UserDataCsvExportService`
+  - added DB-backed tests for `ProfileService` validation/success/rollback/reset branches
+  - added action handler tests for update/reset return-path and session behavior
+  - added export CSV handler tests (unauthorized, user-missing, empty sections, representative summary row)
+  - `composer test:db:reset` -> OK
+  - `composer test:action` -> OK (`109 tests`, `457 assertions`)
+  - `composer test` -> OK (`134 tests`, `514 assertions`)
+  - `composer qa` -> OK (`25 tests`, `57 assertions`)
+- Phase 2E repository/support/recommendation/achievement/progress coverage implemented and validated locally:
+  - added repository contract tests (`Category`, `User`, `UserSettings`, `Habit`, `HabitQuery`, `Stats`)
+  - added support/value-object tests (`ActionResponse`, `DateFormatter`, `RequestContext`, `UserLocalDateResolver`)
+  - added representative service tests for `BehaviorAnalyzer`, `RecommendationEngine`, `AchievementService`, and `UserProgressService`
+  - `composer test:db:reset` -> OK
+  - `composer test:action` -> OK (`133 tests`, `559 assertions`)
+  - `composer test` -> OK (`171 tests`, `653 assertions`)
+  - `composer qa` -> OK (`38 tests`, `94 assertions`)
 - Test infrastructure hardening during validation:
   - `TestDatabase::resetSchema()` now closes existing shared DB connection before drop/create
   - `SqlDumpImporter` ignores dump-level `CREATE DATABASE` / `USE` statements (reset already handles DB selection)
@@ -53,15 +72,15 @@
 
 ## In Progress
 
-- Coverage expansion continuation after Phase 2C validation (profile/settings/export, repository/support, helper/legacy slices)
+- Coverage expansion continuation after Phase 2E validation (helper/legacy Phase 2F and remaining low-priority gaps)
 
 ## Blockers
 
-- No active blocker for Phase 2C.
-- Future blockers may appear in later phases (profile/export action extraction, CSV assertions, repository edge cases, helper globals coupling).
+- No active blocker for Phase 2E.
+- Future blockers may appear in Phase 2F due legacy/global helper coupling and bootstrap/session side effects.
 
 ## Next Actions
 
-1. Start `Phase 2D` profile/settings and export flow coverage
+1. Start `Phase 2F` helper cleanup/testing for legacy/global-coupled helpers
 2. Keep DB-backed verification sequential (`composer test:db:reset` -> `composer test:action` -> `composer test`) because suites share `doitly_test`
 3. Record outcomes in `docs/WORKLOG.md` and this file

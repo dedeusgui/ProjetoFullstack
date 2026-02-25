@@ -17,6 +17,8 @@ Establish a reliable automated testing foundation (unit + action) and expand cov
 - Phase 2A API/stats handler + payload/service coverage
 - Phase 2B auth service + action handler coverage
 - Phase 2C habits command/completion/access service + delete/archive action coverage
+- Phase 2D profile/settings/export service + action handler coverage
+- Phase 2E repository/support/recommendation/achievement/user-progress coverage
 
 ## Implemented Decisions
 
@@ -26,9 +28,9 @@ Establish a reliable automated testing foundation (unit + action) and expand cov
 
 ## Next Milestones
 
-1. Expand profile/settings/export flow coverage (Phase 2D)
-2. Expand repository/support/recommendation/achievement coverage (Phase 2E)
-3. Expand helper cleanup/testing for legacy/global-coupled code (Phase 2F)
+1. Expand helper cleanup/testing for legacy/global-coupled code (Phase 2F)
+2. Backfill remaining high-value branches discovered in prior slices (e.g., fallback/error paths)
+3. Reassess coverage priorities after Phase 2F and decide on additional repository/service depth vs. helper refactors
 
 ## Dependencies / Constraints
 

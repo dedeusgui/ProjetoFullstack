@@ -23,6 +23,14 @@ final class ActionResponse
         return new self('json', $statusCode, null, [], $payload);
     }
 
+    public static function csv(string $filename, string $content, int $statusCode = 200): self
+    {
+        return new self('csv', $statusCode, null, [], [
+            'filename' => $filename,
+            'content' => $content,
+        ]);
+    }
+
     public function isRedirect(): bool
     {
         return $this->type === 'redirect';
@@ -31,6 +39,11 @@ final class ActionResponse
     public function isJson(): bool
     {
         return $this->type === 'json';
+    }
+
+    public function isCsv(): bool
+    {
+        return $this->type === 'csv';
     }
 
     public function getStatusCode(): int

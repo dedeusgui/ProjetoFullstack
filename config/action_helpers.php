@@ -67,6 +67,15 @@ function actionApplyResponse(ActionResponse $response): void
         actionJsonResponse($response->getPayload(), $response->getStatusCode());
     }
 
+    if ($response->isCsv()) {
+        $payload = $response->getPayload();
+        actionCsvResponse(
+            (string) ($payload['content'] ?? ''),
+            (string) ($payload['filename'] ?? 'export.csv'),
+            $response->getStatusCode()
+        );
+    }
+
     throw new RuntimeException('Tipo de resposta de ação não suportado.');
 }
 
@@ -91,6 +100,18 @@ function actionJsonError(string $message, int $statusCode = 500, string $errorCo
     ], $extra);
 
     actionJsonResponse($payload, $statusCode);
+}
+
+function actionCsvResponse(string $content, string $filename, int $statusCode = 200): void
+{
+    if (!headers_sent()) {
+        http_response_code($statusCode);
+        header('Content-Type: text/csv; charset=UTF-8');
+        header('Content-Disposition: attachment; filename="' . str_replace('"', '', $filename) . '"');
+    }
+
+    echo $content;
+    exit;
 }
 
 function actionHandleUnexpectedThrowable(\Throwable $exception, string $fallbackPublicPage = 'dashboard.php'): void
