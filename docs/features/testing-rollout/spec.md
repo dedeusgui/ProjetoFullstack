@@ -1,7 +1,7 @@
 # Feature Spec: Testing Rollout
 
 - Related Objectives: `OBJ-001`, `OBJ-002`, `OBJ-003`
-- Status: in_progress
+- Status: phase_2_complete
 
 ## Goal
 
@@ -19,6 +19,7 @@ Establish a reliable automated testing foundation (unit + action) and expand cov
 - Phase 2C habits command/completion/access service + delete/archive action coverage
 - Phase 2D profile/settings/export service + action handler coverage
 - Phase 2E repository/support/recommendation/achievement/user-progress coverage
+- Phase 2F helper/legacy helper coverage (stable global helper functions + representative wrapper integration tests)
 
 ## Implemented Decisions
 
@@ -28,9 +29,9 @@ Establish a reliable automated testing foundation (unit + action) and expand cov
 
 ## Next Milestones
 
-1. Expand helper cleanup/testing for legacy/global-coupled code (Phase 2F)
-2. Backfill remaining high-value branches discovered in prior slices (e.g., fallback/error paths)
-3. Reassess coverage priorities after Phase 2F and decide on additional repository/service depth vs. helper refactors
+1. Backfill remaining high-value branches discovered in prior slices (e.g., fallback/error paths, hard-to-trigger runtime branches)
+2. Continue action-pattern standardization (`OBJ-005`) where helper/global coupling remains
+3. Introduce CI automation for the validated local test workflow
 
 ## Dependencies / Constraints
 

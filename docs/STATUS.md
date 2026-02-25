@@ -1,15 +1,15 @@
 # Current Status
 
 - Last updated: 2026-02-25
-- Current phase: Engineering foundation and documentation system hardening
+- Current phase: Coverage expansion completed; standardization and CI follow-through
 - Primary audience: Developers and AI agents
 
 ## Objective Summary
 
 ### On-Track
 
-- `OBJ-003` Expand coverage execution/validation (Phase 2A/2B/2C/2D/2E validated locally; ready for Phase 2F)
 - `OBJ-004` Development documentation system and handoff process
+- Post-`OBJ-003` follow-through: CI enablement and action-pattern standardization are unblocked by broader local test coverage
 
 ### Completed
 
@@ -18,12 +18,15 @@
   - `composer install`, `composer test:db:reset`, and test suites executed successfully
 - `OBJ-002` Automated testing foundation (PHPUnit + MySQL test schema workflow)
   - Full local validation completed (`composer test` passing)
+- `OBJ-003` Expand test coverage to critical flows
+  - Phase 2A-2F coverage rollout implemented and validated locally (API/stats, auth, habits, profile/export, repositories/support/recommendation/achievement/progress, helper globals)
+  - Expanded local validation baseline verified (`composer test:action`, `composer test`, `composer qa`)
 
 ## Active Work
 
-- Expand test coverage beyond first-wave habit flow (Phase 2A/2B/2C/2D/2E completed; Phase 2F next)
-- Phase 2A API/stats, Phase 2B auth, Phase 2C habits, Phase 2D profile/export, and Phase 2E repository/support/recommendation coverage validated locally
-- Continue standardizing action patterns where it helps testability
+- Maintain docs freshness and verification evidence discipline across sessions (`OBJ-004`)
+- Continue standardizing action patterns where it helps testability (`OBJ-005`)
+- Evaluate CI workflow introduction now that local test suites are broader and stable
 - Use the engineering handbook verification/review workflow consistently in future sessions
 
 ## Recently Completed
@@ -71,14 +74,19 @@
   - added support/value-object tests (`ActionResponse`, `DateFormatter`, `RequestContext`, `UserLocalDateResolver`)
   - added representative tests for `BehaviorAnalyzer`, `RecommendationEngine`, `AchievementService`, and `UserProgressService`
   - verified `composer test:db:reset`, `composer test:action`, `composer test`, and `composer qa`
+- Implemented and validated `OBJ-003` Phase 2F helper/legacy helper coverage:
+  - added tests for stable `config/*` helper functions (`auth`, `security`, `error`, `action`, `app_helpers`)
+  - added DB-backed helper wrapper integration tests (`getAuthenticatedUserRecord`, category/achievement/progress wrappers)
+  - helper `header()/exit` paths remain intentionally light and are mostly covered indirectly via extracted handlers
+  - verified `composer test:db:reset`, `composer test:action`, `composer test`, and `composer qa`
 
 ## Current Blockers
 
-- No active blocker for the current testing foundation.
-- Next blockers, if any, are expected to come from coverage expansion work (`OBJ-003`).
+- No active blocker for the completed Phase 2 coverage rollout.
+- Next blockers are more likely to come from CI integration or legacy helper/runtime coupling during future standardization work.
 
 ## Next Recommended Step
 
-1. Continue `OBJ-003` with `Phase 2F` helper cleanup/testing (legacy/global-coupled helpers and remaining low-priority gaps)
-2. Keep DB-backed suite runs sequential because `Action` tests share/reset `doitly_test`
-3. Record outcomes and verification evidence in `docs/WORKLOG.md` and `docs/features/testing-rollout/progress.md`
+1. Start `OBJ-005` follow-through by standardizing remaining procedural actions where helper/global coupling still limits testability
+2. Add CI workflow for `composer test` (and optionally `composer qa`) now that local suite breadth is validated
+3. Keep DB-backed suite runs sequential locally because `Action` tests share/reset `doitly_test`

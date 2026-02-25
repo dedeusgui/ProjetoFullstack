@@ -653,3 +653,68 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Continue `OBJ-003` with `Phase 2F` helper cleanup/testing for legacy/global-coupled helpers and remaining low-priority gaps
+
+---
+
+## 2026-02-25 - Phase 2F Helper/Legacy Helper Coverage + OBJ-003 Completion
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Finalize `OBJ-003` by implementing `Phase 2F` helper/legacy helper coverage for stable `config/*` helper functions and representative wrapper integrations
+- Objectives advanced: `OBJ-003`
+- Progress toward objectives:
+  - Completed the final planned Phase 2 coverage slice (`Phase 2F`)
+  - Marked `OBJ-003` coverage expansion as complete after local validation of the full expanded suites
+  - Documented next focus shift toward `OBJ-005` (action pattern standardization) and CI enablement
+- Work completed:
+  - Added unit tests for stable global helper functions in `config/*`:
+    - auth/session state helpers
+    - security helpers (`HTTPS`, CSP nonce/CSP builder, session-cookie config no-op branch)
+    - selected error helpers (request id/context/status/json/html rendering helpers)
+    - action helper state/normalization helpers (return path, CSRF token, auth failure/rate-limit state)
+    - `app_helpers` compatibility wrappers (pure wrappers)
+  - Added DB-backed helper integration tests for:
+    - `getAuthenticatedUserRecord(...)`
+    - category/achievement/progress helper wrappers in `config/app_helpers.php`
+  - Finalized docs/progress/objective status for full Phase 2A-2F rollout completion
+  - Updated `docs/FUTURE_OBJECTIVES.md` to mark `OBJ-003` as `done`
+- Files changed:
+  - `tests/Unit/Config/AuthHelpersTest.php`
+  - `tests/Unit/Config/SecurityHelpersTest.php`
+  - `tests/Unit/Config/ErrorHelpersTest.php`
+  - `tests/Unit/Config/ActionHelpersTest.php`
+  - `tests/Unit/Config/AppHelpersTest.php`
+  - `tests/Action/Config/AuthHelpersDbTest.php`
+  - `tests/Action/Config/AppHelpersIntegrationTest.php`
+  - `docs/features/testing-rollout/progress.md`
+  - `docs/features/testing-rollout/spec.md`
+  - `docs/STATUS.md`
+  - `docs/FUTURE_OBJECTIVES.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No new ADR; Phase 2F adds helper coverage within existing testing strategy and keeps direct `header()/exit` helper paths intentionally light
+  - Helper tests target deterministic state/normalization/output helpers and wrapper integrations; redirect/exit behavior is mostly covered indirectly by handler-based action tests
+- Verification performed (exact commands + key results):
+  - `php -l tests\Unit\Config\AuthHelpersTest.php` -> OK
+  - `php -l tests\Unit\Config\SecurityHelpersTest.php` -> OK
+  - `php -l tests\Unit\Config\ErrorHelpersTest.php` -> OK
+  - `php -l tests\Unit\Config\ActionHelpersTest.php` -> OK
+  - `php -l tests\Unit\Config\AppHelpersTest.php` -> OK
+  - `php -l tests\Action\Config\AuthHelpersDbTest.php` -> OK
+  - `php -l tests\Action\Config\AppHelpersIntegrationTest.php` -> OK
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Unit\Config\AuthHelpersTest.php tests\Unit\Config\SecurityHelpersTest.php tests\Unit\Config\ErrorHelpersTest.php tests\Unit\Config\ActionHelpersTest.php tests\Unit\Config\AppHelpersTest.php` -> OK (`20 tests`, `64 assertions`)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Config\AuthHelpersDbTest.php tests\Action\Config\AppHelpersIntegrationTest.php` -> OK (`4 tests`, `20 assertions`)
+  - `composer test:db:reset` -> OK (`Test database reset completed: doitly_test`)
+  - `composer test:action` -> OK (`137 tests`, `579 assertions`)
+  - `composer test` -> OK (`195 tests`, `737 assertions`)
+  - `composer qa` -> OK (Composer validate + autoload check + `58 tests`, `158 assertions`)
+- Tests/checks intentionally not run (and why):
+  - None; required and recommended checks for this change type were run
+- Blockers / risks:
+  - No active blocker for Phase 2 coverage rollout (`OBJ-003`)
+  - Some helper/bootstrap `header()/exit` paths and runtime-specific branches remain intentionally light and may require subprocess-style tests or further extraction if they become regression hotspots
+  - `composer test` emitted a Composer cache writability warning for `C:/Users/sernu/AppData/Local/Composer/files/` but tests completed successfully
+  - Full-suite runs still include expected error log entries from intentionally triggered `ProfileService` FK-failure rollback tests
+- Objective impact: `on-track` -> `done` for `OBJ-003`
+- Next objective step:
+  - Start `OBJ-005` follow-through (remaining procedural action standardization) and/or add CI automation for the validated local test workflow

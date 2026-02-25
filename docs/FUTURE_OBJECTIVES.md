@@ -42,8 +42,8 @@ This file tracks strategic objectives and provides IDs used in `docs/WORKLOG.md`
 
 ## OBJ-003 - Expand Test Coverage to Critical Flows
 
-- Status: `in_progress`
-- Current note: Initial first-wave tests are validated. Next step is expanding coverage to auth/API/stats and additional failure paths.
+- Status: `done`
+- Current note: Phase 2A-2F coverage rollout was completed and locally validated across API/stats, auth, habits, profile/export, repositories/support, recommendation/achievement/progress, and stable helper globals.
 - Why it matters: Coverage must move beyond the initial habit flow and pure utilities.
 - Success criteria:
   - Auth, API, and stats flows have representative tests

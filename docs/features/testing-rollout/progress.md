@@ -1,7 +1,7 @@
 # Testing Rollout Progress
 
 - Related Objectives: `OBJ-001`, `OBJ-002`, `OBJ-003`
-- Current status: phase_2e_validated
+- Current status: phase_2f_validated
 
 ## Completed
 
@@ -65,6 +65,14 @@
   - `composer test:action` -> OK (`133 tests`, `559 assertions`)
   - `composer test` -> OK (`171 tests`, `653 assertions`)
   - `composer qa` -> OK (`38 tests`, `94 assertions`)
+- Phase 2F helper/legacy helper coverage implemented and validated locally:
+  - added helper tests for stable `config/*` global functions (`auth`, `security`, `error`, `action`, `app_helpers`)
+  - added DB-backed integration tests for helper wrappers (`getAuthenticatedUserRecord`, category/achievement/progress wrappers)
+  - intentionally avoided brittle direct tests for `header()/exit` helper paths; covered surrounding behavior via extracted handlers and helper state functions
+  - `composer test:db:reset` -> OK
+  - `composer test:action` -> OK (`137 tests`, `579 assertions`)
+  - `composer test` -> OK (`195 tests`, `737 assertions`)
+  - `composer qa` -> OK (`58 tests`, `158 assertions`)
 - Test infrastructure hardening during validation:
   - `TestDatabase::resetSchema()` now closes existing shared DB connection before drop/create
   - `SqlDumpImporter` ignores dump-level `CREATE DATABASE` / `USE` statements (reset already handles DB selection)
@@ -72,15 +80,15 @@
 
 ## In Progress
 
-- Coverage expansion continuation after Phase 2E validation (helper/legacy Phase 2F and remaining low-priority gaps)
+- Phase 2 rollout complete; track only residual low-priority branch gaps and future testability refactors as part of other objectives
 
 ## Blockers
 
-- No active blocker for Phase 2E.
-- Future blockers may appear in Phase 2F due legacy/global helper coupling and bootstrap/session side effects.
+- No active blocker for the Phase 2 coverage rollout.
+- Residual gaps are mostly helper/bootstrap `header()/exit` paths and runtime-specific branches that may require additional extraction or subprocess-style tests.
 
 ## Next Actions
 
-1. Start `Phase 2F` helper cleanup/testing for legacy/global-coupled helpers
+1. Close `OBJ-003` as completed and shift focus to `OBJ-005` action-pattern standardization / CI enablement follow-up
 2. Keep DB-backed verification sequential (`composer test:db:reset` -> `composer test:action` -> `composer test`) because suites share `doitly_test`
-3. Record outcomes in `docs/WORKLOG.md` and this file
+3. Backfill only high-value remaining branches discovered during feature work (avoid exhaustive low-value helper exit-path tests)
