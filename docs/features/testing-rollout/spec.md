@@ -14,6 +14,8 @@ Establish a reliable automated testing foundation (unit + action) and expand cov
 - MySQL test schema reset/import
 - First-wave unit tests (pure logic)
 - First-wave habit action handler tests
+- Phase 2A API/stats handler + payload/service coverage
+- Phase 2B auth service + action handler coverage
 
 ## Implemented Decisions
 
@@ -23,9 +25,9 @@ Establish a reliable automated testing foundation (unit + action) and expand cov
 
 ## Next Milestones
 
-1. Execute API/stats coverage expansion slice (see `coverage-expansion-plan.md`, Phase 2A)
-2. Expand auth flow coverage (service + action handlers)
-3. Expand profile/export and remaining habit action coverage
+1. Expand remaining habit command/query/action coverage (Phase 2C)
+2. Expand profile/settings/export flow coverage (Phase 2D)
+3. Expand repository/support/recommendation/achievement coverage (Phase 2E) and helper cleanup/testing (Phase 2F)
 
 ## Dependencies / Constraints
 

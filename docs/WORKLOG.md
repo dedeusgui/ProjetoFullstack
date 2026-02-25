@@ -345,3 +345,71 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Start `Phase 2B` auth flow coverage and follow sequential DB-backed verification (`composer test:db:reset` -> `composer test:action` -> `composer test`)
+
+---
+
+## 2026-02-25 - Phase 2B Auth Coverage (Handler Extraction + Tests)
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Implement `OBJ-003` Phase 2B auth coverage by extracting auth actions to handlers and adding DB-backed tests for auth service and action behavior
+- Objectives advanced: `OBJ-003`
+- Progress toward objectives:
+  - Completed the planned Phase 2B auth coverage slice
+  - Extended the handler/adaptor testability pattern to auth actions (`login`, `register`, `logout`)
+  - Increased DB-backed action coverage and total suite counts with full local validation passing
+- Work completed:
+  - Added `App\Actions\Auth\LoginActionHandler`, `RegisterActionHandler`, and `LogoutActionHandler`
+  - Refactored `actions/login_action.php`, `actions/register_action.php`, and `actions/logout_action.php` into thin adapters applying `ActionResponse`
+  - Kept runtime-only session side effects in adapters (`session_regenerate_id`, `session_destroy`) while making auth logic testable in handlers
+  - Added DB-backed `AuthService` integration tests covering authentication, email normalization, registration success, duplicate insert failure behavior, and `last_login` updates
+  - Added auth action handler tests covering login validation/rate limit/failure/success, register validation branches/success, and logout session clearing
+  - Updated testing rollout/status/progress docs for Phase 2B completion and Phase 2C next step
+- Files changed:
+  - `actions/login_action.php`
+  - `actions/register_action.php`
+  - `actions/logout_action.php`
+  - `app/Actions/Auth/LoginActionHandler.php`
+  - `app/Actions/Auth/RegisterActionHandler.php`
+  - `app/Actions/Auth/LogoutActionHandler.php`
+  - `tests/Action/Auth/AuthServiceTest.php`
+  - `tests/Action/Auth/LoginActionHandlerTest.php`
+  - `tests/Action/Auth/RegisterActionHandlerTest.php`
+  - `tests/Action/Auth/LogoutActionHandlerTest.php`
+  - `docs/features/testing-rollout/progress.md`
+  - `docs/features/testing-rollout/spec.md`
+  - `docs/STATUS.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No new ADR; reused ADR-0002 handler/adaptor + `ActionResponse` pattern for auth actions
+  - Kept `session_regenerate_id(true)` and `session_destroy()` in `actions/*` adapters (runtime concerns) instead of handlers to preserve testability
+  - AuthService duplicate insert failure assertion was aligned to actual runtime behavior (`mysqli_sql_exception` under current mysqli exception mode)
+- Verification performed (exact commands + key results):
+  - `php -l app\Actions\Auth\LoginActionHandler.php` -> OK
+  - `php -l app\Actions\Auth\RegisterActionHandler.php` -> OK
+  - `php -l app\Actions\Auth\LogoutActionHandler.php` -> OK
+  - `php -l actions\login_action.php` -> OK
+  - `php -l actions\register_action.php` -> OK
+  - `php -l actions\logout_action.php` -> OK
+  - `php -l tests\Action\Auth\AuthServiceTest.php` -> OK
+  - `php -l tests\Action\Auth\LoginActionHandlerTest.php` -> OK
+  - `php -l tests\Action\Auth\RegisterActionHandlerTest.php` -> OK
+  - `php -l tests\Action\Auth\LogoutActionHandlerTest.php` -> OK
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Auth\AuthServiceTest.php` -> failed once (`1` failure) due expected exception type mismatch (`InfrastructureException` vs actual `mysqli_sql_exception`), then test updated
+  - `php -l tests\Action\Auth\AuthServiceTest.php` -> OK (after test assertion update)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Auth\AuthServiceTest.php` -> OK (`8 tests`, `21 assertions`)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Auth\LoginActionHandlerTest.php` -> OK (`6 tests`, `30 assertions`)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Auth\RegisterActionHandlerTest.php` -> OK (`8 tests`, `33 assertions`)
+  - `php vendor\bin\phpunit --configuration phpunit.xml tests\Action\Auth\LogoutActionHandlerTest.php` -> OK (`2 tests`, `6 assertions`)
+  - `composer test:db:reset` -> OK (`Test database reset completed: doitly_test`)
+  - `composer test:action` -> OK (`68 tests`, `317 assertions`)
+  - `composer test` -> OK (`93 tests`, `374 assertions`)
+  - `composer qa` -> OK (Composer validate + autoload check + `25 tests`, `57 assertions`)
+- Tests/checks intentionally not run (and why):
+  - None; required and recommended checks for this change type were run
+- Blockers / risks:
+  - No active blocker for Phase 2B
+  - Auth actions now use handler-managed CSRF/rate-limit/session mutation logic; future helper behavior changes should keep auth handlers/tests in sync
+- Objective impact: `on-track`
+- Next objective step:
+  - Continue `OBJ-003` with `Phase 2C` habit command/completion/access services and delete/archive action coverage

@@ -1,7 +1,7 @@
 # Testing Rollout Progress
 
 - Related Objectives: `OBJ-001`, `OBJ-002`, `OBJ-003`
-- Current status: phase_2a_validated
+- Current status: phase_2b_validated
 
 ## Completed
 
@@ -29,6 +29,14 @@
   - `composer test:db:reset` -> OK
   - `composer test:action` -> OK (`44 tests`, `227 assertions`)
   - `composer test` -> OK (`69 tests`, `284 assertions`)
+- Phase 2B auth coverage implemented and validated locally:
+  - extracted handler-based auth actions for login/register/logout using `ActionResponse`
+  - added DB-backed `AuthService` integration tests
+  - added auth action handler tests for validation, rate limit, login success/failure, register branches, and logout session clear
+  - `composer test:db:reset` -> OK
+  - `composer test:action` -> OK (`68 tests`, `317 assertions`)
+  - `composer test` -> OK (`93 tests`, `374 assertions`)
+  - `composer qa` -> OK (`25 tests`, `57 assertions`)
 - Test infrastructure hardening during validation:
   - `TestDatabase::resetSchema()` now closes existing shared DB connection before drop/create
   - `SqlDumpImporter` ignores dump-level `CREATE DATABASE` / `USE` statements (reset already handles DB selection)
@@ -36,15 +44,15 @@
 
 ## In Progress
 
-- Coverage expansion continuation after Phase 2A validation (auth / remaining habits services)
+- Coverage expansion continuation after Phase 2B validation (remaining habits services / profile-export / repository-support slices)
 
 ## Blockers
 
-- No active blocker for Phase 2A.
-- Future blockers may appear in later phases (auth fixtures, additional action extraction, repository edge cases).
+- No active blocker for Phase 2B.
+- Future blockers may appear in later phases (additional action extraction, repository edge cases, export/CSV harness needs).
 
 ## Next Actions
 
-1. Start `Phase 2B` auth coverage (service + login/register/logout action handler extraction/tests)
+1. Start `Phase 2C` habit command/completion/access service and delete/archive action coverage
 2. Keep DB-backed verification sequential (`composer test:db:reset` -> `composer test:action` -> `composer test`) because suites share `doitly_test`
 3. Record outcomes in `docs/WORKLOG.md` and this file

@@ -2,34 +2,20 @@
 require_once '../config/bootstrap.php';
 bootApp();
 
-use App\Auth\AuthService;
+use App\Actions\Auth\LoginActionHandler;
 
 actionRunWithErrorHandling(static function () use ($conn): void {
-    actionRequirePost('login.php');
-    actionRequireCsrf('login.php');
+    $handler = new LoginActionHandler();
+    $response = $handler->handle($conn, $_POST, $_SERVER, $_SESSION);
 
-    $email = strtolower(trim($_POST['email'] ?? ''));
-    $password = $_POST['password'] ?? '';
-
-    if (empty($email) || empty($password)) {
-        actionFlashAndRedirect('error_message', 'Por favor, preencha todos os campos.', '../public/login.php');
+    if (
+        $response->isRedirect()
+        && $response->getRedirectPath() === '../public/dashboard.php'
+        && isset($_SESSION['user_id'])
+        && session_status() === PHP_SESSION_ACTIVE
+    ) {
+        session_regenerate_id(true);
     }
 
-    if (authIsRateLimited()) {
-        actionFlashAndRedirect('error_message', 'Muitas tentativas de login. Aguarde alguns minutos e tente novamente.', '../public/login.php');
-    }
-
-    $authService = new AuthService($conn);
-    $user = $authService->authenticate($email, $password);
-
-    if (!$user) {
-        authRegisterFailure();
-        actionFlashAndRedirect('error_message', 'Email ou senha incorretos.', '../public/login.php');
-    }
-
-    authClearFailures();
-    signInUser($user['id'], $user['name'], $user['email']);
-    $authService->updateLastLogin($user['id']);
-
-    actionRedirect('../public/dashboard.php');
+    actionApplyResponse($response);
 }, 'login.php');
