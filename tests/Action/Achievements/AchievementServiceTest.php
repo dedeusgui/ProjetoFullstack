@@ -58,6 +58,49 @@ final class AchievementServiceTest extends ActionTestCase
         self::assertSame('bi bi-patch-check-fill', AchievementService::mapIconToBootstrap(''));
     }
 
+    public function testGetAchievementsPageDataReturnsRecentUnlockedTimelineLimitedAndOrdered(): void
+    {
+        $userId = $this->fixtures->createUser(['timezone' => 'UTC']);
+        $achievementRows = $this->db()->fetchAll('SELECT id FROM achievements WHERE is_active = 1 ORDER BY id ASC LIMIT 6');
+        self::assertCount(6, $achievementRows, 'Expected at least 6 active achievements in seeded schema.');
+
+        $stmt = $this->db()->prepare('INSERT INTO user_achievements (user_id, achievement_id, unlocked_at, progress) VALUES (?, ?, ?, ?)');
+        foreach ($achievementRows as $index => $achievementRow) {
+            $achievementId = (int) ($achievementRow['id'] ?? 0);
+            $unlockedAt = sprintf('2026-02-%02d 10:00:00', $index + 1);
+            $progress = 100;
+            $stmt->bind_param('iisi', $userId, $achievementId, $unlockedAt, $progress);
+            $stmt->execute();
+        }
+
+        $service = new AchievementService($this->conn());
+        $pageData = $service->getAchievementsPageData($userId);
+        $recentUnlocked = $pageData['recent_unlocked'] ?? [];
+
+        self::assertCount(5, $recentUnlocked);
+
+        $expectedIds = array_slice(
+            array_reverse(array_map(static fn(array $row): int => (int) ($row['id'] ?? 0), $achievementRows)),
+            0,
+            5
+        );
+        $recentIds = array_map(static fn(array $item): int => (int) ($item['id'] ?? 0), $recentUnlocked);
+        self::assertSame($expectedIds, $recentIds);
+
+        $recentTimestamps = array_map(
+            static fn(array $item): int => strtotime((string) ($item['date'] ?? '1970-01-01 00:00:00')) ?: 0,
+            $recentUnlocked
+        );
+        $expectedTimestamps = $recentTimestamps;
+        rsort($expectedTimestamps);
+        self::assertSame($expectedTimestamps, $recentTimestamps);
+
+        foreach ($recentUnlocked as $item) {
+            self::assertTrue((bool) ($item['unlocked'] ?? false));
+            self::assertNotSame('', (string) ($item['date'] ?? ''));
+        }
+    }
+
     private function findBySlug(array $items, string $slug): ?array
     {
         foreach ($items as $item) {

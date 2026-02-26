@@ -1241,3 +1241,57 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Create a UI/UX rework spec/feature workspace (or equivalent planning artifact) that defines UX goals, page priorities, and phased rollout for `OBJ-007`.
+
+---
+
+## 2026-02-26 - Achievements Page UI/UX Rework Phase 1 (Recent Timeline + PT-BR + Filters)
+
+- Date / time: 2026-02-26 11:58:32-03:00
+- Author: Codex (AI agent)
+- Goal: Implement the first major `OBJ-007` UI/UX rework slice on the achievements page with better styling/hover states, PT-BR UI cleanup, and a more rewarding recent achievements experience
+- Objectives advanced: `OBJ-007`, `OBJ-004`
+- Progress toward objectives:
+  - Moved `OBJ-007` from planning into implementation with a full Achievements Phase 1 UI/UX pass
+  - Seeded a dedicated `docs/features/ui-ux-rework/` workspace for future page rework phases and verification tracking
+- Work completed:
+  - Reworked `public/achievements.php` page composition and interactions (hero, timeline, filters, gallery, quick stats)
+  - Replaced the old achievements highlights block with a recent achievements timeline section (up to 5 items)
+  - Improved filter UX with active state, `aria-pressed`, result counter, and empty-state feedback
+  - Expanded `AchievementService::getAchievementsPageData()` to return `recent_unlocked` (newest first, max 5)
+  - Added/updated tests for achievements payload shape and recent timeline ordering/limit
+  - Performed PT-BR copy cleanup on achievements page UI strings (labels/microcopy/rarity text)
+  - Ordered the achievements gallery on the page from easier to harder (rarity -> target -> points)
+  - Added `docs/features/ui-ux-rework/spec.md`, `progress.md`, and `acceptance-checklist.md`, and indexed the workspace
+- Files changed:
+  - `app/Achievements/AchievementService.php`
+  - `public/achievements.php`
+  - `public/assets/css/achievements.css`
+  - `tests/Action/Achievements/AchievementServiceTest.php`
+  - `tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
+  - `docs/features/_index.md`
+  - `docs/features/ui-ux-rework/spec.md`
+  - `docs/features/ui-ux-rework/progress.md`
+  - `docs/features/ui-ux-rework/acceptance-checklist.md`
+  - `docs/STATUS.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Keep existing `highlights` payload for compatibility while introducing `data.recent_unlocked` for the new achievements timeline UI (no ADR needed; local feature evolution)
+  - Keep achievements difficulty ordering as a page-level presentation rule for now (easier -> harder)
+- Verification performed (exact commands + key results):
+  - `php -l public/achievements.php` -> `No syntax errors detected in public/achievements.php`
+  - `php -l app/Achievements/AchievementService.php` -> `No syntax errors detected in app/Achievements/AchievementService.php`
+  - `php -l tests/Action/Achievements/AchievementServiceTest.php` -> `No syntax errors detected in tests/Action/Achievements/AchievementServiceTest.php`
+  - `php -l tests/Action/Api/AchievementsApiPayloadBuilderTest.php` -> `No syntax errors detected in tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
+  - `composer test:action` -> `OK (141 tests, 630 assertions)`
+  - `php -l public/achievements.php` (rerun after PT-BR copy fixes and easier->harder ordering update) -> `No syntax errors detected in public/achievements.php`
+- Tests/checks intentionally not run (and why):
+  - `composer test:unit` not run (changes were validated via targeted syntax checks plus `composer test:action`, which covers the changed achievements payload/service tests)
+  - `composer test` / `composer qa` not run in this session to keep iteration time focused on UI/payload changes
+  - Manual browser smoke-check not run yet (needs follow-up visual QA for desktop/mobile and a11y spot-check)
+- Blockers / risks:
+  - Visual QA remains pending; spacing/contrast/hover intensity may require tuning after in-browser review
+  - PT-BR/encoding cleanup was scoped to `achievements`; other internal pages may still contain mixed or mojibake text
+  - `composer test:action` emits logged exception lines from exercised negative-path tests in `ProfileService`, but the suite finished `OK`
+- Objective impact: `on-track`
+- Next objective step:
+  - Run manual achievements-page QA, then continue `OBJ-007` with the next dashboard page rework slice (`dashboard` or `habits`)

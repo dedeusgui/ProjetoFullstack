@@ -1,7 +1,7 @@
 # Current Status
 
 - Last updated: 2026-02-26
-- Current phase: UI/UX rework planning kickoff + post-achievements follow-through (docs refresh, action standardization, and CI planning)
+- Current phase: UI/UX rework execution (Achievements Phase 1 implemented; manual UI validation + next-page rollout planning)
 - Primary audience: Developers and AI agents
 
 ## Objective Summary
@@ -10,7 +10,7 @@
 
 - `OBJ-004` Development documentation system and handoff process
 - `OBJ-005` HTTP action-pattern follow-through (ongoing standardization and new handler/payload coverage additions)
-- `OBJ-007` Major UI/UX rework planning kickoff (next major product-facing focus)
+- `OBJ-007` Major UI/UX rework execution started (Achievements Phase 1 implemented; broader rollout continuing)
 - Post-`OBJ-003` follow-through: action-pattern standardization and CI planning remain unblocked by broader local test coverage
 
 ### Completed
@@ -26,7 +26,8 @@
 
 ## Active Work
 
-- Define scope, UX goals, and phased rollout strategy for a major UI/UX rework (`OBJ-007`)
+- Manually validate the `achievements` page rework in-browser (desktop/mobile UX QA) and tune any spacing/contrast issues (`OBJ-007`)
+- Plan and sequence the next UI/UX rework page(s) (`dashboard`, `habits`, `history`) using the new `docs/features/ui-ux-rework/*` workspace (`OBJ-007`)
 - Maintain docs freshness and verification evidence discipline across sessions (`OBJ-004`)
 - Keep GitHub-facing `README.md` (PT-BR) aligned with technical docs as project capabilities evolve
 - Continue standardizing action patterns where it helps testability (`OBJ-005`)
@@ -35,6 +36,11 @@
 
 ## Recently Completed
 
+- Implemented `OBJ-007` Achievements Phase 1 UI/UX rework on `public/achievements.php` + `public/assets/css/achievements.css` (premium visual polish, stronger hover states, filter UX feedback, PT-BR copy cleanup)
+- Replaced the old achievements “Destaques” section with a recent achievements timeline (up to 5 items) for a more rewarding recent-unlocks experience
+- Expanded achievements page payload to include `data.recent_unlocked` (newest first, max 5) and added tests for payload shape / ordering limit
+- Ordered the achievements gallery on the page from easier to harder (rarity/target/points) to improve progression scanning
+- Created `docs/features/ui-ux-rework/` feature workspace (`spec.md`, `progress.md`, `acceptance-checklist.md`) and linked it from `docs/features/_index.md`
 - Added a dedicated achievements page (`public/achievements.php`) with internal API/payload builder (`actions/api_get_achievements.php`, `App\Actions\Api\AchievementsApiGetActionHandler`, `App\Api\Internal\AchievementsApiPayloadBuilder`)
 - Removed achievements-specific UI/data from `history.php` and the `history` stats payload (achievements now live only on the dedicated page)
 - Restored sidebar badge consistency on `achievements.php` by adding habits count (`stats.total_habits`) to the achievements payload
@@ -98,7 +104,7 @@
 
 ## Next Recommended Step
 
-1. Define `OBJ-007` UI/UX rework scope, UX quality goals, and phased rollout plan for core pages (`dashboard`, `habits`, `history`, `achievements`)
-2. Continue `OBJ-005` follow-through by standardizing remaining procedural actions where helper/global coupling still limits testability
-3. Add CI workflow for `composer test` (and optionally `composer qa`) now that local suite breadth is validated
-4. Keep DB-backed suite runs sequential locally because `Action` tests share/reset `doitly_test`
+1. Run an in-browser manual QA pass for the reworked `achievements` page (desktop/mobile + keyboard/focus + reduced-motion spot-check) and record findings in `docs/features/ui-ux-rework/progress.md`
+2. Start the next `OBJ-007` page rework phase (`dashboard` or `habits`) using the same feature workspace and verification discipline
+3. Continue `OBJ-005` follow-through by standardizing remaining procedural actions where helper/global coupling still limits testability
+4. Add CI workflow for `composer test` (and optionally `composer qa`) now that local suite breadth is validated

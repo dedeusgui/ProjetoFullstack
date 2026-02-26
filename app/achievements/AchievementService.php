@@ -40,6 +40,7 @@ class AchievementService
 
         $recentUnlocked = array_values(array_filter($achievements, static fn(array $item): bool => !empty($item['unlocked']) && !empty($item['date'])));
         usort($recentUnlocked, static fn(array $a, array $b): int => strtotime((string) ($b['date'] ?? '1970-01-01')) <=> strtotime((string) ($a['date'] ?? '1970-01-01')));
+        $recentUnlockedTimeline = array_slice($recentUnlocked, 0, 5);
 
         $rarityOrder = ['legendary' => 4, 'epic' => 3, 'rare' => 2, 'common' => 1];
         $rarestUnlocked = $recentUnlocked;
@@ -67,6 +68,7 @@ class AchievementService
                 'rarest_unlocked' => $rarestUnlocked[0] ?? null,
                 'next_achievement' => $nextAchievement[0] ?? null,
             ],
+            'recent_unlocked' => $recentUnlockedTimeline,
             'stats' => [
                 'legendary_unlocked' => count(array_filter($achievements, static fn(array $item): bool => !empty($item['unlocked']) && ($item['rarity'] ?? '') === 'legendary')),
                 'overall_progress_percent' => $progressPercent,

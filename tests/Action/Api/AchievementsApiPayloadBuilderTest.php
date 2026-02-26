@@ -22,9 +22,11 @@ final class AchievementsApiPayloadBuilderTest extends ActionTestCase
         self::assertArrayHasKey('hero', $data);
         self::assertArrayHasKey('achievements', $data);
         self::assertArrayHasKey('highlights', $data);
+        self::assertArrayHasKey('recent_unlocked', $data);
         self::assertArrayHasKey('stats', $data);
 
         self::assertIsArray($data['achievements']);
+        self::assertIsArray($data['recent_unlocked']);
         self::assertArrayHasKey('unlocked_count', $data['hero']);
         self::assertArrayHasKey('total_available', $data['hero']);
         self::assertArrayHasKey('progress_percent', $data['hero']);
