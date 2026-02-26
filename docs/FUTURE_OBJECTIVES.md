@@ -76,7 +76,7 @@ This file tracks strategic objectives and provides IDs used in `docs/WORKLOG.md`
 - Status: `planned`
 - Why it matters: Action scripts currently mix procedural and extracted patterns; consistency improves maintainability.
 - Success criteria:
-  - Action handler/adaptor pattern documented and applied to more actions
+  - Action handler/adapter pattern documented and applied to more actions
   - Response handling conventions are standardized
   - Security and redirect behaviors remain equivalent
 

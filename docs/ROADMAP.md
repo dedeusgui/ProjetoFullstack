@@ -11,7 +11,7 @@ This roadmap complements the GitHub-facing project overview in `README.md` by fo
 ## Current Focus (Near-Term)
 
 - Sustain and harden docs freshness/adoption across sessions (`OBJ-004`)
-- Standardize remaining procedural actions on handler/adaptor patterns (`OBJ-005`)
+- Standardize remaining procedural actions on handler/adapter patterns (`OBJ-005`)
 - Evaluate and introduce CI workflow for `composer test` (optionally `composer qa`) now that local suites are stable
 
 ## Next (Mid-Term)

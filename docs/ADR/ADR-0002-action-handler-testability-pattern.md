@@ -11,7 +11,7 @@ The project needed first-wave action tests for habit create/update/toggle flows.
 
 ## Decision
 
-Adopt a handler/adaptor pattern for actions:
+Adopt a handler/adapter pattern for actions:
 
 - Keep `actions/*.php` as thin HTTP adapters/entrypoints
 - Move behavior into `app/Actions/*` handler classes
@@ -43,4 +43,3 @@ Adopt a handler/adaptor pattern for actions:
 - `docs/features/testing-rollout/spec.md`
 - `app/Actions/ActionResponse.php`
 - `config/action_helpers.php`
-

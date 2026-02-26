@@ -21,6 +21,7 @@
 - Realigned `docs/ROADMAP.md` with completed objectives (`OBJ-001` to `OBJ-003`) and current focus (`OBJ-004`, `OBJ-005`, CI follow-through)
 - Audited `docs/` for stale references/redundancy and corrected remaining inconsistencies in testing planning/status documents
 - Marked `docs/features/testing-rollout/coverage-expansion-plan.md` as a historical artifact after `OBJ-003` completion to reduce confusion with active plans
+- Performed a linguistic consistency pass on public-facing PT-BR docs wording and key active docs terminology (e.g., `handler/adapter`)
 
 ## In Progress
 
@@ -45,6 +46,7 @@
   - Manual consistency review across `docs/STATUS.md`, `docs/ROADMAP.md`, and `docs/FUTURE_OBJECTIVES.md`
   - Full `docs/` markdown relative-link resolution check (all `docs/**/*.md`)
   - Targeted stale-reference audit using `rg` across roadmap/objective/testing docs
+  - Targeted terminology scan (`adaptor`/`adapter`, PT-BR wording) across public-facing and active docs
 - Key results:
   - `composer qa` -> OK (`23 tests`, `47 assertions`)
   - `composer test` -> OK (`32 tests`, `90 assertions`)
@@ -55,6 +57,7 @@
   - Roadmap/status/objective alignment -> OK (post-coverage completion reflected consistently)
   - Full docs markdown links -> OK (no broken relative links found)
   - Remaining stale references identified and corrected (`testing-strategy`, `FUTURE_OBJECTIVES`, testing rollout docs)
+  - Public README wording and active docs terminology consistency improved (PT-BR wording + `handler/adapter` standardization)
 
 ## Next Actions
 

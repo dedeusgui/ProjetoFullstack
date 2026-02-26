@@ -820,3 +820,48 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Proceed with Portuguese/professional copy review in user-facing application strings after this docs baseline is clean
+
+---
+
+## 2026-02-25 - Linguistic Consistency Pass (Docs + README PT-BR)
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Improve linguistic consistency across active docs and the public PT-BR README (terminology, mixed-language wording, and professionalism)
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Reduced terminology drift in active docs by standardizing `handler/adapter` wording
+  - Improved PT-BR consistency in the GitHub-facing `README.md` by replacing avoidable anglicisms and clarifying phrasing
+- Work completed:
+  - Revised `README.md` (PT-BR) wording for stronger consistency and professionalism:
+    - replaced/clarified anglicisms (`onboarding`, `handoff`, `runbooks`, `worklog`, `fallbacks`) where appropriate
+    - improved folder description wording (`actions/` HTTP adapters line)
+  - Standardized `handler/adapter` terminology in active docs:
+    - `docs/FUTURE_OBJECTIVES.md`
+    - `docs/ROADMAP.md`
+    - `docs/ADR/ADR-0002-action-handler-testability-pattern.md`
+  - Updated docs-system progress tracking to record this linguistic consistency pass
+- Files changed:
+  - `README.md`
+  - `docs/FUTURE_OBJECTIVES.md`
+  - `docs/ROADMAP.md`
+  - `docs/ADR/ADR-0002-action-handler-testability-pattern.md`
+  - `docs/features/docs-system/progress.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Historical `docs/WORKLOG.md` entries are preserved as-is for traceability; terminology standardization targets active/canonical docs and public-facing README wording
+  - PT-BR README may retain a few necessary technical terms (e.g., `README`, `ADR`, `PHPUnit`) when they are standard identifiers
+- Verification performed (exact commands + key results):
+  - `rg -n "adaptor|adapter|onboarding|handoff|worklog|runbooks|fallbacks" README.md docs -g "*.md" -g "!docs/WORKLOG.md"` -> identified active-doc terminology inconsistencies and PT-BR README mixed-language hotspots
+  - `Get-Content -Raw README.md` -> reviewed PT-BR README wording and structure before/after terminology polish
+  - `Get-Content -Raw docs/FUTURE_OBJECTIVES.md` / `docs/ROADMAP.md` / `docs/ADR/ADR-0002-action-handler-testability-pattern.md` -> reviewed active docs terminology references before standardization
+  - `rg -n "adaptor" docs README.md -g "*.md" -g "!docs/WORKLOG.md"` -> remaining active-doc `adaptor` occurrences removed after edits (no matches)
+  - `git diff --check -- README.md docs/FUTURE_OBJECTIVES.md docs/ROADMAP.md docs/ADR/ADR-0002-action-handler-testability-pattern.md docs/features/docs-system/progress.md docs/WORKLOG.md` -> no whitespace/conflict issues (only CRLF normalization warnings in working copy)
+- Tests/checks intentionally not run (and why):
+  - `composer qa` / `composer test` not rerun (documentation/text-only changes)
+- Blockers / risks:
+  - Linguistic consistency was improved in docs and public README, but user-facing UI strings in application pages/actions have not been revised yet
+  - `docs/WORKLOG.md` intentionally preserves historical wording, so older entries may continue to reflect prior terminology variants
+- Objective impact: `on-track`
+- Next objective step:
+  - Perform a dedicated PT-BR copy review of user-facing UI strings (`public/`, action flash/error messages, and relevant service/user message text)
