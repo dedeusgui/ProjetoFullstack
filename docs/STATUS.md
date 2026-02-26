@@ -1,7 +1,7 @@
 # Current Status
 
-- Last updated: 2026-02-25
-- Current phase: Post-coverage follow-through (docs refresh, action standardization, and CI planning)
+- Last updated: 2026-02-26
+- Current phase: UI/UX rework planning kickoff + post-achievements follow-through (docs refresh, action standardization, and CI planning)
 - Primary audience: Developers and AI agents
 
 ## Objective Summary
@@ -9,7 +9,9 @@
 ### On-Track
 
 - `OBJ-004` Development documentation system and handoff process
-- Post-`OBJ-003` follow-through: CI enablement and action-pattern standardization are unblocked by broader local test coverage
+- `OBJ-005` HTTP action-pattern follow-through (ongoing standardization and new handler/payload coverage additions)
+- `OBJ-007` Major UI/UX rework planning kickoff (next major product-facing focus)
+- Post-`OBJ-003` follow-through: action-pattern standardization and CI planning remain unblocked by broader local test coverage
 
 ### Completed
 
@@ -24,6 +26,7 @@
 
 ## Active Work
 
+- Define scope, UX goals, and phased rollout strategy for a major UI/UX rework (`OBJ-007`)
 - Maintain docs freshness and verification evidence discipline across sessions (`OBJ-004`)
 - Keep GitHub-facing `README.md` (PT-BR) aligned with technical docs as project capabilities evolve
 - Continue standardizing action patterns where it helps testability (`OBJ-005`)
@@ -32,6 +35,10 @@
 
 ## Recently Completed
 
+- Added a dedicated achievements page (`public/achievements.php`) with internal API/payload builder (`actions/api_get_achievements.php`, `App\Actions\Api\AchievementsApiGetActionHandler`, `App\Api\Internal\AchievementsApiPayloadBuilder`)
+- Removed achievements-specific UI/data from `history.php` and the `history` stats payload (achievements now live only on the dedicated page)
+- Restored sidebar badge consistency on `achievements.php` by adding habits count (`stats.total_habits`) to the achievements payload
+- Added targeted action/payload tests for the achievements API path and revalidated `composer test:action` / `composer test:unit`
 - Rewrote root `README.md` in PT-BR for GitHub onboarding (technical portfolio focus + badges)
 - Realigned `docs/ROADMAP.md` with completed objectives (`OBJ-001` to `OBJ-003`) and current focus (`OBJ-004`, `OBJ-005`, CI follow-through)
 - Refreshed docs navigation wording to make the root `README.md` role explicit (GitHub-facing, PT-BR) while keeping `docs/` canonical for engineering
@@ -87,10 +94,11 @@
 ## Current Blockers
 
 - No active blocker for the completed Phase 2 coverage rollout.
-- Next blockers are more likely to come from CI integration or legacy helper/runtime coupling during future standardization work.
+- Next blockers are more likely to come from UI/UX redesign scope decisions, CI integration, or legacy helper/runtime coupling during future standardization work.
 
 ## Next Recommended Step
 
-1. Start `OBJ-005` follow-through by standardizing remaining procedural actions where helper/global coupling still limits testability
-2. Add CI workflow for `composer test` (and optionally `composer qa`) now that local suite breadth is validated
-3. Keep DB-backed suite runs sequential locally because `Action` tests share/reset `doitly_test`
+1. Define `OBJ-007` UI/UX rework scope, UX quality goals, and phased rollout plan for core pages (`dashboard`, `habits`, `history`, `achievements`)
+2. Continue `OBJ-005` follow-through by standardizing remaining procedural actions where helper/global coupling still limits testability
+3. Add CI workflow for `composer test` (and optionally `composer qa`) now that local suite breadth is validated
+4. Keep DB-backed suite runs sequential locally because `Action` tests share/reset `doitly_test`

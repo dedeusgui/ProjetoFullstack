@@ -1206,3 +1206,38 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Smoke-test `public/achievements.php` in-browser to confirm the habits badge value matches `dashboard.php` / `history.php` for the same user.
+
+---
+
+## 2026-02-26 - Refresh Objectives/Status Docs for Recent UI Work + UI/UX Rework Direction
+
+- Date / time: 2026-02-26 11:40:04
+- Author: Codex (AI agent)
+- Goal: Update core engineering docs to reflect recent achievements/history UI work and establish the next major step as a UI/UX rework with strong UX goals.
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Refreshed canonical status/objective/roadmap docs to reflect current project direction and recent completed work.
+  - Added a dedicated strategic objective for the upcoming UI/UX rework so future worklog/status entries can track it explicitly.
+- Work completed:
+  - Updated `docs/STATUS.md` with recent achievements/history/achievements-sidebar outcomes and reprioritized next steps.
+  - Added `OBJ-007` (major UI/UX rework) to `docs/FUTURE_OBJECTIVES.md` with success criteria and near-term target window.
+  - Updated `docs/ROADMAP.md` to bring UI/UX rework into near-term focus and milestone mapping.
+- Files changed:
+  - `docs/STATUS.md`
+  - `docs/FUTURE_OBJECTIVES.md`
+  - `docs/ROADMAP.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Introduced `OBJ-007` for UI/UX redesign instead of expanding `OBJ-005`, to keep action-pattern standardization and UX redesign as separate tracks.
+  - Kept this pass to core docs only (no new feature workspace scaffold yet).
+  - No ADR required (documentation/objective tracking update only).
+- Verification performed (exact commands + key results):
+  - `rg -n "OBJ-007|UI/UX|UX" docs/STATUS.md docs/FUTURE_OBJECTIVES.md docs/ROADMAP.md` -> confirmed new UI/UX objective and roadmap/status references are present and aligned
+  - `rg -n "OBJ-005|OBJ-006|OBJ-007" docs/STATUS.md docs/FUTURE_OBJECTIVES.md docs/ROADMAP.md` -> confirmed objective IDs are consistent across edited docs
+- Tests/checks intentionally not run (and why):
+  - `composer test`, `composer test:unit`, `composer test:action`, `composer qa` not run (docs-only change)
+- Blockers / risks:
+  - `OBJ-007` is now defined, but implementation sequencing still needs a concrete feature/spec plan before UI execution starts.
+- Objective impact: `on-track`
+- Next objective step:
+  - Create a UI/UX rework spec/feature workspace (or equivalent planning artifact) that defines UX goals, page priorities, and phased rollout for `OBJ-007`.
