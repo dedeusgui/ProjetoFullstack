@@ -26,7 +26,7 @@ $settingsCsrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
             </button>
         </div>
 
-        <form method="POST" action="../actions/update_profile_action.php" class="d-flex flex-column gap-md">
+        <form id="settingsForm" method="POST" action="../actions/update_profile_action.php" class="d-flex flex-column gap-md">
             <input type="hidden" name="return_to"
                 value="<?php echo htmlspecialchars($currentPage, ENT_QUOTES, 'UTF-8'); ?>">
             <input type="hidden" name="csrf_token" value="<?php echo $settingsCsrfToken; ?>">
@@ -110,7 +110,7 @@ $settingsCsrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
                 </div>
 
                 <div style="margin-top: var(--space-sm); display:flex; justify-content:flex-end;">
-                    <button type="submit" form="resetAppearanceForm" class="doitly-btn doitly-btn-outline doitly-btn-sm" onclick="localStorage.setItem('doitly-theme','light');">
+                    <button type="submit" form="resetAppearanceForm" class="doitly-btn doitly-btn-outline doitly-btn-sm">
                         <i class="bi bi-arrow-counterclockwise"></i>
                         Restaurar padrão
                     </button>

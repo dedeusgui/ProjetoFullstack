@@ -1,16 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
   const overlay = document.getElementById('settingsModalOverlay');
+  if (!overlay) return;
+
   const themeToggle = document.querySelector('[data-theme-toggle]');
   const themeInput = document.getElementById('settingsThemeInput');
   const primaryColorInput = document.querySelector('[data-primary-color-input]');
   const accentColorInput = document.querySelector('[data-accent-color-input]');
   const textScaleInput = document.querySelector('[data-text-scale-input]');
   const textScaleValue = document.getElementById('settingsTextScaleValue');
+  const settingsForm = document.getElementById('settingsForm');
+  const resetAppearanceForm = document.getElementById('resetAppearanceForm');
   const THEME_KEY = 'doitly-theme';
   const root = document.documentElement;
+  let isSubmitting = false;
+
+  const normalizeTheme = (theme) => (theme === 'dark' ? 'dark' : 'light');
+
+  const getPersistedAppearance = () => ({
+    theme: normalizeTheme(overlay.dataset.theme),
+    primaryColor: overlay.dataset.primaryColor || primaryColorInput?.defaultValue || '#4a74ff',
+    accentColor: overlay.dataset.accentColor || accentColorInput?.defaultValue || '#59d186',
+    textScale: overlay.dataset.textScale || textScaleInput?.defaultValue || '1.00'
+  });
+
+  const persistedAppearance = getPersistedAppearance();
 
   const applyTheme = (theme) => {
-    if (theme === 'dark') {
+    const normalizedTheme = normalizeTheme(theme);
+
+    if (normalizedTheme === 'dark') {
       root.setAttribute('data-theme', 'dark');
       if (themeToggle) themeToggle.checked = true;
     } else {
@@ -19,10 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (themeInput) {
-      themeInput.value = theme;
+      themeInput.value = normalizedTheme;
     }
 
-    window.dispatchEvent(new CustomEvent('doitly:theme-change', { detail: { theme } }));
+    window.dispatchEvent(new CustomEvent('doitly:theme-change', { detail: { theme: normalizedTheme } }));
   };
 
   const applyVisualPreferences = ({ primaryColor, accentColor, textScale }) => {
@@ -45,17 +63,40 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  const initialTheme = root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-  applyTheme(initialTheme);
-  applyVisualPreferences({
-    primaryColor: overlay?.dataset.primaryColor,
-    accentColor: overlay?.dataset.accentColor,
-    textScale: overlay?.dataset.textScale || '1.00'
-  });
+  const applyAppearance = ({ theme, primaryColor, accentColor, textScale }) => {
+    applyTheme(theme);
+    applyVisualPreferences({ primaryColor, accentColor, textScale });
+  };
+
+  const syncThemeStorage = (theme) => {
+    localStorage.setItem(THEME_KEY, normalizeTheme(theme));
+  };
+
+  const restorePersistedAppearance = () => {
+    if (settingsForm) {
+      settingsForm.reset();
+    }
+
+    if (primaryColorInput) {
+      primaryColorInput.value = persistedAppearance.primaryColor;
+    }
+
+    if (accentColorInput) {
+      accentColorInput.value = persistedAppearance.accentColor;
+    }
+
+    if (textScaleInput) {
+      textScaleInput.value = persistedAppearance.textScale;
+    }
+
+    applyAppearance(persistedAppearance);
+    syncThemeStorage(persistedAppearance.theme);
+  };
+
+  restorePersistedAppearance();
 
   themeToggle?.addEventListener('change', (event) => {
     const theme = event.target.checked ? 'dark' : 'light';
-    localStorage.setItem(THEME_KEY, theme);
     applyTheme(theme);
   });
 
@@ -75,13 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
     applyVisualPreferences({ textScale: event.target.value });
   });
 
-
-  if (!overlay) return;
-
   const openButtons = document.querySelectorAll('[data-open-settings-modal]');
   const closeButtons = document.querySelectorAll('[data-close-settings-modal]');
   const avatarInput = overlay.querySelector('[data-avatar-input]');
   const avatarPreview = document.getElementById('settingsAvatarPreview');
+  const initialAvatarPreviewHtml = avatarPreview?.innerHTML || '';
   const initials = (avatarPreview?.textContent || '').trim();
 
 
@@ -102,15 +141,30 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const openModal = () => {
+    isSubmitting = false;
+    restorePersistedAppearance();
+    if (avatarPreview) {
+      avatarPreview.innerHTML = initialAvatarPreviewHtml;
+      syncPreviewSize();
+    }
     overlay.style.display = 'block';
     overlay.setAttribute('aria-hidden', 'false');
     document.body.style.overflow = 'hidden';
   };
 
   const closeModal = () => {
+    if (!isSubmitting) {
+      restorePersistedAppearance();
+      if (avatarPreview) {
+        avatarPreview.innerHTML = initialAvatarPreviewHtml;
+        syncPreviewSize();
+      }
+    }
+
     overlay.style.display = 'none';
     overlay.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
+    isSubmitting = false;
   };
 
   const updatePreview = (url) => {
@@ -153,6 +207,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   avatarInput?.addEventListener('input', (event) => {
     updatePreview(event.target.value);
+  });
+
+  settingsForm?.addEventListener('submit', () => {
+    isSubmitting = true;
+    syncThemeStorage(themeInput?.value || (themeToggle?.checked ? 'dark' : 'light'));
+  });
+
+  resetAppearanceForm?.addEventListener('submit', () => {
+    isSubmitting = true;
+    syncThemeStorage('light');
   });
 
   syncPreviewSize();

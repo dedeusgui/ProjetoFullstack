@@ -1295,3 +1295,41 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Run manual achievements-page QA, then continue `OBJ-007` with the next dashboard page rework slice (`dashboard` or `habits`)
+
+---
+
+## 2026-02-26 - Settings Modal Appearance Preview Revert (Unsaved Changes Consistency Fix)
+
+- Date / time: 2026-02-26 12:10:59-03:00
+- Author: Codex (AI agent)
+- Goal: Fix the settings modal so unsaved appearance changes (theme/colors/text scale) do not leave the current page in a visually changed state after closing/canceling without saving.
+- Objectives advanced: `OBJ-007`, `OBJ-004`
+- Progress toward objectives:
+  - Improved shared internal-page UX consistency by making appearance edits preview-only until explicit save.
+  - Reduced a confusing mismatch between temporary page styling and DB-backed persisted settings across page navigation.
+- Work completed:
+  - Refactored `public/assets/js/settings-modal.js` to track persisted appearance from the modal dataset and restore it on modal dismiss (`Cancelar`, backdrop click, `Esc`).
+  - Removed immediate `localStorage` theme writes during preview changes; theme storage now syncs on initialization/revert and confirmed form submit/reset submit.
+  - Reset settings form fields when reopening/closing the modal so unsaved values do not persist in the UI controls.
+  - Added a stable `id` (`settingsForm`) to the profile settings form and removed the reset button inline `onclick` localStorage side effect from `public/includes/settings_modal.php`.
+  - Updated `docs/features/ui-ux-rework/progress.md` verification/progress notes for the shared settings modal UX fix.
+- Files changed:
+  - `public/assets/js/settings-modal.js`
+  - `public/includes/settings_modal.php`
+  - `docs/features/ui-ux-rework/progress.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Kept live preview behavior for appearance controls, but made it temporary and automatically reverted on non-save modal dismissal.
+  - Treated the server-rendered modal dataset (`data-theme`, `data-primary-color`, `data-accent-color`, `data-text-scale`) as the persisted source of truth for restoring UI state.
+  - No ADR required (localized UX/interaction bug fix).
+- Verification performed (exact commands + key results):
+  - `php -l public/includes/settings_modal.php` -> `No syntax errors detected in public/includes/settings_modal.php`
+  - `node --check public/assets/js/settings-modal.js` -> no output (exit code `0`, JS syntax OK)
+- Tests/checks intentionally not run (and why):
+  - `composer test:unit`, `composer test:action`, `composer test`, `composer qa` not run (change is localized to front-end modal JS + small markup wiring, with no PHP domain/action logic changes)
+  - Manual browser smoke-check not run in this terminal session (required next to validate save/cancel/backdrop/`Esc` behavior across `dashboard` and `habits`)
+- Blockers / risks:
+  - Browser validation is still needed to confirm chart/theme listeners and modal reopen/reset behavior feel correct in practice on affected pages.
+- Objective impact: `on-track`
+- Next objective step:
+  - Run a manual settings modal smoke-check on `public/dashboard.php` and `public/habits.php` covering appearance preview + cancel/close/save paths.

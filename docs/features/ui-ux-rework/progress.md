@@ -13,6 +13,7 @@
 - Added `recent_unlocked` to achievements page payload (`AchievementService::getAchievementsPageData()`)
 - Added/updated action tests for achievements payload shape and recent timeline ordering/limit
 - Ordered achievements gallery display from easier to harder on the page (rarity/target/points)
+- Fixed shared settings modal appearance behavior so theme/colors/text scale remain a temporary preview until save, and revert on cancel/close (`public/assets/js/settings-modal.js`)
 
 ## In Progress
 
@@ -34,13 +35,17 @@
   - `php -l tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
   - `composer test:action`
   - `php -l public/achievements.php` (rerun after PT-BR and ordering adjustments)
+  - `php -l public/includes/settings_modal.php`
+  - `node --check public/assets/js/settings-modal.js`
 - Key results:
   - All listed `php -l` checks -> `No syntax errors detected`
   - `composer test:action` -> OK (`141 tests`, `630 assertions`)
   - Observed error logs during `composer test:action` from exercised exception branches in `ProfileService`, but suite finished `OK`
+  - `node --check public/assets/js/settings-modal.js` -> no output / exit code `0` (JS syntax OK)
 
 ## Next Actions
 
 1. Run manual achievements page smoke-check (desktop + mobile widths, filters, timeline, PT-BR copy)
 2. Capture any visual regressions and tune spacing/contrast/motion if needed
 3. Start Phase 2 rework planning/implementation for `dashboard` or `habits`
+4. Manually smoke-test settings modal appearance preview flows (`Save`, `Cancelar`, backdrop, `Esc`) on `dashboard` and `habits`
