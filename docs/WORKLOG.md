@@ -1417,3 +1417,32 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Apply the schema overhaul to the main local DB, then manually smoke-test: perfect-day achievements (weekly schedules), XP progression, and profile badge unlock visibility.
+
+---
+
+## 2026-02-26 - UI Copy Language Policy Clarification (PT-BR + Intentional English Terms)
+
+- Date / time: 2026-02-26
+- Author: Codex (AI agent)
+- Goal: Clarify in documentation that user-facing UI copy can intentionally mix PT-BR with common product terms in English (e.g., `Dashboard`) to avoid accidental copy reversions.
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Tightened language/copy guidance so future edits preserve intentional product vocabulary choices.
+- Work completed:
+  - Updated architecture language standard to allow PT-BR UI copy with intentional mixed English product terms.
+  - Updated engineering handbook naming/readability guidance with the same rule and an explicit `Dashboard` example.
+- Files changed:
+  - `docs/architecture/system-architecture.md`
+  - `docs/standards/engineering-handbook.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No ADR required (documentation clarification of UI copy style preference).
+- Verification performed (exact commands + key results):
+  - Manual file review only (docs-only clarification)
+- Tests/checks intentionally not run (and why):
+  - No commands run (docs-only change; no workflow/command semantics changed)
+- Blockers / risks:
+  - None for this clarification.
+- Objective impact: `on-track`
+- Next objective step:
+  - Continue UI/backend rollout work using the clarified copy policy when reviewing user-facing labels.
