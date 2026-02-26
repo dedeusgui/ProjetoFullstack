@@ -25,7 +25,7 @@ include_once "includes/header.php";
                     <div class="col-6 col-md-3">
                         <div class="stat-item">
                             <h3 class="stat-number" data-count="1000">0</h3>
-                            <p class="stat-label">Usuários Ativos</p>
+                            <p class="stat-label">Usuários ativos</p>
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
@@ -188,7 +188,7 @@ include_once "includes/header.php";
                     <div class="feature-grid-icon">
                         <i class="bi bi-moon-stars"></i>
                     </div>
-                    <h6>Dark Mode</h6>
+                    <h6>Modo escuro</h6>
                     <p>Interface escura</p>
                 </div>
             </div>
@@ -198,7 +198,7 @@ include_once "includes/header.php";
                     <div class="feature-grid-icon">
                         <i class="bi bi-download"></i>
                     </div>
-                    <h6>Exportar Dados</h6>
+                    <h6>Exportar dados</h6>
                     <p>CSV e PDF</p>
                 </div>
             </div>
@@ -209,7 +209,7 @@ include_once "includes/header.php";
                         <i class="bi bi-phone"></i>
                     </div>
                     <h6>Responsivo</h6>
-                    <p>Mobile e Desktop</p>
+                    <p>Celular e desktop</p>
                 </div>
             </div>
 
@@ -228,7 +228,7 @@ include_once "includes/header.php";
                     <div class="feature-grid-icon">
                         <i class="bi bi-cloud-check"></i>
                     </div>
-                    <h6>Sync na Nuvem</h6>
+                    <h6>Sincronização na nuvem</h6>
                     <p>Dados sincronizados</p>
                 </div>
             </div>
@@ -248,7 +248,7 @@ include_once "includes/header.php";
                     <div class="feature-grid-icon">
                         <i class="bi bi-speedometer2"></i>
                     </div>
-                    <h6>Performance</h6>
+                    <h6>Desempenho</h6>
                     <p>Rápido e leve</p>
                 </div>
             </div>
@@ -284,7 +284,7 @@ include_once "includes/header.php";
                     <h5 class="mb-3">Acompanhe Diariamente</h5>
                     <p class="text-secondary">
                         Marque seus hábitos como concluídos todos os dias. 
-                        Construa sequências (streaks) e mantenha a consistência.
+                        Construa sequências e mantenha a consistência.
                     </p>
                 </div>
             </div>
@@ -470,7 +470,7 @@ include_once "includes/header.php";
                                 <div class="chart-stat">
                                     <i class="bi bi-fire text-danger"></i>
                                     <h5 class="mb-0 mt-2">12 dias</h5>
-                                    <small class="text-secondary">Maior Streak</small>
+                                    <small class="text-secondary">Maior sequência</small>
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
@@ -630,7 +630,7 @@ document.addEventListener('DOMContentLoaded', function() {
 <section class="testimonials-section">
     <div class="container">
         <div class="text-center mb-5" data-aos="fade-up">
-            <h2 class="section-title">O Que Nossos Usuários Dizem</h2>
+            <h2 class="section-title">O que nossos usuários dizem</h2>
             <p class="section-subtitle">
                 Milhares de pessoas já transformaram suas vidas com o Doitly
             </p>
@@ -757,7 +757,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="accordion-body">
                                 É muito simples! Você cria seus hábitos personalizados, define horários e categorias, 
                                 e todos os dias marca como concluído. O Doitly registra automaticamente seu progresso, 
-                                calcula suas sequências (streaks) e gera gráficos para você visualizar sua evolução.
+                                calcula suas sequências e gera gráficos para você visualizar sua evolução.
                             </div>
                         </div>
                     </div>
@@ -823,7 +823,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         </h2>
                         <div id="faq6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                             <div class="accordion-body">
-                                Oferecemos suporte por email e através da nossa central de ajuda com artigos 
+                                Oferecemos suporte por e-mail e através da nossa central de ajuda com artigos
                                 detalhados. Usuários do plano gratuito têm resposta em até 48 horas, e estamos 
                                 sempre trabalhando para melhorar nosso atendimento.
                             </div>
@@ -889,7 +889,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="text-center mt-5" data-aos="fade-up" data-aos-delay="300">
             <a href="register.php" class="doitly-btn doitly-btn-lg">
                 <i class="bi bi-rocket-takeoff me-2"></i>
-                Começar Agora - É Grátis!
+                Começar agora - é grátis!
             </a>
         </div>
     </div>
@@ -911,7 +911,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <i class="bi bi-rocket-takeoff"></i> Criar Minha Conta Grátis
                         </a>
                         <a href="login.php" class="doitly-btn doitly-btn-secondary doitly-btn-lg">
-                            Já Tenho Conta
+                            Já tenho conta
                         </a>
                     </div>
                 </div>

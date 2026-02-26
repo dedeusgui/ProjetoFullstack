@@ -15,7 +15,7 @@ final class LoginActionHandler
 
         if (!$this->hasValidCsrfToken($post, $session)) {
             return ActionResponse::redirect('../public/login.php', [
-                'error_message' => 'Sessao invalida. Atualize a pagina e tente novamente.',
+                'error_message' => 'Sessão inválida. Atualize a página e tente novamente.',
             ]);
         }
 
@@ -41,7 +41,7 @@ final class LoginActionHandler
             $this->registerFailure($server, $session);
 
             return ActionResponse::redirect('../public/login.php', [
-                'error_message' => 'Email ou senha incorretos.',
+                'error_message' => 'E-mail ou senha incorretos.',
             ]);
         }
 

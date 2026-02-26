@@ -156,12 +156,12 @@ include_once "includes/header.php";
             <div class="d-flex justify-content-between align-items-center"
                 style="flex-wrap: wrap; gap: var(--space-md);">
                 <div>
-                    <h1 class="dashboard-title">Histórico e Estatísticas 📊</h1>
+                    <h1 class="dashboard-title">Histórico e estatísticas 📊</h1>
                     <p class="dashboard-subtitle">Acompanhe sua evolução e conquistas</p>
                 </div>
                 <a href="../actions/export_user_data_csv_action.php" class="doitly-btn doitly-btn-secondary">
                     <i class="bi bi-download"></i>
-                    Exportar Dados
+                    Exportar dados
                 </a>
             </div>
         </div>
@@ -182,7 +182,7 @@ include_once "includes/header.php";
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="bi bi-lightning-charge"></i>
-                    Progressão e Recompensas
+                    Progressão e recompensas
                 </h3>
                 <span class="doitly-badge doitly-badge-warning">Nível <?php echo $currentLevel; ?></span>
             </div>
@@ -219,7 +219,7 @@ include_once "includes/header.php";
         <div class="quick-stats" style="margin-bottom: var(--space-xl);">
             <div class="stat-card">
                 <div class="stat-header">
-                    <span class="stat-label">Total Concluído</span>
+                    <span class="stat-label">Total concluído</span>
                     <div class="stat-icon">
                         <i class="bi bi-check-circle"></i>
                     </div>
@@ -227,13 +227,13 @@ include_once "includes/header.php";
                 <h2 class="stat-value"><?php echo $stats['total_completions']; ?></h2>
                 <div class="stat-change positive">
                     <i class="bi bi-arrow-up"></i>
-                    <span>hábitos completados</span>
+                    <span>hábitos concluídos</span>
                 </div>
             </div>
 
             <div class="stat-card stat-success">
                 <div class="stat-header">
-                    <span class="stat-label">Taxa de Sucesso</span>
+                    <span class="stat-label">Taxa de sucesso</span>
                     <div class="stat-icon">
                         <i class="bi bi-trophy"></i>
                     </div>
@@ -247,7 +247,7 @@ include_once "includes/header.php";
 
             <div class="stat-card stat-warning">
                 <div class="stat-header">
-                    <span class="stat-label">Sequência Atual</span>
+                    <span class="stat-label">Sequência atual</span>
                     <div class="stat-icon">
                         <i class="bi bi-fire"></i>
                     </div>
@@ -261,7 +261,7 @@ include_once "includes/header.php";
 
             <div class="stat-card stat-danger">
                 <div class="stat-header">
-                    <span class="stat-label">Melhor Sequência</span>
+                    <span class="stat-label">Melhor sequência</span>
                     <div class="stat-icon">
                         <i class="bi bi-star"></i>
                     </div>
@@ -282,7 +282,7 @@ include_once "includes/header.php";
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="bi bi-calendar-range"></i>
-                            Progresso Mensal
+                            Progresso mensal
                         </h3>
                         <div class="card-actions">
                             <select class="doitly-input history-range-select" style="width: auto; padding: 8px 12px; font-size: 0.875rem;">
@@ -304,7 +304,7 @@ include_once "includes/header.php";
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="bi bi-pie-chart"></i>
-                            Por Categoria
+                            Por categoria
                         </h3>
                     </div>
                     <div class="card-body">
@@ -319,7 +319,7 @@ include_once "includes/header.php";
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="bi bi-graph-up"></i>
-                            Taxa de Conclusão - Últimos 30 Dias
+                            Taxa de conclusão - últimos 30 dias
                         </h3>
                     </div>
                     <div class="card-body">
@@ -334,7 +334,7 @@ include_once "includes/header.php";
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="bi bi-award"></i>
-                            Conquistas (Hub Principal)
+                            Conquistas
                         </h3>
                         <div class="card-actions" style="display:flex; align-items:center; gap: var(--space-sm);">
                             <span class="doitly-badge doitly-badge-success">
@@ -411,7 +411,7 @@ include_once "includes/header.php";
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="bi bi-clock-history"></i>
-                            Histórico Recente (até 10 dias)
+                            Histórico recente (até 10 dias)
                         </h3>
                     </div>
                     <div class="card-body">
@@ -455,7 +455,7 @@ include_once "includes/header.php";
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="bi bi-bar-chart"></i>
-                            Estatísticas por Categoria
+                            Estatísticas por categoria
                         </h3>
                     </div>
                     <div class="card-body">
@@ -468,7 +468,7 @@ include_once "includes/header.php";
                                             Categoria</th>
                                         <th
                                             style="padding: var(--space-md); text-align: center; font-size: 0.875rem; font-weight: var(--font-semibold); color: var(--text-secondary);">
-                                            Total Concluído</th>
+                                            Total concluído</th>
                                         <th
                                             style="padding: var(--space-md); text-align: center; font-size: 0.875rem; font-weight: var(--font-semibold); color: var(--text-secondary);">
                                             Porcentagem</th>

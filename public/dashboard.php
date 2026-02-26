@@ -26,7 +26,7 @@ if (!$userData) {
 $userData['initials'] = getUserInitials($userData['name']);
 $rawUserName = trim((string) ($userData['name'] ?? ''));
 $nameParts = preg_split('/\s+/', $rawUserName);
-$firstName = (is_array($nameParts) && !empty($nameParts[0])) ? $nameParts[0] : 'Usuario';
+$firstName = (is_array($nameParts) && !empty($nameParts[0])) ? $nameParts[0] : 'Usuário';
 $firstNameEscaped = htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8');
 
 $userProgressService = new UserProgressService($conn);
@@ -330,7 +330,7 @@ include_once "includes/header.php";
                             </a>
                             <a href="../actions/export_user_data_csv_action.php" class="doitly-btn doitly-btn-outline w-100">
                                 <i class="bi bi-download"></i>
-                                Exportar Dados
+                                Exportar dados
                             </a>
                         </div>
 
@@ -349,7 +349,7 @@ include_once "includes/header.php";
                                 </div>
                                 <div class="d-flex justify-content-between align-items-center">
                                     <span style="font-size: 0.875rem; color: var(--text-secondary);">Melhor
-                                        streak</span>
+                                        sequência</span>
                                     <strong
                                         style="color: var(--accent-blue);"><?php echo $monthSummary['best_streak']; ?>
                                         dias</strong>

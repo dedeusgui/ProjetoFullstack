@@ -19,7 +19,7 @@ if (!empty($userData['created_at'])) {
 <div id="profileModalOverlay" class="profile-modal-overlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle">
     <div class="profile-modal">
         <div class="profile-modal-header">
-            <h3 id="profileModalTitle">Perfil do Usuário</h3>
+            <h3 id="profileModalTitle">Perfil do usuário</h3>
             <button type="button" class="doitly-btn doitly-btn-ghost doitly-btn-sm" data-close-profile-modal aria-label="Fechar modal de perfil">
                 <i class="bi bi-x-lg"></i>
             </button>

@@ -18,7 +18,7 @@ $settingsCsrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
         style="max-width: 620px; margin: 40px auto; background: var(--bg-light); border-radius: var(--radius-large); padding: var(--space-xl); box-shadow: var(--shadow-strong); border: var(--border-light);">
         <div class="d-flex justify-content-between align-items-center" style="margin-bottom: var(--space-lg);">
             <h2 style="margin: 0; font-size: 1.5rem;">
-                <i class="bi bi-gear"></i> Configurações da Conta
+                <i class="bi bi-gear"></i> Configurações da conta
             </h2>
             <button type="button" class="doitly-btn doitly-btn-ghost doitly-btn-sm" data-close-settings-modal
                 aria-label="Fechar modal">
@@ -112,7 +112,7 @@ $settingsCsrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
                 <div style="margin-top: var(--space-sm); display:flex; justify-content:flex-end;">
                     <button type="submit" form="resetAppearanceForm" class="doitly-btn doitly-btn-outline doitly-btn-sm" onclick="localStorage.setItem('doitly-theme','light');">
                         <i class="bi bi-arrow-counterclockwise"></i>
-                        Retornar ao padrão
+                        Restaurar padrão
                     </button>
                 </div>
             </div>
@@ -130,7 +130,7 @@ $settingsCsrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
                             <button type="button" class="btn btn-link position-absolute"
                                 onclick="togglePasswordVisibility('settingsCurrentPassword', this)"
                                 style="right: 4px; top: 50%; transform: translateY(-50%); padding: 4px 8px; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;"
-                                title="Mostrar/Ocultar senha">
+                                title="Mostrar/ocultar senha">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -145,7 +145,7 @@ $settingsCsrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
                             <button type="button" class="btn btn-link position-absolute"
                                 onclick="togglePasswordVisibility('settingsNewPassword', this)"
                                 style="right: 4px; top: 50%; transform: translateY(-50%); padding: 4px 8px; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;"
-                                title="Mostrar/Ocultar senha">
+                                title="Mostrar/ocultar senha">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>
@@ -160,7 +160,7 @@ $settingsCsrfToken = htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8');
                             <button type="button" class="btn btn-link position-absolute"
                                 onclick="togglePasswordVisibility('settingsConfirmPassword', this)"
                                 style="right: 4px; top: 50%; transform: translateY(-50%); padding: 4px 8px; color: var(--text-secondary); text-decoration: none; font-size: 0.9rem;"
-                                title="Mostrar/Ocultar senha">
+                                title="Mostrar/ocultar senha">
                                 <i class="bi bi-eye"></i>
                             </button>
                         </div>

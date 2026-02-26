@@ -76,7 +76,7 @@ $htmlInlineStyle = sprintf(
       <h2 class="doitly-navbar-brand">Doitly</h2>
       <div class="d-flex gap-md align-items-center">
         <?php if (!isset($hideLoginButton) || !$hideLoginButton): ?>
-          <a href="login.php" class="doitly-btn doitly-btn-md">Login</a>
+          <a href="login.php" class="doitly-btn doitly-btn-md">Entrar</a>
         <?php endif; ?>
         
         <?php if (isset($showRegisterButton) && $showRegisterButton): ?>

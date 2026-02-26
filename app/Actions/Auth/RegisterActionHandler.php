@@ -15,7 +15,7 @@ final class RegisterActionHandler
 
         if (!$this->hasValidCsrfToken($post, $session)) {
             return ActionResponse::redirect('../public/register.php', [
-                'error_message' => 'Sessao invalida. Atualize a pagina e tente novamente.',
+                'error_message' => 'Sessão inválida. Atualize a página e tente novamente.',
             ]);
         }
 
@@ -32,26 +32,26 @@ final class RegisterActionHandler
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             return ActionResponse::redirect('../public/register.php', [
-                'error_message' => 'Email invalido.',
+                'error_message' => 'E-mail inválido.',
             ]);
         }
 
         if (strlen($password) < 6) {
             return ActionResponse::redirect('../public/register.php', [
-                'error_message' => 'A senha deve ter no minimo 6 caracteres.',
+                'error_message' => 'A senha deve ter no mínimo 6 caracteres.',
             ]);
         }
 
         if ($password !== $confirmPassword) {
             return ActionResponse::redirect('../public/register.php', [
-                'error_message' => 'As senhas nao conferem.',
+                'error_message' => 'As senhas não conferem.',
             ]);
         }
 
         $authService = new AuthService($conn);
         if ($authService->emailExists($email)) {
             return ActionResponse::redirect('../public/register.php', [
-                'error_message' => 'Este email ja esta cadastrado.',
+                'error_message' => 'Este e-mail já está cadastrado.',
             ]);
         }
 

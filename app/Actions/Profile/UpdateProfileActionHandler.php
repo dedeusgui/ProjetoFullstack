@@ -21,7 +21,7 @@ final class UpdateProfileActionHandler
 
         if (!$this->hasValidCsrfToken($post, $session)) {
             return ActionResponse::redirect('../public/dashboard.php', [
-                'error_message' => 'Sessao invalida. Atualize a pagina e tente novamente.',
+                'error_message' => 'Sessão inválida. Atualize a página e tente novamente.',
             ]);
         }
 

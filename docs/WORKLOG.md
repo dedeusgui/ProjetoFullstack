@@ -865,3 +865,190 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Perform a dedicated PT-BR copy review of user-facing UI strings (`public/`, action flash/error messages, and relevant service/user message text)
+
+---
+
+## 2026-02-25 - PT-BR Copy Review in Code (UI + Action/Service Messages)
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Improve Portuguese consistency and professionalism in user-facing code strings (UI pages and action/service flash/error messages) and preserve the GitHub README exactly as updated remotely by the user
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Reduced PT-BR inconsistencies in user-facing messages returned by handlers/services (auth, habits, profile/API auth errors)
+  - Improved visible UI copy consistency in auth pages and key public pages (`index`, `dashboard`, `habits`)
+  - Resolved local `README.md` merge conflict by keeping the remote GitHub version exactly as requested
+- Work completed:
+  - Pulled latest `main` from GitHub using rebase + autostash; resolved the `README.md` conflict by restoring the remote (`HEAD`) version exactly
+  - Standardized repeated CSRF/session flash error copy in handlers (`Sessão inválida...`)
+  - Corrected accents and wording in auth/habit/API messages (e.g., `E-mail`, `Hábito`, `Usuário não autenticado`, `Categoria inválida`)
+  - Kept CSV export table labels in `UserDataCsvExportService` unchanged (ASCII) to avoid altering established export formatting assumptions; only updated the user-facing error message
+  - Improved PT-BR UI consistency in:
+    - `public/login.php` / `public/register.php` (`E-mail`, `Fazer login`)
+    - `public/habits.php` (`Personalizado` instead of `Custom`/`Customizado`)
+    - `public/index.php` / `public/dashboard.php` (`sequência(s)` instead of `streak` in visible labels/text)
+- Files changed:
+  - `app/Actions/Api/HabitsApiGetActionHandler.php`
+  - `app/Actions/Api/StatsApiGetActionHandler.php`
+  - `app/Actions/Auth/LoginActionHandler.php`
+  - `app/Actions/Auth/RegisterActionHandler.php`
+  - `app/Actions/Habits/HabitArchiveActionHandler.php`
+  - `app/Actions/Habits/HabitCreateActionHandler.php`
+  - `app/Actions/Habits/HabitDeleteActionHandler.php`
+  - `app/Actions/Habits/HabitToggleCompletionActionHandler.php`
+  - `app/Actions/Habits/HabitUpdateActionHandler.php`
+  - `app/Actions/Profile/ResetAppearanceActionHandler.php`
+  - `app/Actions/Profile/UpdateProfileActionHandler.php`
+  - `app/Habits/HabitCommandService.php`
+  - `public/login.php`
+  - `public/register.php`
+  - `public/habits.php`
+  - `public/index.php`
+  - `public/dashboard.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - `README.md` was intentionally restored to the remote (`HEAD`) version after `git pull --rebase --autostash` conflict, per user request
+  - CSV export content labels remain ASCII for now; only the export failure message was updated for PT-BR quality
+  - No new ADR required (copy/content polish only)
+- Verification performed (exact commands + key results):
+  - `git status --short` / `git branch --show-current` / `git remote -v` -> confirmed local dirty state before pull and active branch `main`
+  - `git pull --rebase --autostash` -> pulled remote update (`949e04d`), autostash reapplied with conflict in `README.md`
+  - `git status --short` / `git stash list` / `git log --oneline -n 3` -> confirmed conflict state and autostash preservation
+  - `git checkout HEAD -- README.md` -> restored `README.md` to the exact remote version (conflict resolved by keeping remote)
+  - `rg -n "Sessao invalida" app/Actions` -> identified repeated session/CSRF flash message variants
+  - `rg -n "Habito|Voce nao|Categoria invalida|Email invalido|As senhas nao|Usuario nao" app` -> identified accentuation and wording hotspots in user-facing messages
+  - `rg -n "Custom|Fazer Login|Email</label>|E-mail</label>" public/habits.php public/register.php public/login.php -g "*.php"` -> identified visible UI wording inconsistencies
+  - `rg -n "streak|Streak|Custom|Email|Login" public -g "*.php"` + targeted `Select-String` checks -> identified visible anglicisms/labels in `public/index.php` and `public/dashboard.php`
+  - `php -l ...` on all changed action/service/UI files -> OK (no syntax errors)
+  - `rg -n "Sessao invalida|Usuario nao autenticado|Habito invalido|Voce nao tem permissao|Email invalido|As senhas nao|ja esta cadastrado|Maior Streak|streaks\\)" app public -g "*.php"` -> no remaining matches for the targeted outdated strings (exit code `1`, expected)
+- Tests/checks intentionally not run (and why):
+  - `composer test`, `composer test:action`, `composer qa` not rerun (copy/message/UI text-only changes; some tests may assert exact strings and require expectation updates if run)
+- Blockers / risks:
+  - Additional UI strings may still have style inconsistencies outside the files touched in this pass (`history.php`, modals, and less frequent flows)
+  - Some test assertions may depend on exact message text and can fail until expectations are updated (not validated in this session)
+- Objective impact: `on-track`
+- Next objective step:
+  - Continue PT-BR copy review in remaining user-facing pages and low-frequency flows (`history.php`, profile/settings modals, export-related messages if needed)
+
+---
+
+## 2026-02-25 - PT-BR Copy Review in Code (UI Pass 2: Landing/Header/History)
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Continue the PT-BR UI copy review on remaining public-facing screens/components (`index`, `history`, navbar/header) with focus on mixed-language labels and consistency
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Reduced mixed-language UI labels in the landing page and navigation
+  - Improved wording consistency in `history.php` labels and action buttons
+- Work completed:
+  - Updated navbar CTA label in `public/includes/header.php` from `Login` to `Entrar`
+  - Refined `public/history.php` UI labels:
+    - `Exportar Dados` -> `Exportar dados`
+    - `hábitos completados` -> `hábitos concluídos`
+    - `Conquistas (Hub Principal)` -> `Conquistas`
+  - Refined `public/dashboard.php` export button label:
+    - `Exportar Dados` -> `Exportar dados`
+  - Refined landing page (`public/index.php`) mixed-language labels:
+    - `Dark Mode` -> `Modo escuro`
+    - `Exportar Dados` -> `Exportar dados`
+    - `Sync na Nuvem` -> `Sincronização na nuvem`
+    - `Mobile e Desktop` -> `Celular e desktop`
+    - `Performance` -> `Desempenho`
+    - `email` -> `e-mail` (FAQ suporte)
+    - `Começar Agora - É Grátis!` -> `Começar agora - é grátis!`
+    - `Já Tenho Conta` -> `Já tenho conta`
+- Files changed:
+  - `public/includes/header.php`
+  - `public/history.php`
+  - `public/dashboard.php`
+  - `public/index.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Maintain sentence case in most CTA/button labels (`Exportar dados`, `Já tenho conta`) for PT-BR consistency across the UI
+  - Keep technical identifiers/variables (`current_streak`, `best_streak`) unchanged because they are internal code fields, not user-facing copy
+- Verification performed (exact commands + key results):
+  - `rg -n --glob "public/**/*.php" "Dark Mode|Sync na Nuvem|Exportar Dados|Hub Principal|Maior Streak|streaks\\)|Mobile e Desktop|<h6>Performance</h6>|>Login<" public` -> no remaining matches for the targeted outdated visible labels after edits (exit code `1`, expected)
+  - `php -l public/index.php; php -l public/history.php; php -l public/dashboard.php; php -l public/includes/header.php` -> OK (no syntax errors)
+  - `git diff --stat -- public/index.php public/history.php public/dashboard.php public/includes/header.php docs/WORKLOG.md` -> reviewed scope of this pass
+- Tests/checks intentionally not run (and why):
+  - `composer test` / `composer qa` not rerun (UI copy-only changes in PHP templates)
+- Blockers / risks:
+  - Additional wording inconsistencies may still exist in lower-frequency screens/modals (`public/includes/settings_modal.php`, `public/includes/profile_modal.php`) and future features
+  - Product terminology choices (e.g., `dashboard`, `XP`, `CSV`, `PDF`) remain intentionally mixed where they are standard or branding-aligned
+- Objective impact: `on-track`
+- Next objective step:
+  - Continue optional PT-BR polish in remaining modal/secondary UI copy if desired; otherwise prepare commit/review
+
+---
+
+## 2026-02-25 - PT-BR Copy Review in Code (UI Pass 3: Modals + History Label Polish)
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Finalize a PT-BR consistency pass on modal copy and remaining `history.php` label capitalization
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Improved sentence-case consistency in modal titles and `history.php` UI labels
+  - Reduced remaining capitalization inconsistencies in user-facing screens
+- Work completed:
+  - Updated `public/includes/profile_modal.php`: `Perfil do Usuário` -> `Perfil do usuário`
+  - Updated `public/includes/settings_modal.php`:
+    - `Configurações da Conta` -> `Configurações da conta`
+    - `Retornar ao padrão` -> `Restaurar padrão`
+    - `Mostrar/Ocultar senha` -> `Mostrar/ocultar senha` (button titles)
+  - Updated `public/history.php` title/labels to sentence case in visible UI headings and table header (e.g., `Taxa de sucesso`, `Progresso mensal`, `Estatísticas por categoria`, `Total concluído`)
+- Files changed:
+  - `public/includes/profile_modal.php`
+  - `public/includes/settings_modal.php`
+  - `public/history.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Prefer sentence case for UI labels/headings in PT-BR where the text is product UI copy (except names/brands and intentionally styled marketing headings)
+  - No new ADR required
+- Verification performed (exact commands + key results):
+  - `php -l public/includes/profile_modal.php; php -l public/includes/settings_modal.php; php -l public/history.php` -> OK (no syntax errors)
+  - `rg -n "Perfil do Usuário|Configurações da Conta|Retornar ao padrão|Mostrar/Ocultar senha|Total Concluído|Taxa de Sucesso|Sequência Atual|Melhor Sequência|Progresso Mensal|Por Categoria|Taxa de Conclusão - Últimos 30 Dias|Histórico Recente|Estatísticas por Categoria" public/includes/profile_modal.php public/includes/settings_modal.php public/history.php` -> one remaining table header match identified (`Total Concluído` in `history.php`) and corrected
+  - `Select-String -Path public/history.php -Pattern "Total Concluído" -Context 1,1` -> confirmed remaining location before final patch
+- Tests/checks intentionally not run (and why):
+  - `composer test` / `composer qa` not rerun (UI copy-only changes)
+- Blockers / risks:
+  - Some marketing/landing headings remain in title case intentionally and were not force-normalized to preserve page style
+  - Additional UI copy passes may still find minor wording preferences, but major inconsistencies were addressed
+- Objective impact: `on-track`
+- Next objective step:
+  - Review/commit the copy changes or continue only if you want a stricter terminology/style guide pass across every visible string
+
+---
+
+## 2026-02-26 - PT-BR Copy Review in Code (UI Pass 4: Final UI Consistency Touch-Ups)
+
+- Date / time: 2026-02-26
+- Author: Codex (AI agent)
+- Goal: Apply a final quick pass on remaining obvious PT-BR inconsistencies in already-touched UI files
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Removed remaining visible fallback/heading inconsistencies identified after the broader copy review
+- Work completed:
+  - Updated `public/dashboard.php` fallback name from `Usuario` to `Usuário`
+  - Updated `public/index.php` marketing/stat heading copy for PT-BR consistency:
+    - `Usuários Ativos` -> `Usuários ativos`
+    - `O Que Nossos Usuários Dizem` -> `O que nossos usuários dizem`
+- Files changed:
+  - `public/dashboard.php`
+  - `public/index.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Kept this pass intentionally narrow (only obvious inconsistencies) to avoid unnecessary churn in marketing copy
+  - No new ADR required
+- Verification performed (exact commands + key results):
+  - `php -l public/dashboard.php` -> OK (no syntax errors)
+  - `php -l public/index.php` -> OK (no syntax errors)
+  - `rg -n "Usuario|Usuários Ativos|O Que Nossos Usuários Dizem" public/dashboard.php public/index.php -g "*.php"` -> no matches after edits (exit code `1`, expected)
+- Tests/checks intentionally not run (and why):
+  - `composer test`, `composer test:action`, `composer qa` not rerun (UI copy-only changes)
+- Blockers / risks:
+  - Additional style preferences may still exist in marketing copy, but no obvious PT-BR inconsistency remains in the files touched in this pass
+- Objective impact: `on-track`
+- Next objective step:
+  - Review and commit the PT-BR copy/documentation updates, or run a stricter terminology audit across all visible strings if you want a formal style guide pass

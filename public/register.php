@@ -42,7 +42,7 @@ include_once "includes/header.php";
             </div>
 
             <div class="mb-4">
-                <label for="email" class="form-label text-secondary fs-6">Email</label>
+                <label for="email" class="form-label text-secondary fs-6">E-mail</label>
                 <div class="input-group">
                     <input type="email" class="doitly-input" id="email" name="email" placeholder="seu@email.com"
                         required>
@@ -88,7 +88,7 @@ include_once "includes/header.php";
             <p class="text-secondary mb-0">
                 Já tem uma conta?
                 <a href="login.php" class="text-decoration-none fw-medium" style="color: var(--accent-blue);">Fazer
-                    Login</a>
+                    login</a>
             </p>
         </div>
     </div>

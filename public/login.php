@@ -34,7 +34,7 @@ include_once "includes/header.php";
         <form action="../actions/login_action.php" method="post">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(getCsrfToken(), ENT_QUOTES, 'UTF-8'); ?>">
             <div class="mb-4">
-                <label for="email" class="form-label text-secondary fs-6">Email</label>
+                <label for="email" class="form-label text-secondary fs-6">E-mail</label>
                 <div class="input-group">
                     <input type="email" class="doitly-input" id="email" name="email" placeholder="seu@email.com"
                         required autofocus>

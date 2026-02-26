@@ -13,7 +13,7 @@ final class StatsApiGetActionHandler
         if (!$this->isLoggedIn($session)) {
             return ActionResponse::json([
                 'success' => false,
-                'message' => 'Usuario nao autenticado.',
+                'message' => 'Usuário não autenticado.',
                 'error_code' => 'unauthorized',
                 'request_id' => RequestContext::getRequestId(),
             ], 401);

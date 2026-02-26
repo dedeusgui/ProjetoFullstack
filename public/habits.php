@@ -277,7 +277,7 @@ include_once "includes/header.php";
                                             <?php elseif ($habit['frequency'] === 'weekly'): ?>
                                                 <span class="doitly-badge doitly-badge-warning" style="font-size: 0.75rem;">Semanal</span>
                                             <?php else: ?>
-                                                <span class="doitly-badge doitly-badge-success" style="font-size: 0.75rem;">Custom</span>
+                                                <span class="doitly-badge doitly-badge-success" style="font-size: 0.75rem;">Personalizado</span>
                                             <?php endif; ?>
                                         </div>
                                         
@@ -519,7 +519,7 @@ include_once "includes/header.php";
                     <select name="frequency" class="doitly-input" id="habitFrequency" onchange="toggleTargetDays()">
                         <option value="daily">Diário</option>
                         <option value="weekly">Semanal</option>
-                        <option value="custom">Customizado</option>
+                        <option value="custom">Personalizado</option>
                     </select>
                 </div>
                 <div class="col-md-6" id="targetDaysWrapper" style="display: none;">
