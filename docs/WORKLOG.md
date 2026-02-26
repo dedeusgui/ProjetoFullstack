@@ -1052,3 +1052,192 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Review and commit the PT-BR copy/documentation updates, or run a stricter terminology audit across all visible strings if you want a formal style guide pass
+
+---
+
+## 2026-02-26 - Fix Settings Modal on Achievements Page
+
+- Date / time: 2026-02-26
+- Author: Codex (AI agent)
+- Goal: Restore settings modal behavior on the achievements page (avoid anchor jump to top).
+- Objectives advanced: `OBJ-005`
+- Progress toward objectives:
+  - Small UI consistency fix to keep modal behavior aligned across dashboard pages.
+- Work completed:
+  - Added the settings/profile modal includes to `public/achievements.php` so the overlay exists and click handlers bind.
+- Files changed:
+  - `public/achievements.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No ADR required (small UI include fix).
+- Verification performed:
+  - Not run (template include change only).
+- Blockers / risks:
+  - None known; behavior should match `dashboard.php`, `habits.php`, and `history.php`.
+- Objective impact: `on-track`
+- Next objective step:
+  - If desired, smoke-test `public/achievements.php` with an authenticated session to confirm the modal opens.
+
+---
+
+## 2026-02-26 - Achievements Dedicated Page (UI + Service + Repository + API)
+
+- Date / time: 2026-02-26
+- Author: Codex (AI agent)
+- Goal: Implement a dedicated achievements page with visual states, filters, progress hero, highlights, and navigation integration.
+- Objectives advanced: `OBJ-005`
+- Progress toward objectives:
+  - Added a new achievements vertical slice using layered architecture (`public/`, `actions/`, `app/`, `app/repository/`).
+  - Kept HTTP adapters thin and moved retrieval/aggregation logic to domain service/repository.
+- Work completed:
+  - Created `public/achievements.php` and `public/assets/css/achievements.css`.
+  - Added internal API endpoint `actions/api_get_achievements.php` with handler `App\Actions\Api\AchievementsApiGetActionHandler` and payload builder `App\Api\Internal\AchievementsApiPayloadBuilder`.
+  - Added `App\Repository\AchievementRepository` for achievement/user reads.
+  - Expanded `App\Achievements\AchievementService` with page-data aggregation and sorting/filter-ready payload.
+  - Updated sidebar navigation in `public/dashboard.php`, `public/habits.php`, and `public/history.php` to include "Conquistas" + unlocked badge.
+- Files changed:
+  - `public/achievements.php`
+  - `public/assets/css/achievements.css`
+  - `actions/api_get_achievements.php`
+  - `app/Actions/Api/AchievementsApiGetActionHandler.php`
+  - `app/api/internal/AchievementsApiPayloadBuilder.php`
+  - `app/achievements/AchievementService.php`
+  - `app/repository/AchievementRepository.php`
+  - `public/dashboard.php`
+  - `public/habits.php`
+  - `public/history.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Reused existing `AchievementService` and incrementally expanded it instead of introducing parallel page-only service, to avoid duplication and preserve current call sites.
+  - No ADR required (no cross-cutting boundary exception introduced).
+- Verification performed (exact commands + key results):
+  - `php -l public/achievements.php && php -l actions/api_get_achievements.php && php -l app/achievements/AchievementService.php && php -l app/repository/AchievementRepository.php && php -l app/api/internal/AchievementsApiPayloadBuilder.php && php -l app/Actions/Api/AchievementsApiGetActionHandler.php && php -l public/dashboard.php && php -l public/habits.php && php -l public/history.php` -> OK (all files without syntax errors)
+  - `composer test:unit` -> failed (`vendor/bin/phpunit` missing)
+  - `composer install` -> failed due outbound network/proxy restriction (`CONNECT tunnel failed, response 403` when downloading GitHub packages)
+  - `php -S 0.0.0.0:8080 -t public` + Playwright screenshot attempt -> server started, but request to `/achievements.php` returned 500 because Composer autoload is unavailable.
+- Tests/checks intentionally not run (and why):
+  - `composer test:action`, `composer test`, `composer qa` not run because dependency installation is blocked by network/proxy constraints in this environment.
+- Blockers / risks:
+  - Runtime validation is blocked until Composer dependencies are installed (autoload required by `config/bootstrap.php`).
+  - Screenshot artifact currently reflects runtime error state instead of authenticated UI due missing autoload/dependencies.
+- Objective impact: `on-track`
+- Next objective step:
+  - In an environment with Composer dependency access, run `composer install`, then `composer test:unit`, `composer test:action`, and smoke-test `public/achievements.php` authenticated flow.
+
+---
+
+## 2026-02-26 - Separate Achievements From History Page (Cleanup + Regression Tests)
+
+- Date / time: 2026-02-26 11:28:01
+- Author: Codex (AI agent)
+- Goal: Remove achievements-specific UI/data from `history.php` now that a dedicated achievements page exists, and validate docs/tests for regressions.
+- Objectives advanced: `OBJ-005`
+- Progress toward objectives:
+  - Finished the page split by making `history` consume history-only data again.
+  - Added missing action/payload tests for the achievements API path introduced in the prior achievements-page rollout.
+- Work completed:
+  - Removed achievements banner, XP/rewards card, and achievements list from `public/history.php`.
+  - Kept achievements access in navigation only (sidebar "Conquistas" badge remains).
+  - Removed `achievements` from the `history` payload in `App\Api\Internal\StatsApiPayloadBuilder`.
+  - Updated `StatsApiPayloadBuilder` history test to assert the `achievements` key is not present.
+  - Added `AchievementsApiGetActionHandler` and `AchievementsApiPayloadBuilder` tests.
+  - Reviewed existing docs coverage and confirmed prior achievements-page work was recorded in `docs/WORKLOG.md`.
+- Files changed:
+  - `public/history.php`
+  - `app/api/internal/StatsApiPayloadBuilder.php`
+  - `tests/Action/Api/StatsApiPayloadBuilderTest.php`
+  - `tests/Action/Api/AchievementsApiGetActionHandlerTest.php`
+  - `tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Removed `history.data.achievements` from the internal stats payload contract to prevent future UI coupling drift.
+  - Kept sidebar achievements badge on `history.php` by reading `UserProgressService` directly (global navigation concern, not page content duplication).
+  - No ADR required (cleanup within existing boundaries).
+- Verification performed (exact commands + key results):
+  - `php -l public/history.php` -> OK (no syntax errors)
+  - `php -l app/Api/Internal/StatsApiPayloadBuilder.php` -> OK (no syntax errors)
+  - `php -l tests/Action/Api/AchievementsApiPayloadBuilderTest.php` -> OK (no syntax errors)
+  - `php -l tests/Action/Api/AchievementsApiGetActionHandlerTest.php` -> OK (no syntax errors)
+  - `php -l tests/Action/Api/StatsApiPayloadBuilderTest.php` -> OK (no syntax errors)
+  - `composer test:action` -> OK (`140` tests, `613` assertions)
+  - `composer test:unit` -> OK (`58` tests, `158` assertions)
+- Tests/checks intentionally not run (and why):
+  - `composer test` not rerun (changed area is covered by action + unit suites already run)
+  - `composer qa` not run (no style/static-analysis-sensitive refactor beyond localized page/payload/test cleanup)
+- Blockers / risks:
+  - `public/history.php` layout spacing changed materially after section removal; visual smoke test is still recommended if UI polish matters for this release.
+  - `composer test:action` still emits known logged exception entries from profile-service negative-path tests, but the suite passes.
+- Objective impact: `on-track`
+- Next objective step:
+  - Smoke-test `history.php` and `achievements.php` in a browser with an authenticated user to confirm the visual split and nav badge behavior.
+
+---
+
+## 2026-02-26 - Fix Habits Count Badge on Achievements Sidebar
+
+- Date / time: 2026-02-26 11:35:03
+- Author: Codex (AI agent)
+- Goal: Show the habits count badge in the `achievements.php` sidebar, matching the other pages.
+- Objectives advanced: `OBJ-005`
+- Progress toward objectives:
+  - Restored sidebar badge consistency across dashboard pages by providing habits count in the achievements page payload.
+- Work completed:
+  - Added `stats.total_habits` to `App\Api\Internal\AchievementsApiPayloadBuilder` using `StatsQueryService`.
+  - Updated `public/achievements.php` sidebar to render the habits count badge next to "Meus Hábitos".
+  - Updated achievements payload builder test to assert the new `total_habits` key.
+- Files changed:
+  - `app/api/internal/AchievementsApiPayloadBuilder.php`
+  - `public/achievements.php`
+  - `tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Kept the count in the achievements page payload (`stats.total_habits`) instead of querying directly in `public/achievements.php`, preserving page/payload layering.
+  - No ADR required (small payload/page consistency fix).
+- Verification performed (exact commands + key results):
+  - `php -l app/Api/Internal/AchievementsApiPayloadBuilder.php` -> OK (no syntax errors)
+  - `php -l public/achievements.php` -> OK (no syntax errors)
+  - `php -l tests/Action/Api/AchievementsApiPayloadBuilderTest.php` -> OK (no syntax errors)
+  - `composer test:action` -> OK (`140` tests, `614` assertions)
+- Tests/checks intentionally not run (and why):
+  - `composer test:unit` not rerun (change is limited to page payload + action test coverage path)
+  - `composer test` / `composer qa` not rerun (small localized UI payload fix, action suite already validates impacted area)
+- Blockers / risks:
+  - `composer test:action` still logs known profile-service exception entries in negative-path tests, but the suite passes.
+- Objective impact: `on-track`
+- Next objective step:
+  - Smoke-test `public/achievements.php` in-browser to confirm the habits badge value matches `dashboard.php` / `history.php` for the same user.
+
+---
+
+## 2026-02-26 - Refresh Objectives/Status Docs for Recent UI Work + UI/UX Rework Direction
+
+- Date / time: 2026-02-26 11:40:04
+- Author: Codex (AI agent)
+- Goal: Update core engineering docs to reflect recent achievements/history UI work and establish the next major step as a UI/UX rework with strong UX goals.
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Refreshed canonical status/objective/roadmap docs to reflect current project direction and recent completed work.
+  - Added a dedicated strategic objective for the upcoming UI/UX rework so future worklog/status entries can track it explicitly.
+- Work completed:
+  - Updated `docs/STATUS.md` with recent achievements/history/achievements-sidebar outcomes and reprioritized next steps.
+  - Added `OBJ-007` (major UI/UX rework) to `docs/FUTURE_OBJECTIVES.md` with success criteria and near-term target window.
+  - Updated `docs/ROADMAP.md` to bring UI/UX rework into near-term focus and milestone mapping.
+- Files changed:
+  - `docs/STATUS.md`
+  - `docs/FUTURE_OBJECTIVES.md`
+  - `docs/ROADMAP.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Introduced `OBJ-007` for UI/UX redesign instead of expanding `OBJ-005`, to keep action-pattern standardization and UX redesign as separate tracks.
+  - Kept this pass to core docs only (no new feature workspace scaffold yet).
+  - No ADR required (documentation/objective tracking update only).
+- Verification performed (exact commands + key results):
+  - `rg -n "OBJ-007|UI/UX|UX" docs/STATUS.md docs/FUTURE_OBJECTIVES.md docs/ROADMAP.md` -> confirmed new UI/UX objective and roadmap/status references are present and aligned
+  - `rg -n "OBJ-005|OBJ-006|OBJ-007" docs/STATUS.md docs/FUTURE_OBJECTIVES.md docs/ROADMAP.md` -> confirmed objective IDs are consistent across edited docs
+- Tests/checks intentionally not run (and why):
+  - `composer test`, `composer test:unit`, `composer test:action`, `composer qa` not run (docs-only change)
+- Blockers / risks:
+  - `OBJ-007` is now defined, but implementation sequencing still needs a concrete feature/spec plan before UI execution starts.
+- Objective impact: `on-track`
+- Next objective step:
+  - Create a UI/UX rework spec/feature workspace (or equivalent planning artifact) that defines UX goals, page priorities, and phased rollout for `OBJ-007`.

@@ -61,7 +61,9 @@ function getAuthenticatedUserRecord(mysqli $conn): ?array
 
 function signInUser(int $userId, string $userName, string $userEmail): void
 {
-    session_regenerate_id(true);
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_regenerate_id(true);
+    }
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $userName;
     $_SESSION['user_email'] = $userEmail;

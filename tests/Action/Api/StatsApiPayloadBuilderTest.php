@@ -80,7 +80,7 @@ final class StatsApiPayloadBuilderTest extends ActionTestCase
         self::assertArrayHasKey('monthly_data', $data);
         self::assertArrayHasKey('category_stats', $data);
         self::assertArrayHasKey('recent_history', $data);
-        self::assertArrayHasKey('achievements', $data);
+        self::assertArrayNotHasKey('achievements', $data);
         self::assertArrayHasKey('adaptive_recommendation', $data);
     }
 

@@ -25,7 +25,7 @@ final class HabitArchiveActionHandlerTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertSame('Habito arquivado com sucesso!', $response->getFlash()['success_message'] ?? null);
+        self::assertSame('Hábito arquivado com sucesso!', $response->getFlash()['success_message'] ?? null);
 
         $row = $this->db()->fetchOne('SELECT is_active, archived_at FROM habits WHERE id = ' . (int) $habitId);
         self::assertSame('0', (string) ($row['is_active'] ?? '1'));
@@ -51,7 +51,7 @@ final class HabitArchiveActionHandlerTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertSame('Habito restaurado com sucesso!', $response->getFlash()['success_message'] ?? null);
+        self::assertSame('Hábito restaurado com sucesso!', $response->getFlash()['success_message'] ?? null);
 
         $row = $this->db()->fetchOne('SELECT is_active, archived_at FROM habits WHERE id = ' . (int) $habitId);
         self::assertSame('1', (string) ($row['is_active'] ?? '0'));
@@ -74,7 +74,8 @@ final class HabitArchiveActionHandlerTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertSame('Habito arquivado com sucesso!', $response->getFlash()['success_message'] ?? null);
+        self::assertSame('Hábito arquivado com sucesso!', $response->getFlash()['success_message'] ?? null);
         self::assertSame('0', (string) ($this->db()->fetchOne('SELECT is_active FROM habits WHERE id = ' . (int) $habitId)['is_active'] ?? '1'));
     }
 }
+

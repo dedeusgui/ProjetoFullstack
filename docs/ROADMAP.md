@@ -10,12 +10,14 @@ This roadmap complements the GitHub-facing project overview in `README.md` by fo
 
 ## Current Focus (Near-Term)
 
+- Plan and begin a major UI/UX rework with strong UX-quality goals and phased rollout strategy (`OBJ-007`)
 - Sustain and harden docs freshness/adoption across sessions (`OBJ-004`)
 - Standardize remaining procedural actions on handler/adapter patterns (`OBJ-005`)
-- Evaluate and introduce CI workflow for `composer test` (optionally `composer qa`) now that local suites are stable
+- Evaluate and introduce CI workflow for `composer test` (optionally `composer qa`) now that local suites are stable (after UI/UX scope is defined)
 
 ## Next (Mid-Term)
 
+- Introduce CI workflow for `composer test` / `composer qa` if not completed during near-term follow-through
 - Improve observability and error diagnostics (`OBJ-006`)
 - Expand runbooks for recurring failure/debug scenarios
 - Strengthen release and migration discipline
@@ -31,4 +33,5 @@ This roadmap complements the GitHub-facing project overview in `README.md` by fo
 - M2: Testing foundation verified and documented (`OBJ-002`)
 - M3: Coverage expansion completed for critical flows (`OBJ-003`)
 - M4: Docs-system operational consistency + action-pattern standardization (`OBJ-004`, `OBJ-005`)
-- M5: CI and observability improvements (`OBJ-006` + CI follow-through)
+- M5: UI/UX redesign planning + phased implementation kickoff (`OBJ-007`)
+- M6: CI and observability improvements (`OBJ-006` + CI follow-through)

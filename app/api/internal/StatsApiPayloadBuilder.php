@@ -2,7 +2,6 @@
 
 namespace App\Api\Internal;
 
-use App\Achievements\AchievementService;
 use App\Recommendation\BehaviorAnalyzer;
 use App\Recommendation\RecommendationEngine;
 use App\Recommendation\ScoreEngine;
@@ -15,8 +14,6 @@ class StatsApiPayloadBuilder
     {
         $view = self::normalizeView($view);
         $statsQueryService = new StatsQueryService($conn);
-        $achievementService = new AchievementService($conn);
-
         $userTodayDate = $statsQueryService->getUserTodayDate($userId);
         $totalHabits = $statsQueryService->getTotalHabits($userId);
         $completedToday = $statsQueryService->getCompletedToday($userId, $userTodayDate);
@@ -61,7 +58,6 @@ class StatsApiPayloadBuilder
         if ($view === 'history') {
             $totalCompletions = $statsQueryService->getTotalCompletions($userId);
             $bestStreak = $statsQueryService->getBestStreak($userId);
-            $achievements = $achievementService->syncUserAchievements($userId);
             $userCreatedAt = $statsQueryService->getUserCreatedAt($userId);
 
             $historyData = [
@@ -77,7 +73,6 @@ class StatsApiPayloadBuilder
                 'monthly_data' => $statsQueryService->getMonthlyData($userId, 30),
                 'category_stats' => $statsQueryService->getCategoryStats($userId),
                 'recent_history' => $statsQueryService->getRecentHistory($userId, 10, $userCreatedAt),
-                'achievements' => $achievements,
                 'adaptive_recommendation' => self::buildAdaptiveRecommendation($conn, $userId, $userTodayDate)
             ];
 

@@ -1,0 +1,124 @@
+.achievements-page {
+    display: grid;
+    gap: var(--space-lg);
+}
+
+.achievements-hero .hero-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+}
+
+.hero-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.hero-user {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+}
+
+.hero-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    background: var(--accent-blue);
+    color: #fff;
+}
+
+.xp-bar,
+.progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(128, 128, 128, 0.2);
+    overflow: hidden;
+}
+
+.xp-bar-fill,
+.progress-fill {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+}
+
+.hero-chips {
+    margin-top: var(--space-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-sm);
+}
+
+.achievement-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-md);
+}
+
+.achievement-card .achievement-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-sm);
+}
+
+.achievement-card .achievement-head i {
+    font-size: 1.5rem;
+}
+
+.achievement-card.unlocked {
+    border: 1px solid var(--badge-color);
+    box-shadow: 0 0 20px var(--badge-glow), 0 4px 16px rgba(0, 0, 0, 0.1);
+    animation: achievementPulse 3s ease-in-out infinite;
+}
+
+.achievement-card.in_progress {
+    border: 1px solid rgba(74, 116, 255, 0.35);
+}
+
+.achievement-card.locked {
+    filter: grayscale(1);
+    opacity: 0.75;
+}
+
+.achievement-footer {
+    margin-top: var(--space-sm);
+    display: flex;
+    justify-content: space-between;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.highlights-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-sm);
+}
+
+.highlight-item {
+    background: rgba(128, 128, 128, 0.1);
+    border-radius: var(--radius-medium);
+    padding: var(--space-sm);
+    display: grid;
+    gap: 4px;
+}
+
+@keyframes achievementPulse {
+    0%, 100% { box-shadow: 0 0 20px var(--badge-glow); }
+    50% { box-shadow: 0 0 35px var(--badge-glow); }
+}

@@ -58,7 +58,7 @@ function getPerfectDaysStreak($conn, $userId, $days = 365) {
 
 function getUserAchievements($conn, $userId) {
     $service = new AchievementService($conn);
-    return $service->syncUserAchievements((int) $userId);
+    return $service->getUserAchievements((int) $userId);
 }
 
 function calculateLevelFromXp(int $totalXp): int {

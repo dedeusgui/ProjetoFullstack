@@ -22,7 +22,7 @@ final class StatsApiGetActionHandlerTest extends ActionTestCase
         $payload = $response->getPayload();
         self::assertFalse($payload['success'] ?? true);
         self::assertSame('unauthorized', $payload['error_code'] ?? null);
-        self::assertSame('Usuario nao autenticado.', $payload['message'] ?? null);
+        self::assertSame('Usuário não autenticado.', $payload['message'] ?? null);
         self::assertIsString($payload['request_id'] ?? null);
         self::assertNotSame('', $payload['request_id'] ?? '');
     }
@@ -74,3 +74,4 @@ final class StatsApiGetActionHandlerTest extends ActionTestCase
         self::assertArrayHasKey('recent_history', $payload['data']);
     }
 }
+

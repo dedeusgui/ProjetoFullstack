@@ -23,7 +23,7 @@ final class HabitToggleCompletionActionHandler
 
             if (!$this->hasValidCsrfToken($post, $session)) {
                 return ActionResponse::redirect('../public/habits.php', [
-                    'error_message' => 'SessÃ£o invÃ¡lida. Atualize a pÃ¡gina e tente novamente.',
+                    'error_message' => 'Sessão inválida. Atualize a página e tente novamente.',
                 ]);
             }
 
@@ -32,7 +32,7 @@ final class HabitToggleCompletionActionHandler
 
             if ($habitId <= 0) {
                 return ActionResponse::redirect($redirectPath, [
-                    'error_message' => 'HÃ¡bito invÃ¡lido.',
+                    'error_message' => 'Hábito inválido.',
                 ]);
             }
 
@@ -78,3 +78,4 @@ final class HabitToggleCompletionActionHandler
         return hash_equals((string) $session['csrf_token'], $submittedToken);
     }
 }
+

@@ -33,7 +33,7 @@ final class LoginActionHandlerTest extends ActionTestCase
 
         $this->assertRedirect($response, '../public/login.php');
         self::assertSame(
-            'Sessao invalida. Atualize a pagina e tente novamente.',
+            'Sessão inválida. Atualize a página e tente novamente.',
             $response->getFlash()['error_message'] ?? null
         );
     }
@@ -101,7 +101,7 @@ final class LoginActionHandlerTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/login.php');
-        self::assertSame('Email ou senha incorretos.', $response->getFlash()['error_message'] ?? null);
+        self::assertSame('E-mail ou senha incorretos.', $response->getFlash()['error_message'] ?? null);
         self::assertArrayHasKey($attemptKey, $_SESSION);
         self::assertSame(1, (int) ($_SESSION[$attemptKey]['count'] ?? 0));
         self::assertIsInt($_SESSION[$attemptKey]['first_attempt_at'] ?? null);
@@ -148,3 +148,4 @@ final class LoginActionHandlerTest extends ActionTestCase
         return 'auth_attempts_' . hash('sha256', $ip);
     }
 }
+

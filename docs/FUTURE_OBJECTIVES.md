@@ -89,6 +89,20 @@ This file tracks strategic objectives and provides IDs used in `docs/WORKLOG.md`
   - Common failure runbooks exist
   - Production-safe debug workflow is documented
 
+## OBJ-007 - Major UI/UX Rework (Design System + UX Quality Upgrade)
+
+- Status: `planned`
+- Current note: Recent achievements/history UI changes are in place; the next major step is a broad UI/UX rework plan and phased implementation focused on significantly improving user experience quality across core pages.
+- Why it matters: The current UI is functional, but a cohesive visual system and stronger UX quality are needed to improve clarity, usability, and perceived product quality.
+- Success criteria:
+  - Core pages (`dashboard`, `habits`, `history`, `achievements`) share a consistent navigation/layout and interaction model
+  - A unified UI design language is defined and applied (tokens/components/layout rhythm)
+  - Key user flows (habit management, history reading, achievements browsing) are improved for clarity and ease of use
+  - Responsive behavior is validated on desktop and mobile for major pages
+  - Accessibility baseline improvements are implemented (keyboard/focus states, readable contrast, reduced-motion support where applicable)
+  - A phased rollout/migration strategy is documented to avoid high-risk UI rewrites in one pass
+- Target window: Near-term
+
 ## Deferred Objectives
 
 - CI-based test automation (local test stability prerequisite is now met; implementation timing remains a prioritization decision)
