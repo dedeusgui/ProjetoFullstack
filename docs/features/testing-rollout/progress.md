@@ -89,6 +89,6 @@
 
 ## Next Actions
 
-1. Close `OBJ-003` as completed and shift focus to `OBJ-005` action-pattern standardization / CI enablement follow-up
+1. Keep `OBJ-003` documented as completed and shift active engineering follow-through to `OBJ-005` action-pattern standardization / CI enablement
 2. Keep DB-backed verification sequential (`composer test:db:reset` -> `composer test:action` -> `composer test`) because suites share `doitly_test`
 3. Backfill only high-value remaining branches discovered during feature work (avoid exhaustive low-value helper exit-path tests)

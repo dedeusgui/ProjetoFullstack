@@ -21,7 +21,7 @@ Use this folder to understand:
 
 ## Canonical Sources (Avoid Duplication)
 
-- Root `README.md`: GitHub-facing product overview and quickstart only
+- Root `README.md`: GitHub-facing product overview and quickstart only (public-facing, PT-BR)
 - `docs/README.md`: engineering docs navigation hub
 - `docs/architecture/system-architecture.md`: architecture boundaries and refactor direction
 - `docs/standards/engineering-handbook.md`: clean code, SOLID, review, testing/verification policy
@@ -31,7 +31,7 @@ If a topic already has a canonical doc, summarize and link to it instead of dupl
 
 ## Reading Map
 
-- Product overview and quickstart: `README.md`
+- Product overview and quickstart (GitHub-facing, PT-BR): `README.md`
 - Architecture narrative and boundaries: `docs/architecture/system-architecture.md`
 - Stable project context: `docs/context/project-overview.md`
 - Development workflow summary: `docs/CONTRIBUTING_DEV.md`

@@ -1,8 +1,16 @@
 # Testing Rollout Coverage Expansion Plan
 
 - Related Objectives: `OBJ-003`, `OBJ-004`
-- Status: planned
+- Status: completed (historical planning artifact)
 - Baseline date: 2026-02-25
+
+## Document Status (Historical)
+
+This file is kept as the baseline planning artifact used to execute the Phase 2A-2F coverage rollout.
+
+- Final execution results and verification evidence live in `docs/features/testing-rollout/progress.md`
+- `OBJ-003` is now tracked as completed in `docs/FUTURE_OBJECTIVES.md`
+- Use this file for historical rationale/phase sequencing reference, not as the current next-step plan
 
 ## Purpose
 
@@ -43,7 +51,7 @@ This plan is behavior-first, not "one test per file" by default.
 - Action:
   - Habit create/update/toggle handlers
 
-## Next Steps (Priority Order)
+## Planned Phases at Baseline (Historical Priority Order)
 
 ## Phase 2A: API endpoints and payload building (highest leverage)
 
@@ -275,7 +283,7 @@ Goal: reduce regression risk in shared helpers and legacy entry points while avo
 
 Many helper functions are globally coupled to headers/session/runtime state. Add tests where stable, but do not block progress on exhaustive coverage if extraction to classes provides a cleaner path.
 
-## Execution Sequence (Recommended Sprint Order)
+## Execution Sequence (Historical Recommended Sprint Order)
 
 1. `Phase 2A` API coverage (API actions + payload builders + stats query service)
 2. `Phase 2B` Auth service + auth action handler extraction/tests
@@ -301,7 +309,7 @@ Many helper functions are globally coupled to headers/session/runtime state. Add
 - Some services instantiate repositories internally (limited DI), increasing integration-test reliance
 - Export/CSV and frontend UI behaviors may require specialized test harnesses beyond current PHPUnit setup
 
-## First Concrete Implementation Slice (Recommended Next Session)
+## First Concrete Implementation Slice (Historical Baseline Recommendation)
 
 Start with `Phase 2A` and complete this minimum set:
 

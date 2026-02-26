@@ -39,8 +39,14 @@
   - `composer test:action`
   - `composer test`
 
-## Next Testing Milestones
+## Coverage Expansion Status
 
-1. Expand tests to auth/API/stats flows (`OBJ-003`)
-2. Continue extracting procedural actions into handlers where testability is poor
-3. Track coverage rollout progress in `docs/features/testing-rollout/coverage-expansion-plan.md`
+- `OBJ-003` coverage expansion (Phase 2A-2F) is completed and locally validated.
+- Detailed rollout execution evidence and final counts are tracked in `docs/features/testing-rollout/progress.md`.
+- The original phase plan remains in `docs/features/testing-rollout/coverage-expansion-plan.md` as a historical planning artifact.
+
+## Next Testing Focus
+
+1. Continue extracting procedural actions into handlers where testability is poor (`OBJ-005`)
+2. Introduce CI automation for the validated local test workflow (at least `composer test`; optionally `composer qa`)
+3. Backfill only high-value remaining branches discovered during feature work (avoid low-value exhaustive helper/runtime path tests)

@@ -1,7 +1,7 @@
 # Current Status
 
 - Last updated: 2026-02-25
-- Current phase: Coverage expansion completed; standardization and CI follow-through
+- Current phase: Post-coverage follow-through (docs refresh, action standardization, and CI planning)
 - Primary audience: Developers and AI agents
 
 ## Objective Summary
@@ -25,12 +25,16 @@
 ## Active Work
 
 - Maintain docs freshness and verification evidence discipline across sessions (`OBJ-004`)
+- Keep GitHub-facing `README.md` (PT-BR) aligned with technical docs as project capabilities evolve
 - Continue standardizing action patterns where it helps testability (`OBJ-005`)
 - Evaluate CI workflow introduction now that local test suites are broader and stable
 - Use the engineering handbook verification/review workflow consistently in future sessions
 
 ## Recently Completed
 
+- Rewrote root `README.md` in PT-BR for GitHub onboarding (technical portfolio focus + badges)
+- Realigned `docs/ROADMAP.md` with completed objectives (`OBJ-001` to `OBJ-003`) and current focus (`OBJ-004`, `OBJ-005`, CI follow-through)
+- Refreshed docs navigation wording to make the root `README.md` role explicit (GitHub-facing, PT-BR) while keeping `docs/` canonical for engineering
 - Added root `AGENTS.md` agent operating guide (task routing, boundaries, verification, docs update rules)
 - Unified engineering documentation under `docs/` (root `README.md` remains GitHub-facing)
 - Moved architecture narrative to `docs/architecture/system-architecture.md`

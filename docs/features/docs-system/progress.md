@@ -16,6 +16,11 @@
 - Added engineering handbook with clean code, SOLID, review, and verification standards
 - Updated templates and workflow docs to capture verification evidence and risks
 - Added root `AGENTS.md` to guide AI agents on task routing, boundaries, verification, and required docs updates
+- Performed documentation consistency refresh across `README.md`, `docs/STATUS.md`, and `docs/ROADMAP.md`
+- Rewrote root `README.md` in PT-BR for GitHub onboarding with technical portfolio positioning and badges
+- Realigned `docs/ROADMAP.md` with completed objectives (`OBJ-001` to `OBJ-003`) and current focus (`OBJ-004`, `OBJ-005`, CI follow-through)
+- Audited `docs/` for stale references/redundancy and corrected remaining inconsistencies in testing planning/status documents
+- Marked `docs/features/testing-rollout/coverage-expansion-plan.md` as a historical artifact after `OBJ-003` completion to reduce confusion with active plans
 
 ## In Progress
 
@@ -35,14 +40,24 @@
   - `composer test`
   - PowerShell validation of `AGENTS.md` canonical doc paths
   - PowerShell validation of `AGENTS.md` command references against `composer.json`
+  - PowerShell path existence checks for docs links referenced in `README.md`
+  - PowerShell listing/validation of `composer.json` scripts used by `README.md`
+  - Manual consistency review across `docs/STATUS.md`, `docs/ROADMAP.md`, and `docs/FUTURE_OBJECTIVES.md`
+  - Full `docs/` markdown relative-link resolution check (all `docs/**/*.md`)
+  - Targeted stale-reference audit using `rg` across roadmap/objective/testing docs
 - Key results:
   - `composer qa` -> OK (`23 tests`, `47 assertions`)
   - `composer test` -> OK (`32 tests`, `90 assertions`)
   - `AGENTS.md` path references -> OK
   - `AGENTS.md` command references -> OK
+  - Referenced docs paths in `README.md` -> OK (all `Test-Path` checks returned `True`)
+  - README command references -> OK (`test`, `test:unit`, `test:action`, `test:db:reset`, `qa` present in `composer.json`)
+  - Roadmap/status/objective alignment -> OK (post-coverage completion reflected consistently)
+  - Full docs markdown links -> OK (no broken relative links found)
+  - Remaining stale references identified and corrected (`testing-strategy`, `FUTURE_OBJECTIVES`, testing rollout docs)
 
 ## Next Actions
 
 1. Use the handbook verification matrix in future implementation sessions
 2. Keep feature specs/progress docs updated with verification evidence
-3. Reassess `OBJ-004` completion after at least 3 consistent sessions
+3. Reassess `OBJ-004` completion after continued consistent sessions and docs freshness evidence

@@ -1,29 +1,34 @@
 # Development Roadmap (Engineering-Facing)
 
-This roadmap complements the product roadmap in `README.md` by focusing on engineering enablement and delivery reliability.
+This roadmap complements the GitHub-facing project overview in `README.md` by focusing on engineering enablement and delivery reliability.
 
-## Near-Term (Current)
+## Completed Foundations (Done)
 
-- Finalize local environment compatibility (`OBJ-001`)
-- Validate and stabilize first-wave automated tests (`OBJ-002`)
-- Finish docs system adoption (`OBJ-004`)
+- `OBJ-001` Local environment standardization (PHP/Composer/MySQL compatibility)
+- `OBJ-002` Automated testing foundation (PHPUnit + MySQL test reset workflow)
+- `OBJ-003` Critical-flow coverage expansion (Phase 2A-2F)
 
-## Mid-Term
+## Current Focus (Near-Term)
 
-- Expand automated tests to auth/API/stats (`OBJ-003`)
-- Standardize more actions on handler/adaptor pattern (`OBJ-005`)
-- Add CI workflow for tests after local stability is confirmed
+- Sustain and harden docs freshness/adoption across sessions (`OBJ-004`)
+- Standardize remaining procedural actions on handler/adaptor patterns (`OBJ-005`)
+- Evaluate and introduce CI workflow for `composer test` (optionally `composer qa`) now that local suites are stable
 
-## Long-Term
+## Next (Mid-Term)
 
-- Broader observability and runbooks (`OBJ-006`)
-- Stronger release and migration discipline
-- Documentation automation/checks (optional)
+- Improve observability and error diagnostics (`OBJ-006`)
+- Expand runbooks for recurring failure/debug scenarios
+- Strengthen release and migration discipline
 
-## Milestone Mapping
+## Later (Long-Term / Optional)
 
-- M1: Environment + test execution unblocked
-- M2: Testing foundation verified and documented
-- M3: Coverage expansion for critical flows
-- M4: CI automation and observability improvements
+- Documentation automation/checks (freshness or link validation)
+- Broader engineering automation around repeatable verification workflows
 
+## Milestone Mapping (Updated)
+
+- M1: Local environment and test execution unblocked (`OBJ-001`)
+- M2: Testing foundation verified and documented (`OBJ-002`)
+- M3: Coverage expansion completed for critical flows (`OBJ-003`)
+- M4: Docs-system operational consistency + action-pattern standardization (`OBJ-004`, `OBJ-005`)
+- M5: CI and observability improvements (`OBJ-006` + CI follow-through)

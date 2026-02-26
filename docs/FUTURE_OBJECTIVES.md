@@ -91,5 +91,5 @@ This file tracks strategic objectives and provides IDs used in `docs/WORKLOG.md`
 
 ## Deferred Objectives
 
-- CI-based test automation (deferred until local test execution is stable)
+- CI-based test automation (local test stability prerequisite is now met; implementation timing remains a prioritization decision)
 - Broader docs automation/enforcement (linting/checks for docs freshness)

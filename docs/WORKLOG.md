@@ -718,3 +718,105 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track` -> `done` for `OBJ-003`
 - Next objective step:
   - Start `OBJ-005` follow-through (remaining procedural action standardization) and/or add CI automation for the validated local test workflow
+
+---
+
+## 2026-02-25 - Documentation Refresh + PT-BR README Professionalization
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Refresh engineering-facing docs consistency and rewrite/polish the root `README.md` in PT-BR with stronger professional portfolio positioning
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Improved the GitHub-facing onboarding experience with a clearer PT-BR README and stronger technical presentation
+  - Realigned roadmap/status/docs-system progress docs with the current post-coverage project state
+  - Reduced Portuguese quality issues (accentuation and wording) in public-facing project text
+- Work completed:
+  - Rewrote root `README.md` in PT-BR with:
+    - technical portfolio framing (architecture, tests, documentation maturity)
+    - onboarding-focused local setup steps
+    - badges (stack + local tests/docs)
+    - links to canonical engineering docs in `docs/`
+  - Refined `README.md` wording for better Portuguese quality (accentuation, grammar, and professional tone)
+  - Updated `composer.json` package description in PT-BR for clearer/professional wording
+  - Updated `docs/ROADMAP.md` to reflect completed `OBJ-001`/`OBJ-002`/`OBJ-003` and current focus on `OBJ-004`/`OBJ-005` + CI follow-through
+  - Updated `docs/STATUS.md` current phase/active work/recently completed notes to reflect the docs refresh
+  - Updated `docs/README.md` to clarify that root `README.md` is GitHub-facing and PT-BR
+  - Updated `docs/features/docs-system/progress.md` with the docs refresh and verification evidence
+- Files changed:
+  - `README.md`
+  - `composer.json`
+  - `docs/ROADMAP.md`
+  - `docs/STATUS.md`
+  - `docs/README.md`
+  - `docs/features/docs-system/progress.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Root `README.md` remains GitHub-facing and PT-BR; `docs/` remains the canonical engineering documentation workspace in English
+  - README roadmap details remain out of scope for the public page; roadmap tracking stays in `docs/ROADMAP.md`
+  - No new ADR required (documentation/content refresh within existing docs-system scope)
+- Verification performed (exact commands + key results):
+  - `rg -n "Aplicacao|aplicacao|habitos|habito|repositorio|documentacao|Contribuicao|contribuicao|tecnic|configuracoes|acoes|execucao|verificacao|uteis|usuarios|usuario|canon" README.md composer.json docs -g "*.md" -g "composer.json"` -> identified Portuguese wording/accent gaps in `README.md` and `composer.json` for correction
+  - `Get-Content -Raw README.md` -> reviewed final PT-BR README content/structure after rewrite and language polish
+  - `git diff -- README.md docs/ROADMAP.md docs/STATUS.md docs/README.md docs/features/docs-system/progress.md` -> reviewed docs changes for content consistency
+  - `git status --short` -> confirmed intended touched files before final verification
+  - `$paths = @('docs/README.md','docs/STATUS.md','docs/standards/engineering-handbook.md','docs/architecture/system-architecture.md','docs/ADR/INDEX.md','docs/CONTRIBUTING_DEV.md'); foreach ($p in $paths) { "${p} => $(Test-Path $p)" }` -> all referenced docs paths returned `True`
+  - `$composer = Get-Content -Raw composer.json | ConvertFrom-Json; $composer.scripts.PSObject.Properties.Name | Sort-Object` -> confirmed README-referenced scripts exist (`test`, `test:unit`, `test:action`, `test:db:reset`, `qa`)
+  - `git diff --check -- README.md composer.json docs/README.md docs/ROADMAP.md docs/STATUS.md docs/features/docs-system/progress.md` -> no whitespace/conflict issues; only CRLF normalization warnings in working copy
+- Tests/checks intentionally not run (and why):
+  - `composer qa` / `composer test` not rerun (docs + metadata wording changes only; no application/runtime behavior changed)
+- Blockers / risks:
+  - Root `README.md` now has better PT-BR quality, but user-facing UI copy inside application pages was not reviewed in this session
+  - Future docs changes must keep the PT-BR README aligned with engineering docs as architecture/test workflows evolve
+- Objective impact: `on-track`
+- Next objective step:
+  - Continue `OBJ-004` freshness discipline while advancing `OBJ-005` (action pattern standardization) and CI planning
+
+---
+
+## 2026-02-25 - Docs Consistency Audit (Stale References + Redundancy Clarification)
+
+- Date / time: 2026-02-25
+- Author: Codex (AI agent)
+- Goal: Audit `docs/` for stale references and confusing redundancy, then update the remaining testing-related docs to match the current project state
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Reduced documentation drift by aligning testing strategy/objectives/progress docs after `OBJ-003` completion
+  - Clarified which testing rollout document is historical versus currently authoritative
+- Work completed:
+  - Audited `docs/` for relative-link integrity and stale references across roadmap/objective/testing docs
+  - Updated `docs/ROADMAP.md` wording to reference the GitHub-facing README overview (instead of a product roadmap in `README.md`)
+  - Updated `docs/FUTURE_OBJECTIVES.md` deferred CI note to remove the outdated "local stability not met" condition
+  - Updated `docs/architecture/testing-strategy.md`:
+    - replaced stale `OBJ-003` expansion milestones with current coverage-expansion-complete status
+    - added current testing follow-through focus (`OBJ-005`, CI, high-value branch backfills)
+    - clarified that `coverage-expansion-plan.md` is historical
+  - Updated `docs/features/testing-rollout/progress.md` next actions to stop suggesting closing `OBJ-003` (already done)
+  - Updated `docs/features/testing-rollout/coverage-expansion-plan.md` status/headings to mark it as a completed historical planning artifact
+  - Updated `docs/features/docs-system/progress.md` to record the audit and results
+- Files changed:
+  - `docs/ROADMAP.md`
+  - `docs/FUTURE_OBJECTIVES.md`
+  - `docs/architecture/testing-strategy.md`
+  - `docs/features/testing-rollout/progress.md`
+  - `docs/features/testing-rollout/coverage-expansion-plan.md`
+  - `docs/features/docs-system/progress.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No new ADR; changes are consistency/maintenance updates within the existing docs system
+  - `docs/features/testing-rollout/coverage-expansion-plan.md` is retained as a historical planning artifact for traceability, not an active next-step plan
+- Verification performed (exact commands + key results):
+  - `Get-ChildItem docs -Recurse -File -Filter *.md | Select-Object -ExpandProperty FullName` -> enumerated full docs scope for audit
+  - `rg -n "OBJ-00[1-6]|Current phase|Current status|Current note|Next Recommended Step|Near-Term|Mid-Term|Long-Term|Current Focus" docs -g "*.md"` -> cross-checked objective/status references across docs
+  - `rg -n "deferred until local test execution is stable|Expand tests to auth/API/stats flows|product roadmap in \`README.md\`|Close \`OBJ-003\` as completed" docs -g "*.md"` -> identified stale wording in `FUTURE_OBJECTIVES`, `testing-strategy`, and testing rollout docs
+  - `Get-Content -Raw docs/FUTURE_OBJECTIVES.md` / `docs/architecture/testing-strategy.md` / `docs/features/testing-rollout/progress.md` / `docs/features/testing-rollout/coverage-expansion-plan.md` -> reviewed candidate files before edits
+  - PowerShell full docs link scan (`docs/**/*.md`, relative markdown links) -> OK (`no broken relative links found`)
+  - `git diff --check -- docs/ROADMAP.md docs/FUTURE_OBJECTIVES.md docs/architecture/testing-strategy.md docs/features/testing-rollout/progress.md docs/features/testing-rollout/coverage-expansion-plan.md docs/features/docs-system/progress.md docs/WORKLOG.md` -> no whitespace/conflict issues (only CRLF normalization warnings)
+- Tests/checks intentionally not run (and why):
+  - `composer qa` / `composer test` not rerun (docs-only consistency updates; no runtime behavior changes)
+- Blockers / risks:
+  - Documentation consistency improved, but future drift remains possible if historical planning docs are updated without clear status markers
+  - UI/user-facing Portuguese copy review across `public/` is still pending (separate next task)
+- Objective impact: `on-track`
+- Next objective step:
+  - Proceed with Portuguese/professional copy review in user-facing application strings after this docs baseline is clean

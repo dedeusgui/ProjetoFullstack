@@ -1,6 +1,6 @@
 {
   "name": "doitly/projetofullstack",
-  "description": "Projeto de habitos com arquitetura em camadas incremental",
+  "description": "Projeto de hábitos com arquitetura em camadas e evolução incremental",
   "type": "project",
   "license": "proprietary",
   "require": {
