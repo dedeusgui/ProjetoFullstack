@@ -38,6 +38,7 @@ $rarityConfig = [
 ];
 
 $unlockedCount = (int) ($hero['unlocked_count'] ?? 0);
+$habitCount = (int) ($stats['total_habits'] ?? 0);
 
 include_once 'includes/header.php';
 ?>
@@ -54,7 +55,7 @@ include_once 'includes/header.php';
                 <h5 class="nav-section-title">Menu Principal</h5>
                 <ul class="nav-menu">
                     <li class="nav-item"><a href="dashboard.php" class="nav-link"><i class="bi bi-house-door"></i><span>Dashboard</span></a></li>
-                    <li class="nav-item"><a href="habits.php" class="nav-link"><i class="bi bi-list-check"></i><span>Meus Hábitos</span></a></li>
+                    <li class="nav-item"><a href="habits.php" class="nav-link"><i class="bi bi-list-check"></i><span>Meus Hábitos</span><span class="nav-badge"><?php echo $habitCount; ?></span></a></li>
                     <li class="nav-item"><a href="history.php" class="nav-link"><i class="bi bi-graph-up-arrow"></i><span>Histórico</span></a></li>
                     <li class="nav-item"><a href="achievements.php" class="nav-link active"><i class="bi bi-trophy"></i><span>Conquistas</span><span class="nav-badge"><?php echo $unlockedCount; ?></span></a></li>
                 </ul>
@@ -205,3 +206,4 @@ document.querySelectorAll('[data-filter-btn]').forEach(btn => {
 <?php include_once 'includes/profile_modal.php'; ?>
 
 <?php include_once 'includes/footer.php'; ?>
+

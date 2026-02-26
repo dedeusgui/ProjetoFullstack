@@ -1123,3 +1123,86 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - In an environment with Composer dependency access, run `composer install`, then `composer test:unit`, `composer test:action`, and smoke-test `public/achievements.php` authenticated flow.
+
+---
+
+## 2026-02-26 - Separate Achievements From History Page (Cleanup + Regression Tests)
+
+- Date / time: 2026-02-26 11:28:01
+- Author: Codex (AI agent)
+- Goal: Remove achievements-specific UI/data from `history.php` now that a dedicated achievements page exists, and validate docs/tests for regressions.
+- Objectives advanced: `OBJ-005`
+- Progress toward objectives:
+  - Finished the page split by making `history` consume history-only data again.
+  - Added missing action/payload tests for the achievements API path introduced in the prior achievements-page rollout.
+- Work completed:
+  - Removed achievements banner, XP/rewards card, and achievements list from `public/history.php`.
+  - Kept achievements access in navigation only (sidebar "Conquistas" badge remains).
+  - Removed `achievements` from the `history` payload in `App\Api\Internal\StatsApiPayloadBuilder`.
+  - Updated `StatsApiPayloadBuilder` history test to assert the `achievements` key is not present.
+  - Added `AchievementsApiGetActionHandler` and `AchievementsApiPayloadBuilder` tests.
+  - Reviewed existing docs coverage and confirmed prior achievements-page work was recorded in `docs/WORKLOG.md`.
+- Files changed:
+  - `public/history.php`
+  - `app/api/internal/StatsApiPayloadBuilder.php`
+  - `tests/Action/Api/StatsApiPayloadBuilderTest.php`
+  - `tests/Action/Api/AchievementsApiGetActionHandlerTest.php`
+  - `tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Removed `history.data.achievements` from the internal stats payload contract to prevent future UI coupling drift.
+  - Kept sidebar achievements badge on `history.php` by reading `UserProgressService` directly (global navigation concern, not page content duplication).
+  - No ADR required (cleanup within existing boundaries).
+- Verification performed (exact commands + key results):
+  - `php -l public/history.php` -> OK (no syntax errors)
+  - `php -l app/Api/Internal/StatsApiPayloadBuilder.php` -> OK (no syntax errors)
+  - `php -l tests/Action/Api/AchievementsApiPayloadBuilderTest.php` -> OK (no syntax errors)
+  - `php -l tests/Action/Api/AchievementsApiGetActionHandlerTest.php` -> OK (no syntax errors)
+  - `php -l tests/Action/Api/StatsApiPayloadBuilderTest.php` -> OK (no syntax errors)
+  - `composer test:action` -> OK (`140` tests, `613` assertions)
+  - `composer test:unit` -> OK (`58` tests, `158` assertions)
+- Tests/checks intentionally not run (and why):
+  - `composer test` not rerun (changed area is covered by action + unit suites already run)
+  - `composer qa` not run (no style/static-analysis-sensitive refactor beyond localized page/payload/test cleanup)
+- Blockers / risks:
+  - `public/history.php` layout spacing changed materially after section removal; visual smoke test is still recommended if UI polish matters for this release.
+  - `composer test:action` still emits known logged exception entries from profile-service negative-path tests, but the suite passes.
+- Objective impact: `on-track`
+- Next objective step:
+  - Smoke-test `history.php` and `achievements.php` in a browser with an authenticated user to confirm the visual split and nav badge behavior.
+
+---
+
+## 2026-02-26 - Fix Habits Count Badge on Achievements Sidebar
+
+- Date / time: 2026-02-26 11:35:03
+- Author: Codex (AI agent)
+- Goal: Show the habits count badge in the `achievements.php` sidebar, matching the other pages.
+- Objectives advanced: `OBJ-005`
+- Progress toward objectives:
+  - Restored sidebar badge consistency across dashboard pages by providing habits count in the achievements page payload.
+- Work completed:
+  - Added `stats.total_habits` to `App\Api\Internal\AchievementsApiPayloadBuilder` using `StatsQueryService`.
+  - Updated `public/achievements.php` sidebar to render the habits count badge next to "Meus Hábitos".
+  - Updated achievements payload builder test to assert the new `total_habits` key.
+- Files changed:
+  - `app/api/internal/AchievementsApiPayloadBuilder.php`
+  - `public/achievements.php`
+  - `tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Kept the count in the achievements page payload (`stats.total_habits`) instead of querying directly in `public/achievements.php`, preserving page/payload layering.
+  - No ADR required (small payload/page consistency fix).
+- Verification performed (exact commands + key results):
+  - `php -l app/Api/Internal/AchievementsApiPayloadBuilder.php` -> OK (no syntax errors)
+  - `php -l public/achievements.php` -> OK (no syntax errors)
+  - `php -l tests/Action/Api/AchievementsApiPayloadBuilderTest.php` -> OK (no syntax errors)
+  - `composer test:action` -> OK (`140` tests, `614` assertions)
+- Tests/checks intentionally not run (and why):
+  - `composer test:unit` not rerun (change is limited to page payload + action test coverage path)
+  - `composer test` / `composer qa` not rerun (small localized UI payload fix, action suite already validates impacted area)
+- Blockers / risks:
+  - `composer test:action` still logs known profile-service exception entries in negative-path tests, but the suite passes.
+- Objective impact: `on-track`
+- Next objective step:
+  - Smoke-test `public/achievements.php` in-browser to confirm the habits badge value matches `dashboard.php` / `history.php` for the same user.
