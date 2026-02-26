@@ -54,7 +54,8 @@ final class HabitDeleteActionHandlerTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/habits.php');
-        self::assertSame('Habito deletado com sucesso!', $response->getFlash()['success_message'] ?? null);
+        self::assertSame('Hábito deletado com sucesso!', $response->getFlash()['success_message'] ?? null);
         self::assertNull($this->db()->fetchOne('SELECT id FROM habits WHERE id = ' . (int) $habitId));
     }
 }
+

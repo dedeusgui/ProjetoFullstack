@@ -44,8 +44,8 @@
     overflow: hidden;
 }
 
-.xp-bar span,
-.progress-track span {
+.xp-bar-fill,
+.progress-fill {
     display: block;
     height: 100%;
     background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));

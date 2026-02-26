@@ -17,7 +17,7 @@ final class HabitCommandServiceTest extends ActionTestCase
         $result = $service->create($userId, $this->validPayload(['category' => 'Categoria Inexistente']));
 
         self::assertFalse($result['success'] ?? true);
-        self::assertSame('Categoria invalida.', $result['message'] ?? null);
+        self::assertSame('Categoria inválida.', $result['message'] ?? null);
         self::assertSame('0', (string) ($this->db()->fetchOne('SELECT COUNT(*) AS c FROM habits')['c'] ?? '1'));
     }
 
@@ -64,7 +64,7 @@ final class HabitCommandServiceTest extends ActionTestCase
         $result = $service->delete($otherId, $habitId);
 
         self::assertFalse($result['success'] ?? true);
-        self::assertSame('Voce nao tem permissao para deletar este habito.', $result['message'] ?? null);
+        self::assertSame('Você não tem permissão para deletar este hábito.', $result['message'] ?? null);
         self::assertNotNull($this->db()->fetchOne('SELECT id FROM habits WHERE id = ' . (int) $habitId));
     }
 
@@ -77,7 +77,7 @@ final class HabitCommandServiceTest extends ActionTestCase
         $result = $service->delete($userId, $habitId);
 
         self::assertTrue($result['success'] ?? false);
-        self::assertSame('Habito deletado com sucesso!', $result['message'] ?? null);
+        self::assertSame('Hábito deletado com sucesso!', $result['message'] ?? null);
         self::assertNull($this->db()->fetchOne('SELECT id FROM habits WHERE id = ' . (int) $habitId));
     }
 
@@ -89,7 +89,7 @@ final class HabitCommandServiceTest extends ActionTestCase
 
         $archive = $service->archive($userId, $habitId);
         self::assertTrue($archive['success'] ?? false);
-        self::assertSame('Habito arquivado com sucesso!', $archive['message'] ?? null);
+        self::assertSame('Hábito arquivado com sucesso!', $archive['message'] ?? null);
 
         $archived = $this->db()->fetchOne('SELECT is_active, archived_at FROM habits WHERE id = ' . (int) $habitId);
         self::assertSame('0', (string) ($archived['is_active'] ?? '1'));
@@ -97,7 +97,7 @@ final class HabitCommandServiceTest extends ActionTestCase
 
         $restore = $service->restore($userId, $habitId);
         self::assertTrue($restore['success'] ?? false);
-        self::assertSame('Habito restaurado com sucesso!', $restore['message'] ?? null);
+        self::assertSame('Hábito restaurado com sucesso!', $restore['message'] ?? null);
 
         $restored = $this->db()->fetchOne('SELECT is_active, archived_at FROM habits WHERE id = ' . (int) $habitId);
         self::assertSame('1', (string) ($restored['is_active'] ?? '0'));
@@ -113,7 +113,7 @@ final class HabitCommandServiceTest extends ActionTestCase
         $result = $service->restore($userId, 0);
 
         self::assertFalse($result['success'] ?? true);
-        self::assertSame('Habito invalido.', $result['message'] ?? null);
+        self::assertSame('Hábito inválido.', $result['message'] ?? null);
     }
 
     private function validPayload(array $overrides = []): array
@@ -132,3 +132,4 @@ final class HabitCommandServiceTest extends ActionTestCase
         ], $overrides);
     }
 }
+

@@ -20,7 +20,7 @@ class AchievementService
 
     public function getUserAchievements(int $userId): array
     {
-        return $this->syncUserAchievements($userId);
+        return $this->buildUserAchievements($userId, false);
     }
 
     public function getAchievementsPageData(int $userId): array
@@ -76,105 +76,7 @@ class AchievementService
 
     public function syncUserAchievements(int $userId): array
     {
-        $totalHabits = $this->getTotalHabits($userId);
-        $totalCompletions = $this->getTotalCompletions($userId);
-        $bestStreak = $this->getBestStreak($userId);
-        $perfectStreak = $this->getPerfectDaysStreak($userId, 730);
-
-        $metrics = [
-            'streak' => $bestStreak,
-            'total_completions' => $totalCompletions,
-            'habits_count' => $totalHabits,
-            'perfect_week' => $perfectStreak,
-            'perfect_month' => $perfectStreak,
-        ];
-
-        $categoryByCriteria = [
-            'streak' => 'consistencia',
-            'perfect_week' => 'consistencia',
-            'perfect_month' => 'consistencia',
-            'habits_count' => 'exploracao',
-            'total_completions' => 'performance',
-        ];
-
-        $tierByRarity = [
-            'common' => 'bronze',
-            'rare' => 'prata',
-            'epic' => 'ouro',
-            'legendary' => 'ouro',
-        ];
-
-        $rows = $this->achievementRepository->findActiveWithUserUnlockData($userId);
-
-        $achievements = [];
-        $justUnlockedIds = [];
-
-        foreach ($rows as $achievement) {
-            $achievementId = (int) $achievement['id'];
-            $criteriaType = (string) $achievement['criteria_type'];
-            $criteriaValue = max(1, (int) $achievement['criteria_value']);
-            $metricValue = (int) ($metrics[$criteriaType] ?? 0);
-
-            [$progressPercent, $targetValue] = $this->resolveProgressPercentAndTarget($criteriaType, $criteriaValue, $metricValue);
-            $currentValue = min($metricValue, $targetValue);
-            $isUnlocked = $currentValue >= $targetValue;
-
-            if ($isUnlocked && empty($achievement['user_achievement_id'])) {
-                $insertStmt = $this->conn->prepare("INSERT INTO user_achievements (user_id, achievement_id, progress) VALUES (?, ?, ?)");
-                $insertStmt->bind_param('iii', $userId, $achievementId, $currentValue);
-                $insertStmt->execute();
-
-                $achievement['unlocked_at'] = date('Y-m-d H:i:s');
-                $justUnlockedIds[$achievementId] = true;
-            }
-
-            $progressLabel = $criteriaType === 'perfect_week' || $criteriaType === 'perfect_month'
-                ? $currentValue . '/' . $targetValue . ' dias perfeitos'
-                : $currentValue . '/' . $targetValue;
-
-            $unlockedAt = $achievement['unlocked_at'] ?? null;
-
-            $achievements[] = [
-                'id' => $achievementId,
-                'slug' => $achievement['slug'],
-                'name' => $achievement['name'],
-                'description' => $achievement['description'],
-                'icon' => self::mapIconToBootstrap($achievement['icon'] ?? ''),
-                'badge_color' => $achievement['badge_color'] ?? '#4a74ff',
-                'criteria_type' => $criteriaType,
-                'criteria_value' => $criteriaValue,
-                'points' => (int) ($achievement['points'] ?? 0),
-                'rarity' => $achievement['rarity'],
-                'progress' => $currentValue,
-                'progress_percent' => $progressPercent,
-                'progress_current' => $currentValue,
-                'progress_target' => $targetValue,
-                'progress_label' => $progressLabel,
-                'is_near_completion' => !$isUnlocked && $progressPercent >= 80,
-                'category' => $categoryByCriteria[$criteriaType] ?? 'performance',
-                'tier' => $tierByRarity[$achievement['rarity']] ?? 'bronze',
-                'unlocked' => !empty($unlockedAt) || $isUnlocked,
-                'just_unlocked' => isset($justUnlockedIds[$achievementId]),
-                'date' => $unlockedAt,
-            ];
-        }
-
-        usort($achievements, static function (array $a, array $b): int {
-            if (($a['unlocked'] ?? false) !== ($b['unlocked'] ?? false)) {
-                return ($a['unlocked'] ?? false) ? -1 : 1;
-            }
-
-            $rarityOrder = ['legendary' => 4, 'epic' => 3, 'rare' => 2, 'common' => 1];
-            $aRarity = $rarityOrder[$a['rarity'] ?? 'common'] ?? 0;
-            $bRarity = $rarityOrder[$b['rarity'] ?? 'common'] ?? 0;
-            if ($aRarity !== $bRarity) {
-                return $bRarity <=> $aRarity;
-            }
-
-            return ($b['progress_percent'] ?? 0) <=> ($a['progress_percent'] ?? 0);
-        });
-
-        return $achievements;
+        return $this->buildUserAchievements($userId, true);
     }
 
     public static function mapIconToBootstrap(string $icon): string
@@ -334,5 +236,108 @@ class AchievementService
     private function getUserTodayDate(int $userId): string
     {
         return $this->userLocalDateResolver->getTodayDateForUser($userId);
+    }
+
+    private function buildUserAchievements(int $userId, bool $persistUnlocked): array
+    {
+        $totalHabits = $this->getTotalHabits($userId);
+        $totalCompletions = $this->getTotalCompletions($userId);
+        $bestStreak = $this->getBestStreak($userId);
+        $perfectStreak = $this->getPerfectDaysStreak($userId, 730);
+
+        $metrics = [
+            'streak' => $bestStreak,
+            'total_completions' => $totalCompletions,
+            'habits_count' => $totalHabits,
+            'perfect_week' => $perfectStreak,
+            'perfect_month' => $perfectStreak,
+        ];
+
+        $categoryByCriteria = [
+            'streak' => 'consistencia',
+            'perfect_week' => 'consistencia',
+            'perfect_month' => 'consistencia',
+            'habits_count' => 'exploracao',
+            'total_completions' => 'performance',
+        ];
+
+        $tierByRarity = [
+            'common' => 'bronze',
+            'rare' => 'prata',
+            'epic' => 'ouro',
+            'legendary' => 'ouro',
+        ];
+
+        $rows = $this->achievementRepository->findActiveWithUserUnlockData($userId);
+
+        $achievements = [];
+        $justUnlockedIds = [];
+
+        foreach ($rows as $achievement) {
+            $achievementId = (int) $achievement['id'];
+            $criteriaType = (string) $achievement['criteria_type'];
+            $criteriaValue = max(1, (int) $achievement['criteria_value']);
+            $metricValue = (int) ($metrics[$criteriaType] ?? 0);
+
+            [$progressPercent, $targetValue] = $this->resolveProgressPercentAndTarget($criteriaType, $criteriaValue, $metricValue);
+            $currentValue = min($metricValue, $targetValue);
+            $isUnlocked = $currentValue >= $targetValue;
+
+            if ($persistUnlocked && $isUnlocked && empty($achievement['user_achievement_id'])) {
+                $insertStmt = $this->conn->prepare("INSERT INTO user_achievements (user_id, achievement_id, progress) VALUES (?, ?, ?)");
+                $insertStmt->bind_param('iii', $userId, $achievementId, $currentValue);
+                $insertStmt->execute();
+
+                $achievement['unlocked_at'] = date('Y-m-d H:i:s');
+                $justUnlockedIds[$achievementId] = true;
+            }
+
+            $progressLabel = $criteriaType === 'perfect_week' || $criteriaType === 'perfect_month'
+                ? $currentValue . '/' . $targetValue . ' dias perfeitos'
+                : $currentValue . '/' . $targetValue;
+
+            $unlockedAt = $achievement['unlocked_at'] ?? null;
+
+            $achievements[] = [
+                'id' => $achievementId,
+                'slug' => $achievement['slug'],
+                'name' => $achievement['name'],
+                'description' => $achievement['description'],
+                'icon' => self::mapIconToBootstrap($achievement['icon'] ?? ''),
+                'badge_color' => $achievement['badge_color'] ?? '#4a74ff',
+                'criteria_type' => $criteriaType,
+                'criteria_value' => $criteriaValue,
+                'points' => (int) ($achievement['points'] ?? 0),
+                'rarity' => $achievement['rarity'],
+                'progress' => $currentValue,
+                'progress_percent' => $progressPercent,
+                'progress_current' => $currentValue,
+                'progress_target' => $targetValue,
+                'progress_label' => $progressLabel,
+                'is_near_completion' => !$isUnlocked && $progressPercent >= 80,
+                'category' => $categoryByCriteria[$criteriaType] ?? 'performance',
+                'tier' => $tierByRarity[$achievement['rarity']] ?? 'bronze',
+                'unlocked' => !empty($unlockedAt) || $isUnlocked,
+                'just_unlocked' => $persistUnlocked && isset($justUnlockedIds[$achievementId]),
+                'date' => $unlockedAt,
+            ];
+        }
+
+        usort($achievements, static function (array $a, array $b): int {
+            if (($a['unlocked'] ?? false) !== ($b['unlocked'] ?? false)) {
+                return ($a['unlocked'] ?? false) ? -1 : 1;
+            }
+
+            $rarityOrder = ['legendary' => 4, 'epic' => 3, 'rare' => 2, 'common' => 1];
+            $aRarity = $rarityOrder[$a['rarity'] ?? 'common'] ?? 0;
+            $bRarity = $rarityOrder[$b['rarity'] ?? 'common'] ?? 0;
+            if ($aRarity !== $bRarity) {
+                return $bRarity <=> $aRarity;
+            }
+
+            return ($b['progress_percent'] ?? 0) <=> ($a['progress_percent'] ?? 0);
+        });
+
+        return $achievements;
     }
 }

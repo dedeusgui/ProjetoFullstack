@@ -82,7 +82,9 @@ include_once 'includes/header.php';
                         </div>
                     </div>
                     <div>
-                        <div class="xp-bar"><span style="width: <?php echo (float) ($hero['xp_progress_percent'] ?? 0); ?>%"></span></div>
+                        <div class="xp-bar">
+                            <span class="xp-bar-fill" data-xp-progress="<?php echo (float) ($hero['xp_progress_percent'] ?? 0); ?>"></span>
+                        </div>
                         <small><?php echo (int) ($hero['xp_to_next_level'] ?? 0); ?> XP para o próximo nível</small>
                     </div>
                 </div>
@@ -109,7 +111,12 @@ include_once 'includes/header.php';
                 $progressPercent = (int) ($achievement['progress_percent'] ?? 0);
                 $status = $isUnlocked ? 'unlocked' : ($progressPercent > 0 ? 'in_progress' : 'locked');
                 ?>
-                <article class="dashboard-card achievement-card <?php echo $status; ?>" data-status="<?php echo $status; ?>" data-rarity="<?php echo $rarity; ?>" style="--badge-color: <?php echo htmlspecialchars((string) ($achievement['badge_color'] ?? $rarityMeta['color']), ENT_QUOTES, 'UTF-8'); ?>; --badge-glow: <?php echo htmlspecialchars($rarityMeta['glow'], ENT_QUOTES, 'UTF-8'); ?>;">
+                <article
+                    class="dashboard-card achievement-card <?php echo $status; ?>"
+                    data-status="<?php echo $status; ?>"
+                    data-rarity="<?php echo $rarity; ?>"
+                    data-badge-color="<?php echo htmlspecialchars((string) ($achievement['badge_color'] ?? $rarityMeta['color']), ENT_QUOTES, 'UTF-8'); ?>"
+                    data-badge-glow="<?php echo htmlspecialchars($rarityMeta['glow'], ENT_QUOTES, 'UTF-8'); ?>">
                     <div class="card-body">
                         <div class="achievement-head">
                             <i class="<?php echo htmlspecialchars((string) $achievement['icon'], ENT_QUOTES, 'UTF-8'); ?>"></i>
@@ -119,7 +126,9 @@ include_once 'includes/header.php';
                         <p><?php echo htmlspecialchars((string) $achievement['description'], ENT_QUOTES, 'UTF-8'); ?></p>
 
                         <div class="achievement-progress" title="<?php echo htmlspecialchars((string) $achievement['progress_label'], ENT_QUOTES, 'UTF-8'); ?>">
-                            <div class="progress-track"><span style="width: <?php echo $progressPercent; ?>%"></span></div>
+                            <div class="progress-track">
+                                <span class="progress-fill" data-progress-percent="<?php echo $progressPercent; ?>"></span>
+                            </div>
                             <small><?php echo htmlspecialchars((string) $achievement['progress_label'], ENT_QUOTES, 'UTF-8'); ?> (<?php echo $progressPercent; ?>%)</small>
                         </div>
 
@@ -160,6 +169,27 @@ include_once 'includes/header.php';
 </div>
 
 <script>
+document.querySelectorAll('.achievement-card').forEach(card => {
+    const badgeColor = card.dataset.badgeColor;
+    const badgeGlow = card.dataset.badgeGlow;
+    if (badgeColor) {
+        card.style.setProperty('--badge-color', badgeColor);
+    }
+    if (badgeGlow) {
+        card.style.setProperty('--badge-glow', badgeGlow);
+    }
+});
+
+document.querySelectorAll('.progress-fill').forEach(fill => {
+    const percent = Number(fill.dataset.progressPercent || 0);
+    fill.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+});
+
+document.querySelectorAll('.xp-bar-fill').forEach(fill => {
+    const percent = Number(fill.dataset.xpProgress || 0);
+    fill.style.width = `${Math.min(100, Math.max(0, percent))}%`;
+});
+
 document.querySelectorAll('[data-filter-btn]').forEach(btn => {
     btn.addEventListener('click', () => {
         const filter = btn.dataset.filterBtn;
@@ -170,5 +200,8 @@ document.querySelectorAll('[data-filter-btn]').forEach(btn => {
     });
 });
 </script>
+
+<?php include_once 'includes/settings_modal.php'; ?>
+<?php include_once 'includes/profile_modal.php'; ?>
 
 <?php include_once 'includes/footer.php'; ?>

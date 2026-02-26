@@ -15,7 +15,7 @@ final class LoginActionHandler
 
         if (!$this->hasValidCsrfToken($post, $session)) {
             return ActionResponse::redirect('../public/login.php', [
-                'error_message' => 'SessÃ£o invÃ¡lida. Atualize a pÃ¡gina e tente novamente.',
+                'error_message' => 'Sessão inválida. Atualize a página e tente novamente.',
             ]);
         }
 
@@ -115,3 +115,4 @@ final class LoginActionHandler
         return 'auth_attempts_' . hash('sha256', $ip);
     }
 }
+

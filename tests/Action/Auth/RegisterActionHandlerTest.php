@@ -33,7 +33,7 @@ final class RegisterActionHandlerTest extends ActionTestCase
 
         $this->assertRedirect($response, '../public/register.php');
         self::assertSame(
-            'Sessao invalida. Atualize a pagina e tente novamente.',
+            'Sessão inválida. Atualize a página e tente novamente.',
             $response->getFlash()['error_message'] ?? null
         );
     }
@@ -65,7 +65,7 @@ final class RegisterActionHandlerTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/register.php');
-        self::assertSame('Email invalido.', $response->getFlash()['error_message'] ?? null);
+        self::assertSame('E-mail inválido.', $response->getFlash()['error_message'] ?? null);
     }
 
     public function testShortPasswordRedirectsWithErrorFlash(): void
@@ -82,7 +82,7 @@ final class RegisterActionHandlerTest extends ActionTestCase
 
         $this->assertRedirect($response, '../public/register.php');
         self::assertSame(
-            'A senha deve ter no minimo 6 caracteres.',
+            'A senha deve ter no mínimo 6 caracteres.',
             $response->getFlash()['error_message'] ?? null
         );
     }
@@ -99,7 +99,7 @@ final class RegisterActionHandlerTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/register.php');
-        self::assertSame('As senhas nao conferem.', $response->getFlash()['error_message'] ?? null);
+        self::assertSame('As senhas não conferem.', $response->getFlash()['error_message'] ?? null);
     }
 
     public function testDuplicateEmailRedirectsWithErrorFlash(): void
@@ -117,7 +117,7 @@ final class RegisterActionHandlerTest extends ActionTestCase
         $response = $handler->handle($this->conn(), $_POST, $_SERVER, $_SESSION);
 
         $this->assertRedirect($response, '../public/register.php');
-        self::assertSame('Este email ja esta cadastrado.', $response->getFlash()['error_message'] ?? null);
+        self::assertSame('Este e-mail já está cadastrado.', $response->getFlash()['error_message'] ?? null);
     }
 
     public function testSuccessfulRegistrationCreatesUserAndSignsIn(): void
@@ -159,3 +159,4 @@ final class RegisterActionHandlerTest extends ActionTestCase
         ];
     }
 }
+

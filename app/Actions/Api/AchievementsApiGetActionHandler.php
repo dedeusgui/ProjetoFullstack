@@ -13,7 +13,7 @@ final class AchievementsApiGetActionHandler
         if (!isset($session['user_id']) || empty($session['user_id'])) {
             return ActionResponse::json([
                 'success' => false,
-                'message' => 'UsuÃ¡rio nÃ£o autenticado.',
+                'message' => 'Usuário não autenticado.',
                 'error_code' => 'unauthorized',
                 'request_id' => RequestContext::getRequestId(),
             ], 401);
@@ -22,3 +22,4 @@ final class AchievementsApiGetActionHandler
         return ActionResponse::json(AchievementsApiPayloadBuilder::build($conn, (int) $session['user_id']));
     }
 }
+

@@ -1055,6 +1055,31 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 
 ---
 
+## 2026-02-26 - Fix Settings Modal on Achievements Page
+
+- Date / time: 2026-02-26
+- Author: Codex (AI agent)
+- Goal: Restore settings modal behavior on the achievements page (avoid anchor jump to top).
+- Objectives advanced: `OBJ-005`
+- Progress toward objectives:
+  - Small UI consistency fix to keep modal behavior aligned across dashboard pages.
+- Work completed:
+  - Added the settings/profile modal includes to `public/achievements.php` so the overlay exists and click handlers bind.
+- Files changed:
+  - `public/achievements.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No ADR required (small UI include fix).
+- Verification performed:
+  - Not run (template include change only).
+- Blockers / risks:
+  - None known; behavior should match `dashboard.php`, `habits.php`, and `history.php`.
+- Objective impact: `on-track`
+- Next objective step:
+  - If desired, smoke-test `public/achievements.php` with an authenticated session to confirm the modal opens.
+
+---
+
 ## 2026-02-26 - Achievements Dedicated Page (UI + Service + Repository + API)
 
 - Date / time: 2026-02-26

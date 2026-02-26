@@ -33,17 +33,17 @@ class HabitCommandService
             return ['success' => false, 'message' => 'Erro ao criar hÃ¡bito. Tente novamente.'];
         }
 
-        return ['success' => true, 'message' => 'HÃ¡bito criado com sucesso!'];
+        return ['success' => true, 'message' => 'Hábito criado com sucesso!'];
     }
 
     public function update(int $userId, int $habitId, array $request): array
     {
         if ($habitId <= 0) {
-            return ['success' => false, 'message' => 'HÃ¡bito invÃ¡lido.'];
+            return ['success' => false, 'message' => 'Hábito inválido.'];
         }
 
         if (!$this->habitRepository->userOwnsHabit($habitId, $userId)) {
-            return ['success' => false, 'message' => 'VocÃª nÃ£o tem permissÃ£o para editar este hÃ¡bito.'];
+            return ['success' => false, 'message' => 'Você não tem permissão para editar este hábito.'];
         }
 
         $input = HabitInputSanitizer::fromRequest($request);
@@ -60,30 +60,30 @@ class HabitCommandService
             return ['success' => false, 'message' => 'Erro ao atualizar hÃ¡bito. Tente novamente.'];
         }
 
-        return ['success' => true, 'message' => 'HÃ¡bito atualizado com sucesso!'];
+        return ['success' => true, 'message' => 'Hábito atualizado com sucesso!'];
     }
 
     public function delete(int $userId, int $habitId): array
     {
         if ($habitId <= 0) {
-            return ['success' => false, 'message' => 'HÃ¡bito invÃ¡lido.'];
+            return ['success' => false, 'message' => 'Hábito inválido.'];
         }
 
         if (!$this->habitRepository->userOwnsHabit($habitId, $userId)) {
-            return ['success' => false, 'message' => 'VocÃª nÃ£o tem permissÃ£o para deletar este hÃ¡bito.'];
+            return ['success' => false, 'message' => 'Você não tem permissão para deletar este hábito.'];
         }
 
         if (!$this->habitRepository->deleteForUser($habitId, $userId)) {
             return ['success' => false, 'message' => 'Erro ao deletar hÃ¡bito. Tente novamente.'];
         }
 
-        return ['success' => true, 'message' => 'HÃ¡bito deletado com sucesso!'];
+        return ['success' => true, 'message' => 'Hábito deletado com sucesso!'];
     }
 
     public function archive(int $userId, int $habitId): array
     {
         if ($habitId <= 0) {
-            return ['success' => false, 'message' => 'HÃ¡bito invÃ¡lido.'];
+            return ['success' => false, 'message' => 'Hábito inválido.'];
         }
 
         if (!$this->habitRepository->userOwnsHabit($habitId, $userId)) {
@@ -94,13 +94,13 @@ class HabitCommandService
             return ['success' => false, 'message' => 'Erro ao arquivar hÃ¡bito. Tente novamente.'];
         }
 
-        return ['success' => true, 'message' => 'HÃ¡bito arquivado com sucesso!'];
+        return ['success' => true, 'message' => 'Hábito arquivado com sucesso!'];
     }
 
     public function restore(int $userId, int $habitId): array
     {
         if ($habitId <= 0) {
-            return ['success' => false, 'message' => 'HÃ¡bito invÃ¡lido.'];
+            return ['success' => false, 'message' => 'Hábito inválido.'];
         }
 
         if (!$this->habitRepository->userOwnsHabit($habitId, $userId)) {
@@ -111,14 +111,14 @@ class HabitCommandService
             return ['success' => false, 'message' => 'Erro ao restaurar hÃ¡bito. Tente novamente.'];
         }
 
-        return ['success' => true, 'message' => 'HÃ¡bito restaurado com sucesso!'];
+        return ['success' => true, 'message' => 'Hábito restaurado com sucesso!'];
     }
 
     private function prepareHabitData(array $data): array
     {
         $categoryId = $this->categoryRepository->findIdByName((string) ($data['category'] ?? ''));
         if (!$categoryId) {
-            return ['error' => 'Categoria invÃ¡lida.'];
+            return ['error' => 'Categoria inválida.'];
         }
 
         $data['category_id'] = $categoryId;
@@ -127,3 +127,4 @@ class HabitCommandService
         return $data;
     }
 }
+

@@ -21,7 +21,7 @@ final class UpdateProfileActionHandler
 
         if (!$this->hasValidCsrfToken($post, $session)) {
             return ActionResponse::redirect('../public/dashboard.php', [
-                'error_message' => 'SessÃ£o invÃ¡lida. Atualize a pÃ¡gina e tente novamente.',
+                'error_message' => 'Sessão inválida. Atualize a página e tente novamente.',
             ]);
         }
 
@@ -69,3 +69,4 @@ final class UpdateProfileActionHandler
         return hash_equals((string) $session['csrf_token'], $submittedToken);
     }
 }
+
