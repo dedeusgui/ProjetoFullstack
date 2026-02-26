@@ -32,6 +32,7 @@ $firstNameEscaped = htmlspecialchars($firstName, ENT_QUOTES, 'UTF-8');
 $userProgressService = new UserProgressService($conn);
 $profileSummary = $userProgressService->refreshUserProgressSummary((int) $userId);
 $userData['level'] = (int) ($profileSummary['level'] ?? 1);
+$unlockedAchievementsCount = (int) ($profileSummary['unlocked_achievements_count'] ?? 0);
 
 // Carregar dados centralizados pela API (somente via PHP interno)
 $dashboardPayload = StatsApiPayloadBuilder::build($conn, (int) $userId, 'dashboard');
@@ -175,6 +176,13 @@ include_once "includes/header.php";
                         <a href="history.php" class="nav-link">
                             <i class="bi bi-graph-up-arrow"></i>
                             <span>Histórico</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="achievements.php" class="nav-link">
+                            <i class="bi bi-trophy"></i>
+                            <span>Conquistas</span>
+                            <span class="nav-badge"><?php echo $unlockedAchievementsCount; ?></span>
                         </a>
                     </li>
                 </ul>

@@ -1052,3 +1052,49 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Review and commit the PT-BR copy/documentation updates, or run a stricter terminology audit across all visible strings if you want a formal style guide pass
+
+---
+
+## 2026-02-26 - Achievements Dedicated Page (UI + Service + Repository + API)
+
+- Date / time: 2026-02-26
+- Author: Codex (AI agent)
+- Goal: Implement a dedicated achievements page with visual states, filters, progress hero, highlights, and navigation integration.
+- Objectives advanced: `OBJ-005`
+- Progress toward objectives:
+  - Added a new achievements vertical slice using layered architecture (`public/`, `actions/`, `app/`, `app/repository/`).
+  - Kept HTTP adapters thin and moved retrieval/aggregation logic to domain service/repository.
+- Work completed:
+  - Created `public/achievements.php` and `public/assets/css/achievements.css`.
+  - Added internal API endpoint `actions/api_get_achievements.php` with handler `App\Actions\Api\AchievementsApiGetActionHandler` and payload builder `App\Api\Internal\AchievementsApiPayloadBuilder`.
+  - Added `App\Repository\AchievementRepository` for achievement/user reads.
+  - Expanded `App\Achievements\AchievementService` with page-data aggregation and sorting/filter-ready payload.
+  - Updated sidebar navigation in `public/dashboard.php`, `public/habits.php`, and `public/history.php` to include "Conquistas" + unlocked badge.
+- Files changed:
+  - `public/achievements.php`
+  - `public/assets/css/achievements.css`
+  - `actions/api_get_achievements.php`
+  - `app/Actions/Api/AchievementsApiGetActionHandler.php`
+  - `app/api/internal/AchievementsApiPayloadBuilder.php`
+  - `app/achievements/AchievementService.php`
+  - `app/repository/AchievementRepository.php`
+  - `public/dashboard.php`
+  - `public/habits.php`
+  - `public/history.php`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Reused existing `AchievementService` and incrementally expanded it instead of introducing parallel page-only service, to avoid duplication and preserve current call sites.
+  - No ADR required (no cross-cutting boundary exception introduced).
+- Verification performed (exact commands + key results):
+  - `php -l public/achievements.php && php -l actions/api_get_achievements.php && php -l app/achievements/AchievementService.php && php -l app/repository/AchievementRepository.php && php -l app/api/internal/AchievementsApiPayloadBuilder.php && php -l app/Actions/Api/AchievementsApiGetActionHandler.php && php -l public/dashboard.php && php -l public/habits.php && php -l public/history.php` -> OK (all files without syntax errors)
+  - `composer test:unit` -> failed (`vendor/bin/phpunit` missing)
+  - `composer install` -> failed due outbound network/proxy restriction (`CONNECT tunnel failed, response 403` when downloading GitHub packages)
+  - `php -S 0.0.0.0:8080 -t public` + Playwright screenshot attempt -> server started, but request to `/achievements.php` returned 500 because Composer autoload is unavailable.
+- Tests/checks intentionally not run (and why):
+  - `composer test:action`, `composer test`, `composer qa` not run because dependency installation is blocked by network/proxy constraints in this environment.
+- Blockers / risks:
+  - Runtime validation is blocked until Composer dependencies are installed (autoload required by `config/bootstrap.php`).
+  - Screenshot artifact currently reflects runtime error state instead of authenticated UI due missing autoload/dependencies.
+- Objective impact: `on-track`
+- Next objective step:
+  - In an environment with Composer dependency access, run `composer install`, then `composer test:unit`, `composer test:action`, and smoke-test `public/achievements.php` authenticated flow.

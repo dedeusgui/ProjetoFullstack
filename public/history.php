@@ -69,6 +69,7 @@ foreach ($achievements as $achievement) {
 $userProgressService = new UserProgressService($conn);
 $profileSummary = $userProgressService->refreshUserProgressSummary((int) $userId, $achievements);
 $userData['level'] = (int) ($profileSummary['level'] ?? 1);
+$unlockedAchievementsCount = (int) ($profileSummary['unlocked_achievements_count'] ?? 0);
 
 $achievementCount = (int) ($profileSummary['achievements_count'] ?? count($achievements));
 $unlockedAchievements = $profileSummary['unlocked_achievements'] ?? [];
@@ -123,6 +124,13 @@ include_once "includes/header.php";
                         <a href="history.php" class="nav-link active">
                             <i class="bi bi-graph-up-arrow"></i>
                             <span>Histórico</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="achievements.php" class="nav-link">
+                            <i class="bi bi-trophy"></i>
+                            <span>Conquistas</span>
+                            <span class="nav-badge"><?php echo $unlockedAchievementsCount; ?></span>
                         </a>
                     </li>
                 </ul>
