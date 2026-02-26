@@ -1,7 +1,7 @@
 # Current Status
 
 - Last updated: 2026-02-26
-- Current phase: UI/UX rework execution (Achievements Phase 1 implemented; manual UI validation + next-page rollout planning)
+- Current phase: Achievements/progression overhaul implemented (backend + XP/rewards) with follow-up manual UI QA and migration rollout validation pending
 - Primary audience: Developers and AI agents
 
 ## Objective Summary
@@ -11,6 +11,7 @@
 - `OBJ-004` Development documentation system and handoff process
 - `OBJ-005` HTTP action-pattern follow-through (ongoing standardization and new handler/payload coverage additions)
 - `OBJ-007` Major UI/UX rework execution started (Achievements Phase 1 implemented; broader rollout continuing)
+- Achievements/progression backend modernization (rule-based achievements, XP/rewards, frequency simplification) implemented and validated locally
 - Post-`OBJ-003` follow-through: action-pattern standardization and CI planning remain unblocked by broader local test coverage
 
 ### Completed
@@ -26,6 +27,8 @@
 
 ## Active Work
 
+- Manually validate achievements + profile UI after the backend progression/reward overhaul (hero XP bar, recent unlocks, profile badges)
+- Apply/roll out the schema overhaul on non-test local DBs (new achievement/progression/reward tables; `custom` frequency removal migration)
 - Manually validate the `achievements` page rework in-browser (desktop/mobile UX QA) and tune any spacing/contrast issues (`OBJ-007`)
 - Plan and sequence the next UI/UX rework page(s) (`dashboard`, `habits`, `history`) using the new `docs/features/ui-ux-rework/*` workspace (`OBJ-007`)
 - Maintain docs freshness and verification evidence discipline across sessions (`OBJ-004`)
@@ -36,6 +39,12 @@
 
 ## Recently Completed
 
+- Rebuilt achievements persistence around `achievement_definitions`, `user_achievement_unlocks`, and `user_achievement_events` (rule-driven sync + unlock event logging)
+- Fixed perfect-day achievement logic to respect scheduled habits per date (weekly supported; zero-scheduled day breaks streak)
+- Added a simpler XP progression model (completion XP + achievement XP), seeded `progression_levels`, and persistent level rewards (`reward_definitions`, `user_reward_unlocks`, `user_reward_events`)
+- Added profile badge rewards display in `public/includes/profile_modal.php`
+- Removed `custom` habit frequency from schema/UI/validation paths and migrated behavior toward `daily`/`weekly` only
+- Revalidated local test suites after the overhaul (`composer test:db:reset`, `composer test:unit`, `composer test:action`, `composer test`, `composer qa`)
 - Implemented `OBJ-007` Achievements Phase 1 UI/UX rework on `public/achievements.php` + `public/assets/css/achievements.css` (premium visual polish, stronger hover states, filter UX feedback, PT-BR copy cleanup)
 - Replaced the old achievements “Destaques” section with a recent achievements timeline (up to 5 items) for a more rewarding recent-unlocks experience
 - Expanded achievements page payload to include `data.recent_unlocked` (newest first, max 5) and added tests for payload shape / ordering limit
@@ -100,11 +109,13 @@
 ## Current Blockers
 
 - No active blocker for the completed Phase 2 coverage rollout.
+- Existing non-test databases still need the new schema applied (or reset/imported) before the v2 achievements/progression tables and reward logic are available at runtime.
 - Next blockers are more likely to come from UI/UX redesign scope decisions, CI integration, or legacy helper/runtime coupling during future standardization work.
 
 ## Next Recommended Step
 
 1. Run an in-browser manual QA pass for the reworked `achievements` page (desktop/mobile + keyboard/focus + reduced-motion spot-check) and record findings in `docs/features/ui-ux-rework/progress.md`
-2. Start the next `OBJ-007` page rework phase (`dashboard` or `habits`) using the same feature workspace and verification discipline
-3. Continue `OBJ-005` follow-through by standardizing remaining procedural actions where helper/global coupling still limits testability
-4. Add CI workflow for `composer test` (and optionally `composer qa`) now that local suite breadth is validated
+2. Validate the new profile badge reward UX in-browser and decide the next reward types to add (themes/cosmetics/feature unlocks)
+3. Apply the schema overhaul/migration to the main local DB and smoke-test achievement unlocks + level rewards with existing data
+4. Start the next `OBJ-007` page rework phase (`dashboard` or `habits`) using the same feature workspace and verification discipline
+5. Add CI workflow for `composer test` (and optionally `composer qa`) now that local suite breadth is validated

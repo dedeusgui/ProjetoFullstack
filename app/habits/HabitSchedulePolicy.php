@@ -49,14 +49,6 @@ class HabitSchedulePolicy
             return in_array($phpWeekDay, $days, true);
         }
 
-        if ($frequency === 'custom') {
-            $days = self::normalizeTargetDays($habit['target_days'] ?? null);
-            if (empty($days)) {
-                return false;
-            }
-            return in_array($phpWeekDay, $days, true);
-        }
-
         return true;
     }
 

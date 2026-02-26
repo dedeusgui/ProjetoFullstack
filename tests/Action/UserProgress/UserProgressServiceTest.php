@@ -14,8 +14,9 @@ final class UserProgressServiceTest extends ActionTestCase
         $service = new UserProgressService($this->conn());
 
         self::assertSame(1, $service->calculateLevelFromXp(0));
-        self::assertSame(2, $service->calculateLevelFromXp(120));
-        self::assertSame(3, $service->calculateLevelFromXp(480));
+        self::assertSame(2, $service->calculateLevelFromXp(100));
+        self::assertSame(3, $service->calculateLevelFromXp(200));
+        self::assertSame(5, $service->calculateLevelFromXp(480));
     }
 
     public function testRefreshUserProgressSummaryBuildsSummaryAndPersistsLevelAndXp(): void
@@ -31,11 +32,13 @@ final class UserProgressServiceTest extends ActionTestCase
         $summary = $service->refreshUserProgressSummary($userId, $achievements);
 
         self::assertSame(240, $summary['total_xp'] ?? null);
-        self::assertSame(2, $summary['level'] ?? null);
+        self::assertSame(3, $summary['level'] ?? null);
         self::assertSame(2, $summary['unlocked_achievements_count'] ?? null);
         self::assertSame(3, $summary['achievements_count'] ?? null);
         self::assertGreaterThanOrEqual(0, (int) ($summary['xp_progress_percent'] ?? -1));
         self::assertLessThanOrEqual(100, (int) ($summary['xp_progress_percent'] ?? 101));
+        self::assertArrayHasKey('profile_badges', $summary);
+        self::assertArrayHasKey('total_badges_unlocked', $summary);
 
         $row = $this->db()->fetchOne('SELECT level, experience_points FROM users WHERE id = ' . (int) $userId);
         self::assertSame((string) ($summary['level'] ?? ''), (string) ($row['level'] ?? ''));

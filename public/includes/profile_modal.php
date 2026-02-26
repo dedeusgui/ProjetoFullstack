@@ -4,6 +4,7 @@ $profileName = $userData['name'] ?? 'Usuário';
 $profileAvatarUrl = $userData['avatar_url'] ?? null;
 $profileInitials = $userData['initials'] ?? 'U';
 $profileAchievements = $profileSummary['unlocked_achievements'] ?? [];
+$profileBadges = $profileSummary['profile_badges'] ?? [];
 
 $memberSinceLabel = 'Data de criação indisponível';
 if (!empty($userData['created_at'])) {
@@ -42,6 +43,23 @@ if (!empty($userData['created_at'])) {
                 </div>
                 <span class="user-level-badge">Nível <?php echo $profileLevel; ?></span>
             </div>
+
+            <h5 class="profile-section-title">Badges de nível</h5>
+            <?php if (empty($profileBadges)): ?>
+                <p class="profile-empty-state">Suba de nível para desbloquear badges de perfil.</p>
+            <?php else: ?>
+                <ul class="profile-achievements-list">
+                    <?php foreach ($profileBadges as $badge): ?>
+                        <li class="profile-achievement-item">
+                            <span class="profile-achievement-icon"><i class="<?php echo htmlspecialchars($badge['icon'] ?? 'bi bi-patch-check-fill', ENT_QUOTES, 'UTF-8'); ?>"></i></span>
+                            <div>
+                                <strong><?php echo htmlspecialchars($badge['name'] ?? 'Badge', ENT_QUOTES, 'UTF-8'); ?></strong>
+                                <p><?php echo htmlspecialchars($badge['description'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php endif; ?>
 
             <h5 class="profile-section-title">Conquistas desbloqueadas</h5>
             <?php if (empty($profileAchievements)): ?>

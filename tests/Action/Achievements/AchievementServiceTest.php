@@ -29,7 +29,7 @@ final class AchievementServiceTest extends ActionTestCase
         self::assertGreaterThanOrEqual(100, (int) ($firstStep['progress_percent'] ?? 0));
         self::assertSame('bi bi-flag-fill', $firstStep['icon'] ?? null);
 
-        $persisted = $this->db()->fetchOne('SELECT COUNT(*) AS c FROM user_achievements WHERE user_id = ' . (int) $userId);
+        $persisted = $this->db()->fetchOne('SELECT COUNT(*) AS c FROM user_achievement_unlocks WHERE user_id = ' . (int) $userId);
         self::assertSame('1', (string) ($persisted['c'] ?? '0'));
     }
 
@@ -39,6 +39,7 @@ final class AchievementServiceTest extends ActionTestCase
         $habitId = $this->fixtures->createHabit($userId, ['is_active' => 1]);
         $today = date('Y-m-d');
         $yesterday = date('Y-m-d', strtotime($today . ' -1 day'));
+        $this->db()->execute("UPDATE habits SET created_at = '" . $yesterday . " 00:00:00', start_date = '" . $yesterday . "' WHERE id = " . (int) $habitId);
         $this->fixtures->createCompletion($habitId, $userId, ['completion_date' => $yesterday]);
         $this->fixtures->createCompletion($habitId, $userId, ['completion_date' => $today]);
         $service = new AchievementService($this->conn());
@@ -61,15 +62,17 @@ final class AchievementServiceTest extends ActionTestCase
     public function testGetAchievementsPageDataReturnsRecentUnlockedTimelineLimitedAndOrdered(): void
     {
         $userId = $this->fixtures->createUser(['timezone' => 'UTC']);
-        $achievementRows = $this->db()->fetchAll('SELECT id FROM achievements WHERE is_active = 1 ORDER BY id ASC LIMIT 6');
+        $achievementRows = $this->db()->fetchAll('SELECT id FROM achievement_definitions WHERE is_active = 1 ORDER BY id ASC LIMIT 6');
         self::assertCount(6, $achievementRows, 'Expected at least 6 active achievements in seeded schema.');
 
-        $stmt = $this->db()->prepare('INSERT INTO user_achievements (user_id, achievement_id, unlocked_at, progress) VALUES (?, ?, ?, ?)');
+        $stmt = $this->db()->prepare('INSERT INTO user_achievement_unlocks (user_id, achievement_definition_id, unlocked_at, awarded_points, rule_version, source) VALUES (?, ?, ?, ?, ?, ?)');
         foreach ($achievementRows as $index => $achievementRow) {
             $achievementId = (int) ($achievementRow['id'] ?? 0);
             $unlockedAt = sprintf('2026-02-%02d 10:00:00', $index + 1);
-            $progress = 100;
-            $stmt->bind_param('iisi', $userId, $achievementId, $unlockedAt, $progress);
+            $points = 100;
+            $ruleVersion = 1;
+            $source = 'test_seed';
+            $stmt->bind_param('iisiis', $userId, $achievementId, $unlockedAt, $points, $ruleVersion, $source);
             $stmt->execute();
         }
 

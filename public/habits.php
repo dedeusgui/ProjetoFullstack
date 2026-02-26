@@ -285,7 +285,7 @@ include_once "includes/header.php";
                                             <?php elseif ($habit['frequency'] === 'weekly'): ?>
                                                 <span class="doitly-badge doitly-badge-warning" style="font-size: 0.75rem;">Semanal</span>
                                             <?php else: ?>
-                                                <span class="doitly-badge doitly-badge-success" style="font-size: 0.75rem;">Personalizado</span>
+                                                <span class="doitly-badge doitly-badge-warning" style="font-size: 0.75rem;">Semanal</span>
                                             <?php endif; ?>
                                         </div>
                                         
@@ -527,7 +527,6 @@ include_once "includes/header.php";
                     <select name="frequency" class="doitly-input" id="habitFrequency" onchange="toggleTargetDays()">
                         <option value="daily">Diário</option>
                         <option value="weekly">Semanal</option>
-                        <option value="custom">Personalizado</option>
                     </select>
                 </div>
                 <div class="col-md-6" id="targetDaysWrapper" style="display: none;">
@@ -807,7 +806,7 @@ function toggleTargetDays() {
     const frequency = document.getElementById('habitFrequency')?.value;
     const wrapper = document.getElementById('targetDaysWrapper');
     if (!wrapper) return;
-    wrapper.style.display = (frequency === 'weekly' || frequency === 'custom') ? 'block' : 'none';
+    wrapper.style.display = (frequency === 'weekly') ? 'block' : 'none';
 }
 
 function toggleGoalFields() {
@@ -907,7 +906,7 @@ function openEditModal(habitId) {
     document.getElementById('habitDescription').value = habit.description || '';
     document.getElementById('habitCategory').value = habit.category;
     document.getElementById('habitTime').value = habit.time;
-    document.getElementById('habitFrequency').value = habit.frequency || 'daily';
+    document.getElementById('habitFrequency').value = habit.frequency === 'custom' ? 'weekly' : (habit.frequency || 'daily');
     document.getElementById('habitGoalType').value = habit.goal_type || 'completion';
     document.getElementById('habitGoalValue').value = habit.goal_value || 1;
     document.getElementById('habitGoalUnit').value = habit.goal_unit || '';

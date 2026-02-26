@@ -1333,3 +1333,87 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Run a manual settings modal smoke-check on `public/dashboard.php` and `public/habits.php` covering appearance preview + cancel/close/save paths.
+
+---
+
+## 2026-02-26 - Achievements/Progression Overhaul + Level Rewards + Custom Frequency Removal
+
+- Date / time: 2026-02-26
+- Author: Codex (AI agent)
+- Goal: Implement the achievements system overhaul (rule-based persistence + perfect-day fix), add a simpler XP/level system with level rewards (profile badges v1), and remove `custom` habit frequency.
+- Objectives advanced: `OBJ-005`, `OBJ-007`, `OBJ-004`
+- Progress toward objectives:
+  - Modernized backend achievements/progression behavior while preserving the achievements page/API payload shape used by the existing UI.
+  - Added reward unlock infrastructure for future progression rewards and surfaced profile badges in the current profile modal.
+  - Simplified habit scheduling model by removing redundant `custom` frequency support.
+- Work completed:
+  - Extended `sql/doitly_unified.sql` with new achievements/progression/reward tables and seeds:
+    - `achievement_definitions`
+    - `user_achievement_unlocks`
+    - `user_achievement_events`
+    - `progression_levels`
+    - `reward_definitions`
+    - `user_reward_unlocks`
+    - `user_reward_events`
+  - Removed `custom` from `habits.frequency` enum definitions in the schema snapshot.
+  - Rebuilt `AchievementService` to use the new definitions/unlocks/events model with rule-driven evaluation and idempotent unlock/event recording.
+  - Fixed perfect-day streak calculation to respect scheduled habits per date (weekly supported; off-days break streak).
+  - Reworked `UserProgressService` to compute XP from completions + achievement bonus XP, resolve levels from seeded thresholds, and grant persistent level badge rewards.
+  - Updated `AchievementsApiPayloadBuilder` to hydrate hero XP/level values from the new progression summary while preserving payload compatibility.
+  - Added profile badge rendering to `public/includes/profile_modal.php`.
+  - Removed `custom` frequency from `HabitInputSanitizer`, `public/habits.php`, and recommendation expected-day logic.
+  - Updated tests for new achievement storage, new XP curve, scheduled perfect-day semantics, and custom-frequency removal.
+  - Updated test DB cleanup helpers for new mutable reward/achievement event tables.
+- Files changed:
+  - `sql/doitly_unified.sql`
+  - `app/Achievements/AchievementService.php`
+  - `app/UserProgress/UserProgressService.php`
+  - `app/Repository/AchievementRepository.php`
+  - `app/Api/Internal/AchievementsApiPayloadBuilder.php`
+  - `app/Habits/HabitInputSanitizer.php`
+  - `app/Habits/HabitSchedulePolicy.php`
+  - `app/Recommendation/BehaviorAnalyzer.php`
+  - `config/app_helpers.php`
+  - `public/habits.php`
+  - `public/includes/profile_modal.php`
+  - `tests/Support/TestDatabase.php`
+  - `tests/Action/Achievements/AchievementServiceTest.php`
+  - `tests/Action/UserProgress/UserProgressServiceTest.php`
+  - `tests/Action/Config/AppHelpersIntegrationTest.php`
+  - `tests/Unit/Habits/HabitInputSanitizerTest.php`
+  - `tests/Unit/Habits/HabitSchedulePolicyTest.php`
+  - `tests/Unit/Config/AppHelpersTest.php`
+  - `docs/STATUS.md`
+  - `docs/WORKLOG.md`
+  - `docs/ADR/INDEX.md`
+  - `docs/ADR/ADR-0004-achievements-progression-overhaul-and-custom-frequency-removal.md`
+- Decisions made (link ADRs if any):
+  - Adopted the v2 achievements/progression/reward storage model and removed `custom` habit frequency (`docs/ADR/ADR-0004-achievements-progression-overhaul-and-custom-frequency-removal.md`).
+  - XP is recomputed from history (completion XP + achievement unlock XP) and persisted as user snapshot fields (`users.level`, `users.experience_points`) for UI compatibility.
+  - Level rewards are persistent unlocks (profile badges v1) and are not revoked in v1 if XP later drops.
+- Verification performed (exact commands + key results):
+  - `php -l app/Achievements/AchievementService.php` -> `No syntax errors detected`
+  - `php -l app/Repository/AchievementRepository.php` -> `No syntax errors detected`
+  - `php -l app/UserProgress/UserProgressService.php` -> `No syntax errors detected`
+  - `php -l app/Api/Internal/AchievementsApiPayloadBuilder.php` -> `No syntax errors detected`
+  - `php -l app/Habits/HabitInputSanitizer.php` -> `No syntax errors detected`
+  - `php -l app/Habits/HabitSchedulePolicy.php` -> `No syntax errors detected`
+  - `php -l app/Recommendation/BehaviorAnalyzer.php` -> `No syntax errors detected`
+  - `php -l config/app_helpers.php` -> `No syntax errors detected`
+  - `php -l public/includes/profile_modal.php` -> `No syntax errors detected`
+  - `php -l public/habits.php` -> `No syntax errors detected`
+  - `composer test:db:reset` -> `Test database reset completed: doitly_test`
+  - `vendor/bin/phpunit tests/Unit/Habits/HabitInputSanitizerTest.php tests/Unit/Habits/HabitSchedulePolicyTest.php tests/Action/Achievements/AchievementServiceTest.php tests/Action/UserProgress/UserProgressServiceTest.php tests/Action/Config/AppHelpersIntegrationTest.php` -> `OK (20 tests, 83 assertions)`
+  - `composer test:unit` -> `OK (58 tests, 159 assertions)`
+  - `composer test:action` -> `OK (141 tests, 634 assertions)` (suite prints expected logged exception lines from negative-path ProfileService tests)
+  - `composer test` -> `OK (199 tests, 793 assertions)` (same expected logged exception lines from negative-path ProfileService tests)
+  - `composer qa` -> `composer.json valid`, autoload optimized, unit suite `OK (58 tests, 159 assertions)`
+- Tests/checks intentionally not run (and why):
+  - Manual browser QA not run in this terminal session (still needed to validate achievements hero XP UI and new profile badge display).
+- Blockers / risks:
+  - Existing non-test DBs need schema migration/reset before the new achievements/progression/reward tables are available.
+  - `public/habits.php` still contains legacy encoding artifacts in user-facing strings unrelated to this overhaul.
+  - Reward revocation on XP loss is intentionally not implemented in v1 (persistent unlocks by design).
+- Objective impact: `on-track`
+- Next objective step:
+  - Apply the schema overhaul to the main local DB, then manually smoke-test: perfect-day achievements (weekly schedules), XP progression, and profile badge unlock visibility.

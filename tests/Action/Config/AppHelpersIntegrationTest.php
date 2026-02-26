@@ -42,8 +42,9 @@ final class AppHelpersIntegrationTest extends ActionTestCase
 
         $summary = getUserProgressSummary($this->conn(), $userId, $achievements);
         self::assertSame(240, $summary['total_xp'] ?? null);
-        self::assertSame(2, $summary['level'] ?? null);
+        self::assertSame(3, $summary['level'] ?? null);
         self::assertSame(2, $summary['unlocked_achievements_count'] ?? null);
+        self::assertArrayHasKey('profile_badges', $summary);
     }
 
     private function findBySlug(array $items, string $slug): ?array

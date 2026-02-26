@@ -255,7 +255,7 @@ CREATE TABLE `habits` (
   `description` text DEFAULT NULL,
   `icon` varchar(50) DEFAULT NULL COMMENT 'Emoji ou nome do ícone',
   `color` varchar(7) DEFAULT '#4a74ff' COMMENT 'Cor personalizada em hexadecimal',
-  `frequency` enum('daily','weekly','custom') NOT NULL DEFAULT 'daily' COMMENT 'Frequência do hábito',
+  `frequency` enum('daily','weekly') NOT NULL DEFAULT 'daily' COMMENT 'Frequência do hábito',
   `target_days` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'Dias da semana para hábitos semanais [0-6, 0=domingo]' CHECK (json_valid(`target_days`)),
   `time_of_day` enum('morning','afternoon','evening','anytime') DEFAULT 'anytime' COMMENT 'Período do dia',
   `reminder_time` time DEFAULT NULL COMMENT 'Horário de lembrete',
@@ -418,7 +418,7 @@ CREATE TABLE `v_habits_full` (
 ,`category_name` varchar(50)
 ,`category_slug` varchar(50)
 ,`category_color` varchar(7)
-,`frequency` enum('daily','weekly','custom')
+,`frequency` enum('daily','weekly')
 ,`time_of_day` enum('morning','afternoon','evening','anytime')
 ,`goal_type` enum('completion','quantity','duration')
 ,`goal_value` int(10) unsigned
@@ -662,3 +662,238 @@ CREATE TABLE IF NOT EXISTS `user_recommendations` (
   KEY `idx_user_recommendations_user_created` (`user_id`, `created_at`),
   CONSTRAINT `fk_user_recommendations_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+-- Extensao: motor de conquistas v2 + progressao/recompensas
+-- --------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `achievement_definitions` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `slug` varchar(80) NOT NULL,
+  `name` varchar(120) NOT NULL,
+  `description` text NOT NULL,
+  `icon` varchar(60) DEFAULT NULL,
+  `badge_color` varchar(7) DEFAULT '#4a74ff',
+  `rarity` enum('common','rare','epic','legendary') NOT NULL DEFAULT 'common',
+  `points` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `rule_key` varchar(50) NOT NULL,
+  `rule_config_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`rule_config_json`)),
+  `sort_order` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `version` smallint UNSIGNED NOT NULL DEFAULT 1,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_achievement_definitions_slug` (`slug`),
+  KEY `idx_achievement_definitions_rule_key` (`rule_key`),
+  KEY `idx_achievement_definitions_active_sort` (`is_active`,`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_achievement_unlocks` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `achievement_definition_id` int(10) UNSIGNED NOT NULL,
+  `unlocked_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `awarded_points` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `rule_version` smallint UNSIGNED NOT NULL DEFAULT 1,
+  `source` varchar(50) NOT NULL DEFAULT 'live_sync',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_user_achievement_unlocks_user_achievement` (`user_id`,`achievement_definition_id`),
+  KEY `idx_user_achievement_unlocks_user` (`user_id`,`unlocked_at`),
+  KEY `idx_user_achievement_unlocks_achievement` (`achievement_definition_id`),
+  CONSTRAINT `fk_user_achievement_unlocks_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_achievement_unlocks_definition` FOREIGN KEY (`achievement_definition_id`) REFERENCES `achievement_definitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_achievement_events` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `achievement_definition_id` int(10) UNSIGNED NOT NULL,
+  `event_type` enum('unlocked') NOT NULL DEFAULT 'unlocked',
+  `event_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `payload_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload_json`)),
+  `source` varchar(50) NOT NULL DEFAULT 'live_sync',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_achievement_events_user_event` (`user_id`,`event_at`),
+  KEY `idx_user_achievement_events_achievement` (`achievement_definition_id`,`event_type`),
+  CONSTRAINT `fk_user_achievement_events_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_achievement_events_definition` FOREIGN KEY (`achievement_definition_id`) REFERENCES `achievement_definitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `progression_levels` (
+  `level` int(10) UNSIGNED NOT NULL,
+  `xp_required_total` int(10) UNSIGNED NOT NULL,
+  `title` varchar(80) NOT NULL,
+  `badge_color` varchar(7) DEFAULT '#4a74ff',
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`level`),
+  UNIQUE KEY `uq_progression_levels_xp_required_total` (`xp_required_total`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `reward_definitions` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `slug` varchar(80) NOT NULL,
+  `reward_type` enum('profile_badge') NOT NULL DEFAULT 'profile_badge',
+  `name` varchar(120) NOT NULL,
+  `description` text NOT NULL,
+  `icon` varchar(60) DEFAULT NULL,
+  `visual_config_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`visual_config_json`)),
+  `unlock_source_type` enum('level_milestone') NOT NULL DEFAULT 'level_milestone',
+  `unlock_source_config_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`unlock_source_config_json`)),
+  `sort_order` int(10) UNSIGNED NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_reward_definitions_slug` (`slug`),
+  KEY `idx_reward_definitions_active_sort` (`is_active`,`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_reward_unlocks` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `reward_definition_id` int(10) UNSIGNED NOT NULL,
+  `unlocked_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `source` varchar(50) NOT NULL DEFAULT 'progress_sync',
+  `source_ref` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_user_reward_unlocks_user_reward` (`user_id`,`reward_definition_id`),
+  KEY `idx_user_reward_unlocks_user` (`user_id`,`unlocked_at`),
+  KEY `idx_user_reward_unlocks_reward` (`reward_definition_id`),
+  CONSTRAINT `fk_user_reward_unlocks_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_reward_unlocks_definition` FOREIGN KEY (`reward_definition_id`) REFERENCES `reward_definitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `user_reward_events` (
+  `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) UNSIGNED NOT NULL,
+  `reward_definition_id` int(10) UNSIGNED NOT NULL,
+  `event_type` enum('unlocked') NOT NULL DEFAULT 'unlocked',
+  `event_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `payload_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`payload_json`)),
+  `source` varchar(50) NOT NULL DEFAULT 'progress_sync',
+  PRIMARY KEY (`id`),
+  KEY `idx_user_reward_events_user_event` (`user_id`,`event_at`),
+  KEY `idx_user_reward_events_reward` (`reward_definition_id`,`event_type`),
+  CONSTRAINT `fk_user_reward_events_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_user_reward_events_definition` FOREIGN KEY (`reward_definition_id`) REFERENCES `reward_definitions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+INSERT INTO `achievement_definitions` (`id`,`slug`,`name`,`description`,`icon`,`badge_color`,`rarity`,`points`,`rule_key`,`rule_config_json`,`sort_order`,`version`,`is_active`)
+VALUES
+  (1,'first-step','Primeiro Passo','Complete seu primeiro hábito','flag','#59d186','common',10,'total_completions','{\"threshold\":1}',10,1,1),
+  (2,'daily-rhythm-3','Ritmo Inicial','Mantenha um streak de 3 dias','fire','#ff9500','common',20,'streak_days','{\"threshold\":3}',20,1,1),
+  (3,'week-warrior','Guerreiro Semanal','Mantenha um streak de 7 dias','fire','#ff9500','rare',50,'streak_days','{\"threshold\":7}',30,1,1),
+  (4,'daily-rhythm-14','Foco de 2 Semanas','Mantenha um streak de 14 dias','trophy','#FFD700','rare',90,'streak_days','{\"threshold\":14}',40,1,1),
+  (5,'month-master','Mestre do Mês','Mantenha um streak de 30 dias','trophy','#FFD700','epic',200,'streak_days','{\"threshold\":30}',50,1,1),
+  (6,'daily-rhythm-60','Lenda da Rotina','Mantenha um streak de 60 dias','rocket','#ff5757','legendary',350,'streak_days','{\"threshold\":60}',60,1,1),
+  (7,'focus-10','Meta 10','Complete 10 hábitos','star','#9b59b6','common',30,'total_completions','{\"threshold\":10}',70,1,1),
+  (8,'century-club','Clube dos 100','Complete 100 hábitos','star','#9b59b6','rare',150,'total_completions','{\"threshold\":100}',80,1,1),
+  (9,'focus-250','Maratonista 250','Complete 250 hábitos','award','#4a74ff','epic',280,'total_completions','{\"threshold\":250}',90,1,1),
+  (10,'focus-500','Elite 500','Complete 500 hábitos','gem','#3498db','legendary',500,'total_completions','{\"threshold\":500}',100,1,1),
+  (11,'dedication','Dedicação Total','Complete 1000 hábitos','gem','#3498db','legendary',1000,'total_completions','{\"threshold\":1000}',110,1,1),
+  (12,'builder-3','Planejador','Crie 3 hábitos diferentes','collection','#e67e22','common',25,'habits_created','{\"threshold\":3}',120,1,1),
+  (13,'habit-collector','Colecionador de Hábitos','Crie 10 hábitos diferentes','collection','#e67e22','rare',75,'habits_created','{\"threshold\":10}',130,1,1),
+  (14,'builder-20','Arquiteto de Rotina','Crie 20 hábitos diferentes','collection','#e67e22','epic',180,'habits_created','{\"threshold\":20}',140,1,1),
+  (15,'perfect-week','Semana Perfeita','Complete todos os hábitos agendados por 7 dias seguidos','award','#4a74ff','epic',100,'perfect_days_streak','{\"threshold\":7}',150,1,1),
+  (16,'perfect-2-weeks','14 Dias Sem Falhar','Complete todos os hábitos agendados por 14 dias seguidos','award','#4a74ff','epic',230,'perfect_days_streak','{\"threshold\":14}',160,1,1),
+  (17,'perfect-month','Mês Perfeito','Complete todos os hábitos agendados por 30 dias seguidos','award','#4a74ff','legendary',420,'perfect_days_streak','{\"threshold\":30}',170,1,1),
+  (18,'unstoppable','Imparável','Mantenha um streak de 100 dias','rocket','#ff5757','legendary',500,'streak_days','{\"threshold\":100}',180,1,1),
+  (19,'active-days-7','Presença Semanal','Complete hábitos em 7 dias diferentes','calendar','#59d186','common',30,'active_days','{\"threshold\":7}',190,1,1),
+  (20,'active-days-30','Presença Mensal','Complete hábitos em 30 dias diferentes','calendar','#4a74ff','rare',120,'active_days','{\"threshold\":30}',200,1,1),
+  (21,'active-days-100','Presença Centenária','Complete hábitos em 100 dias diferentes','calendar','#FFD700','epic',260,'active_days','{\"threshold\":100}',210,1,1),
+  (22,'category-focus-25','Especialista de Categoria','Complete 25 hábitos em uma mesma categoria','patch-check','#9b59b6','rare',90,'max_category_completions','{\"threshold\":25}',220,1,1),
+  (23,'category-focus-100','Mestre de Categoria','Complete 100 hábitos em uma mesma categoria','patch-check','#6c5ce7','epic',220,'max_category_completions','{\"threshold\":100}',230,1,1),
+  (24,'weekday-explorer','Semana Completa','Complete hábitos em todos os dias da semana pelo menos uma vez','collection','#00b894','rare',100,'weekday_coverage','{\"threshold\":7}',240,1,1),
+  (25,'time-master-3','Rotina Completa','Complete hábitos em manhã, tarde e noite','clock','#0984e3','rare',90,'time_of_day_variety','{\"threshold\":3}',250,1,1),
+  (26,'comeback-kid','Volta por Cima','Retorne e complete um hábito após uma pausa de 3+ dias','rocket','#fdcb6e','epic',140,'comeback_count','{\"threshold\":1,\"min_gap_days\":3}',260,1,1)
+ON DUPLICATE KEY UPDATE
+  `name` = VALUES(`name`),
+  `description` = VALUES(`description`),
+  `icon` = VALUES(`icon`),
+  `badge_color` = VALUES(`badge_color`),
+  `rarity` = VALUES(`rarity`),
+  `points` = VALUES(`points`),
+  `rule_key` = VALUES(`rule_key`),
+  `rule_config_json` = VALUES(`rule_config_json`),
+  `sort_order` = VALUES(`sort_order`),
+  `version` = VALUES(`version`),
+  `is_active` = VALUES(`is_active`);
+
+INSERT INTO `progression_levels` (`level`,`xp_required_total`,`title`,`badge_color`,`is_active`)
+VALUES
+  (1,0,'Iniciante','#95a5a6',1),
+  (2,100,'Iniciante II','#95a5a6',1),
+  (3,200,'Aprendiz I','#74b9ff',1),
+  (4,300,'Aprendiz II','#74b9ff',1),
+  (5,400,'Aprendiz III','#74b9ff',1),
+  (6,500,'Constante I','#55efc4',1),
+  (7,600,'Constante II','#55efc4',1),
+  (8,700,'Constante III','#55efc4',1),
+  (9,800,'Constante IV','#55efc4',1),
+  (10,900,'Constante V','#55efc4',1),
+  (11,1050,'Focado I','#0984e3',1),
+  (12,1200,'Focado II','#0984e3',1),
+  (13,1350,'Focado III','#0984e3',1),
+  (14,1500,'Focado IV','#0984e3',1),
+  (15,1650,'Focado V','#0984e3',1),
+  (16,1800,'Disciplina I','#6c5ce7',1),
+  (17,1950,'Disciplina II','#6c5ce7',1),
+  (18,2100,'Disciplina III','#6c5ce7',1),
+  (19,2250,'Disciplina IV','#6c5ce7',1),
+  (20,2400,'Disciplina V','#6c5ce7',1),
+  (21,2600,'Mestre I','#fdcb6e',1),
+  (22,2800,'Mestre II','#fdcb6e',1),
+  (23,3000,'Mestre III','#fdcb6e',1),
+  (24,3200,'Mestre IV','#fdcb6e',1),
+  (25,3400,'Mestre V','#fdcb6e',1),
+  (26,3600,'Elite I','#e17055',1),
+  (27,3800,'Elite II','#e17055',1),
+  (28,4000,'Elite III','#e17055',1),
+  (29,4200,'Elite IV','#e17055',1),
+  (30,4400,'Elite V','#e17055',1),
+  (31,4600,'Veterano I','#d63031',1),
+  (32,4800,'Veterano II','#d63031',1),
+  (33,5000,'Veterano III','#d63031',1),
+  (34,5200,'Veterano IV','#d63031',1),
+  (35,5400,'Veterano V','#d63031',1),
+  (36,5600,'Lendário I','#fd79a8',1),
+  (37,5850,'Lendário II','#fd79a8',1),
+  (38,6100,'Lendário III','#fd79a8',1),
+  (39,6350,'Lendário IV','#fd79a8',1),
+  (40,6600,'Lendário V','#fd79a8',1),
+  (41,6850,'Mítico I','#a29bfe',1),
+  (42,7100,'Mítico II','#a29bfe',1),
+  (43,7350,'Mítico III','#a29bfe',1),
+  (44,7600,'Mítico IV','#a29bfe',1),
+  (45,7850,'Mítico V','#a29bfe',1),
+  (46,8100,'Ascendente I','#00cec9',1),
+  (47,8350,'Ascendente II','#00cec9',1),
+  (48,8600,'Ascendente III','#00cec9',1),
+  (49,8850,'Ascendente IV','#00cec9',1),
+  (50,9100,'Ascendente V','#00cec9',1)
+ON DUPLICATE KEY UPDATE
+  `xp_required_total` = VALUES(`xp_required_total`),
+  `title` = VALUES(`title`),
+  `badge_color` = VALUES(`badge_color`),
+  `is_active` = VALUES(`is_active`);
+
+INSERT INTO `reward_definitions` (`id`,`slug`,`reward_type`,`name`,`description`,`icon`,`visual_config_json`,`unlock_source_type`,`unlock_source_config_json`,`sort_order`,`is_active`)
+VALUES
+  (1,'level-badge-2','profile_badge','Faixa Nível 2','Badge de evolução ao alcançar o nível 2','star','{\"color\":\"#95a5a6\",\"label\":\"N2\"}','level_milestone','{\"level\":2}',10,1),
+  (2,'level-badge-5','profile_badge','Faixa Nível 5','Badge de evolução ao alcançar o nível 5','patch-check','{\"color\":\"#74b9ff\",\"label\":\"N5\"}','level_milestone','{\"level\":5}',20,1),
+  (3,'level-badge-10','profile_badge','Faixa Nível 10','Badge de evolução ao alcançar o nível 10','award','{\"color\":\"#55efc4\",\"label\":\"N10\"}','level_milestone','{\"level\":10}',30,1),
+  (4,'level-badge-15','profile_badge','Faixa Nível 15','Badge de evolução ao alcançar o nível 15','trophy','{\"color\":\"#0984e3\",\"label\":\"N15\"}','level_milestone','{\"level\":15}',40,1),
+  (5,'level-badge-20','profile_badge','Faixa Nível 20','Badge de evolução ao alcançar o nível 20','trophy','{\"color\":\"#6c5ce7\",\"label\":\"N20\"}','level_milestone','{\"level\":20}',50,1),
+  (6,'level-badge-30','profile_badge','Faixa Nível 30','Badge de evolução ao alcançar o nível 30','gem','{\"color\":\"#fdcb6e\",\"label\":\"N30\"}','level_milestone','{\"level\":30}',60,1),
+  (7,'level-badge-50','profile_badge','Faixa Nível 50','Badge de evolução ao alcançar o nível 50','gem','{\"color\":\"#00cec9\",\"label\":\"N50\"}','level_milestone','{\"level\":50}',70,1)
+ON DUPLICATE KEY UPDATE
+  `name` = VALUES(`name`),
+  `description` = VALUES(`description`),
+  `icon` = VALUES(`icon`),
+  `visual_config_json` = VALUES(`visual_config_json`),
+  `unlock_source_type` = VALUES(`unlock_source_type`),
+  `unlock_source_config_json` = VALUES(`unlock_source_config_json`),
+  `sort_order` = VALUES(`sort_order`),
+  `is_active` = VALUES(`is_active`);

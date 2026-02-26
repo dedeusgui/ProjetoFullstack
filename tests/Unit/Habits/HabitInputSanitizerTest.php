@@ -31,7 +31,7 @@ final class HabitInputSanitizerTest extends TestCase
         self::assertSame(1, $result['data']['goal_value']);
     }
 
-    public function testWeeklyAndCustomRequireAtLeastOneTargetDay(): void
+    public function testWeeklyRequiresAtLeastOneTargetDayAndCustomFallsBackToDaily(): void
     {
         $weekly = HabitInputSanitizer::fromRequest([
             'title' => 'Run',
@@ -50,7 +50,8 @@ final class HabitInputSanitizerTest extends TestCase
         ]);
 
         self::assertNotEmpty($weekly['errors']);
-        self::assertNotEmpty($custom['errors']);
+        self::assertSame('daily', $custom['data']['frequency']);
+        self::assertSame([], $custom['errors']);
     }
 
     public function testTargetDaysAreDeduplicatedAndFiltered(): void
@@ -59,7 +60,7 @@ final class HabitInputSanitizerTest extends TestCase
             'title' => 'Study',
             'category' => 'Outros',
             'time' => 'Tarde',
-            'frequency' => 'custom',
+            'frequency' => 'weekly',
             'target_days' => [1, '2', 2, 7, -1, 0],
         ]);
 

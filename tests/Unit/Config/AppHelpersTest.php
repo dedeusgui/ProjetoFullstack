@@ -33,6 +33,6 @@ final class AppHelpersTest extends TestCase
     public function testCompatibilityWrappersForAchievementAndProgressHelpers(): void
     {
         self::assertSame('bi bi-fire', mapAchievementIconToBootstrap('fire'));
-        self::assertSame(3, calculateLevelFromXp(480));
+        self::assertSame(5, calculateLevelFromXp(480));
     }
 }

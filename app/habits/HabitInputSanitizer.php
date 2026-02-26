@@ -21,7 +21,7 @@ class HabitInputSanitizer
             $color = '#4a74ff';
         }
 
-        if (!in_array($frequency, ['daily', 'weekly', 'custom'], true)) {
+        if (!in_array($frequency, ['daily', 'weekly'], true)) {
             $frequency = 'daily';
         }
 
@@ -43,19 +43,19 @@ class HabitInputSanitizer
 
         $errors = [];
         if ($title === '') {
-            $errors[] = 'O título do hábito é obrigatório.';
+            $errors[] = 'O titulo do habito e obrigatorio.';
         }
 
         if ($category === '') {
-            $errors[] = 'A categoria é obrigatória.';
+            $errors[] = 'A categoria e obrigatoria.';
         }
 
         if ($timeOfDay === '') {
-            $errors[] = 'O período do dia é obrigatório.';
+            $errors[] = 'O periodo do dia e obrigatorio.';
         }
 
-        if (($frequency === 'weekly' || $frequency === 'custom') && count($targetDaysValues) === 0) {
-            $errors[] = 'Selecione pelo menos um dia da semana para frequência semanal/customizada.';
+        if ($frequency === 'weekly' && count($targetDaysValues) === 0) {
+            $errors[] = 'Selecione pelo menos um dia da semana para frequencia semanal.';
         }
 
         return [
@@ -70,9 +70,9 @@ class HabitInputSanitizer
                 'target_days_json' => count($targetDaysValues) > 0 ? json_encode($targetDaysValues) : null,
                 'goal_type' => $goalType,
                 'goal_value' => $goalValue,
-                'goal_unit' => $goalUnit
+                'goal_unit' => $goalUnit,
             ],
-            'errors' => $errors
+            'errors' => $errors,
         ];
     }
 }

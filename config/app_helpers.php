@@ -62,7 +62,33 @@ function getUserAchievements($conn, $userId) {
 }
 
 function calculateLevelFromXp(int $totalXp): int {
-    return max(1, (int) floor(sqrt(max(0, $totalXp) / 120)) + 1);
+    $xp = max(0, $totalXp);
+    $level = 1;
+
+    while (true) {
+        $nextLevel = $level + 1;
+        $required = 0;
+        for ($i = 2; $i <= $nextLevel; $i++) {
+            if ($i <= 10) {
+                $required += 100;
+            } elseif ($i <= 20) {
+                $required += 150;
+            } elseif ($i <= 40) {
+                $required += 200;
+            } else {
+                $required += 250;
+            }
+        }
+
+        if ($xp < $required) {
+            return $level;
+        }
+
+        $level++;
+        if ($level > 1000) {
+            return $level;
+        }
+    }
 }
 
 function persistUserProgress($conn, int $userId, int $level, int $experiencePoints): void {

@@ -75,6 +75,10 @@ final class TestDatabase
         $conn->query('SET FOREIGN_KEY_CHECKS = 0');
 
         $tables = [
+            'user_reward_events',
+            'user_reward_unlocks',
+            'user_achievement_events',
+            'user_achievement_unlocks',
             'habit_completions',
             'habits',
             'user_recommendations',

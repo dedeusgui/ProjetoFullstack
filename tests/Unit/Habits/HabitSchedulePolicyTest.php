@@ -47,20 +47,20 @@ final class HabitSchedulePolicyTest extends TestCase
         self::assertFalse(HabitSchedulePolicy::isScheduledForDate($habit, '2026-02-10'));
     }
 
-    public function testCustomScheduleRequiresTargetDays(): void
+    public function testUnknownFrequencyFallsBackToScheduled(): void
     {
         $habit = [
-            'frequency' => 'custom',
+            'frequency' => 'legacy-custom',
             'target_days' => null,
         ];
 
-        self::assertFalse(HabitSchedulePolicy::isScheduledForDate($habit, '2026-02-10'));
+        self::assertTrue(HabitSchedulePolicy::isScheduledForDate($habit, '2026-02-10'));
     }
 
-    public function testGetNextDueDateFindsNextMatchingCustomDay(): void
+    public function testGetNextDueDateFindsNextMatchingWeeklyDay(): void
     {
         $habit = [
-            'frequency' => 'custom',
+            'frequency' => 'weekly',
             'target_days' => json_encode([1]),
         ];
 

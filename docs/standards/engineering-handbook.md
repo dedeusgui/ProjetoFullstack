@@ -99,6 +99,7 @@ In this repo, this mainly applies to service/repository replacements and helper 
 ## Naming and Readability
 
 - Internal identifiers, comments, and docs: English
+- User-facing UI copy: PT-BR by default, but keep intentional mixed terms already used in the product vocabulary (e.g., `Dashboard`) unless the task explicitly requests copy normalization
 - Class names: `PascalCase`
 - Methods/functions/variables: `camelCase`
 - External payload keys (arrays/JSON): `snake_case` when externally consumed

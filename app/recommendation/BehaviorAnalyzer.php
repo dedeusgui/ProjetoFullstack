@@ -164,7 +164,7 @@ class BehaviorAnalyzer
             return true;
         }
 
-        if ($frequency === 'weekly' || $frequency === 'custom') {
+        if ($frequency === 'weekly') {
             if (empty($targetDays)) {
                 return true;
             }

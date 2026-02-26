@@ -178,7 +178,7 @@ Progress in this area:
 
 ## Language Standard
 - Internal identifiers (classes, methods, variables, comments, docs): **English**
-- User-facing UI text: **Portuguese for now**
+- User-facing UI text: **PT-BR by default**, but intentional mixed usage with common product/UX English terms (for example `Dashboard`) is allowed
 - `README.md`: **Portuguese**
 
 ## Layering Rules
