@@ -32,6 +32,8 @@ final class AchievementsApiPayloadBuilderTest extends ActionTestCase
         self::assertArrayHasKey('progress_percent', $data['hero']);
         self::assertArrayHasKey('xp_progress_percent', $data['hero']);
         self::assertArrayHasKey('xp_to_next_level', $data['hero']);
+        self::assertArrayHasKey('rank_label', $data['hero']);
+        self::assertArrayHasKey('next_rank_label', $data['hero']);
 
         self::assertArrayHasKey('latest_unlocked', $data['highlights']);
         self::assertArrayHasKey('rarest_unlocked', $data['highlights']);

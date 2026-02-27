@@ -145,7 +145,14 @@ include_once 'includes/header.php';
 
                 <div class="hero-chips">
                     <span class="hero-chip hero-chip-highlight"><?php echo $unlockedCount; ?>/<?php echo $totalAvailable; ?> desbloqueadas</span>
-                    <span class="hero-chip">Classificação: <?php echo htmlspecialchars((string) ($hero['rank_label'] ?? 'Iniciante'), ENT_QUOTES, 'UTF-8'); ?></span>
+                    <span class="hero-chip">
+                        Classificação: <?php echo htmlspecialchars((string) ($hero['rank_label'] ?? 'Iniciante'), ENT_QUOTES, 'UTF-8'); ?>
+                        <?php if (!empty($hero['next_rank_label'])): ?>
+                            · faltam <?php echo number_format((int) ($hero['xp_to_next_level'] ?? 0), 0, ',', '.'); ?> XP para <?php echo htmlspecialchars((string) $hero['next_rank_label'], ENT_QUOTES, 'UTF-8'); ?>
+                        <?php else: ?>
+                            · rank máximo alcançado
+                        <?php endif; ?>
+                    </span>
                     <span class="hero-chip">Progresso geral: <?php echo (float) ($hero['progress_percent'] ?? 0); ?>%</span>
                     <span class="hero-chip">Lendárias: <?php echo (int) ($stats['legendary_unlocked'] ?? 0); ?></span>
                 </div>

@@ -1,5 +1,6 @@
 <?php
 $profileLevel = (int) ($userData['level'] ?? ($profileSummary['level'] ?? 1));
+$profileRankLabel = (string) ($profileSummary['level_title'] ?? ('Nível ' . $profileLevel));
 $profileName = $userData['name'] ?? 'Usuário';
 $profileAvatarUrl = $userData['avatar_url'] ?? null;
 $profileInitials = $userData['initials'] ?? 'U';
@@ -41,7 +42,10 @@ if (!empty($userData['created_at'])) {
                         <p><?php echo $memberSinceLabel; ?></p>
                     </div>
                 </div>
-                <span class="user-level-badge">Nível <?php echo $profileLevel; ?></span>
+                <div>
+                    <span class="user-level-badge">Nível <?php echo $profileLevel; ?></span>
+                    <p>Classificação atual: <?php echo htmlspecialchars($profileRankLabel, ENT_QUOTES, 'UTF-8'); ?></p>
+                </div>
             </div>
 
             <h5 class="profile-section-title">Badges de nível</h5>

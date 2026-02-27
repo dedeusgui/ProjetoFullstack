@@ -27,6 +27,7 @@ final class AchievementsApiPayloadBuilder
         // rank_label is driven by the progression_levels table (level_title from UserProgressService),
         // which is the canonical source of rank classification in the system.
         $pageData['hero']['rank_label'] = (string) ($progressSummary['level_title'] ?? ($pageData['hero']['rank_label'] ?? 'Iniciante'));
+        $pageData['hero']['next_rank_label'] = $progressSummary['next_level_title'] ?? null;
         $pageData['stats']['total_habits'] = $statsQueryService->getTotalHabits($userId);
         $pageData['stats']['total_badges_unlocked'] = (int) ($progressSummary['total_badges_unlocked'] ?? 0);
 

@@ -5,6 +5,9 @@
 
 ## Completed
 
+- Updated achievements hero classification copy to show current rank + XP remaining to the next rank title (`rank_label`/`next_rank_label`)
+- Added current rank classification visibility in the profile modal summary card
+- Documented/kept the DB-backed rank source as canonical (replacing prior local rank mapping)
 - Implemented achievements page visual rework (`public/achievements.php`, `public/assets/css/achievements.css`)
 - Added premium-style hero, improved card states, hover effects, and filter-chip styling
 - Replaced the old achievements highlights section with a recent achievements timeline (up to 5 items)
@@ -37,7 +40,15 @@
   - `php -l public/achievements.php` (rerun after PT-BR and ordering adjustments)
   - `php -l public/includes/settings_modal.php`
   - `node --check public/assets/js/settings-modal.js`
+  - `php -l app/userprogress/UserProgressService.php`
+  - `php -l app/api/internal/AchievementsApiPayloadBuilder.php`
+  - `php -l public/achievements.php`
+  - `php -l public/includes/profile_modal.php`
+  - `php -l tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
+  - `php -l tests/Action/UserProgress/UserProgressServiceTest.php`
+  - `composer test:action`
 - Key results:
+  - Added rank labels from DB-backed progression summary to achievements/profile UI
   - All listed `php -l` checks -> `No syntax errors detected`
   - `composer test:action` -> OK (`141 tests`, `630 assertions`)
   - Observed error logs during `composer test:action` from exercised exception branches in `ProfileService`, but suite finished `OK`

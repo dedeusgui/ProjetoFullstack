@@ -19,6 +19,51 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 
 ---
 
+## 2026-02-27 - Rank Classification UX Refinements (Achievements + Profile)
+
+- Date / time: 2026-02-27
+- Author: Codex (AI agent)
+- Goal: Improve rank messaging in achievements, expose current rank in profile modal, and register DB-backed rank source documentation
+- Objectives advanced: `OBJ-007`, `OBJ-004`
+- Progress toward objectives:
+  - Improved rank clarity on achievements hero by showing current rank, XP needed, and next rank title
+  - Exposed rank classification in profile modal to keep user identity/progression context consistent
+  - Updated docs to explicitly record that rank labels now come from DB `progression_levels` (instead of legacy local mapping)
+- Work completed:
+  - Extended `UserProgressService` level state with `next_level_title` and propagated it to achievements payload (`next_rank_label`)
+  - Updated achievements hero chip copy to include XP remaining and next rank title
+  - Added current rank label to profile modal summary section
+  - Updated STATUS + UI/UX feature docs with the new rank behavior and the DB-backed rank-source correction note
+- Files changed:
+  - `app/userprogress/UserProgressService.php`
+  - `app/api/internal/AchievementsApiPayloadBuilder.php`
+  - `public/achievements.php`
+  - `public/includes/profile_modal.php`
+  - `tests/Action/Api/AchievementsApiPayloadBuilderTest.php`
+  - `tests/Action/UserProgress/UserProgressServiceTest.php`
+  - `docs/STATUS.md`
+  - `docs/features/ui-ux-rework/progress.md`
+  - `docs/features/ui-ux-rework/spec.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - No new ADR required; this change refines existing achievements/progression UI behavior and preserves the established DB-backed rank source
+- Verification performed:
+  - `php -l app/userprogress/UserProgressService.php` -> OK
+  - `php -l app/api/internal/AchievementsApiPayloadBuilder.php` -> OK
+  - `php -l public/achievements.php` -> OK
+  - `php -l public/includes/profile_modal.php` -> OK
+  - `php -l tests/Action/Api/AchievementsApiPayloadBuilderTest.php` -> OK
+  - `php -l tests/Action/UserProgress/UserProgressServiceTest.php` -> OK
+  - `composer test:action` -> failed in environment (`vendor/bin/phpunit` missing)
+- Blockers / risks:
+  - Action suite could not be executed in this environment due missing Composer dev dependencies (`vendor/bin/phpunit`)
+  - Manual authenticated browser QA of achievements/profile still depends on local login/test data flow
+- Objective impact: `on-track`
+- Next objective step:
+  - Install dev dependencies (`composer install`) and rerun `composer test:action` + broader suite, then perform authenticated manual UI smoke check
+
+---
+
 ## 2026-02-25 - Testing Foundation Rollout (Backfill)
 
 - Date / time: 2026-02-25

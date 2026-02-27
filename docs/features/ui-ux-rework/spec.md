@@ -17,6 +17,8 @@ Modernize the internal dashboard pages with a stronger, more polished UX and vis
 - Recent achievements timeline UX (reward/celebration feel)
 - Internal payload expansion for achievements page (`recent_unlocked`)
 - Tests for new achievements payload shape/ordering limit
+- Rank classification copy update in achievements hero (current rank + XP to next rank + next rank title)
+- Rank classification visibility in profile modal
 
 ### Out
 
@@ -38,6 +40,8 @@ Modernize the internal dashboard pages with a stronger, more polished UX and vis
 - Achievements page payload now includes `data.recent_unlocked` (max 5 items, newest first)
 - Existing `highlights` payload remains for compatibility during rollout
 - Achievements gallery display order on the page is sorted from easier to harder (rarity/target/points)
+- Achievements hero now renders DB-backed rank progression context (`Classificação: <rank>; faltam X XP para <próximo rank>`)
+- Profile modal now shows current DB-backed rank classification alongside level
 
 ## Verification Strategy
 

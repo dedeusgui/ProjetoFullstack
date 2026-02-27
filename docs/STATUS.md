@@ -1,7 +1,7 @@
 # Current Status
 
-- Last updated: 2026-02-26
-- Current phase: Achievements/progression overhaul implemented (backend + XP/rewards) with follow-up manual UI QA and migration rollout validation pending
+- Last updated: 2026-02-27
+- Current phase: Achievements/progression overhaul implemented with rank copy/visibility refinements in achievements + profile, pending broader manual UI QA and migration rollout validation
 - Primary audience: Developers and AI agents
 
 ## Objective Summary
@@ -39,6 +39,9 @@
 
 ## Recently Completed
 
+- Updated achievements hero classification copy to show current rank + XP remaining to the next DB-backed rank title
+- Added current rank classification visibility in the profile modal summary card
+- Documented that rank labels now come from `progression_levels` in DB (replacing previous local rank mapping)
 - Rebuilt achievements persistence around `achievement_definitions`, `user_achievement_unlocks`, and `user_achievement_events` (rule-driven sync + unlock event logging)
 - Fixed perfect-day achievement logic to respect scheduled habits per date (weekly supported; zero-scheduled day breaks streak)
 - Added a simpler XP progression model (completion XP + achievement XP), seeded `progression_levels`, and persistent level rewards (`reward_definitions`, `user_reward_unlocks`, `user_reward_events`)
