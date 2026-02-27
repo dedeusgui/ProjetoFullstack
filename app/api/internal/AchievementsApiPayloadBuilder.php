@@ -24,6 +24,9 @@ final class AchievementsApiPayloadBuilder
         $pageData['hero']['completion_xp'] = (int) ($progressSummary['completion_xp'] ?? 0);
         $pageData['hero']['achievement_xp'] = (int) ($progressSummary['achievement_xp'] ?? 0);
         $pageData['hero']['next_level_reward'] = $progressSummary['next_level_reward'] ?? null;
+        // rank_label is driven by the progression_levels table (level_title from UserProgressService),
+        // which is the canonical source of rank classification in the system.
+        $pageData['hero']['rank_label'] = (string) ($progressSummary['level_title'] ?? ($pageData['hero']['rank_label'] ?? 'Iniciante'));
         $pageData['stats']['total_habits'] = $statsQueryService->getTotalHabits($userId);
         $pageData['stats']['total_badges_unlocked'] = (int) ($progressSummary['total_badges_unlocked'] ?? 0);
 

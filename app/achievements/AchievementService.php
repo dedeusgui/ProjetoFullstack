@@ -59,7 +59,8 @@ class AchievementService
                 'xp_progress_percent' => min(100, round(($xpIntoCurrent / max(1, $xpNeeded)) * 100, 1)),
                 'xp_to_next_level' => max(0, $xpToNext),
                 'xp_needed_for_level' => $xpNeeded,
-                'rank_label' => $this->resolveRankLabel($unlockedCount, $totalAvailable),
+                // rank_label is intentionally omitted here; it is sourced from
+                // UserProgressService (progression_levels.title) in the payload builder.
             ],
             'highlights' => [
                 'latest_unlocked' => $recentUnlocked[0] ?? null,
@@ -373,8 +374,8 @@ class AchievementService
             'total_completions' => ['criteria_type' => 'total_completions', 'criteria_value' => $threshold],
             'habits_created' => ['criteria_type' => 'habits_count', 'criteria_value' => $threshold],
             'perfect_days_streak' => $threshold === 30
-                ? ['criteria_type' => 'perfect_month', 'criteria_value' => 1]
-                : ['criteria_type' => 'perfect_week', 'criteria_value' => max(1, (int) ceil($threshold / 7))],
+            ? ['criteria_type' => 'perfect_month', 'criteria_value' => 1]
+            : ['criteria_type' => 'perfect_week', 'criteria_value' => max(1, (int) ceil($threshold / 7))],
             default => ['criteria_type' => $ruleKey, 'criteria_value' => $threshold],
         };
     }
