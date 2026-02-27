@@ -37,6 +37,7 @@ final class UserProgressServiceTest extends ActionTestCase
         self::assertSame(3, $summary['achievements_count'] ?? null);
         self::assertGreaterThanOrEqual(0, (int) ($summary['xp_progress_percent'] ?? -1));
         self::assertLessThanOrEqual(100, (int) ($summary['xp_progress_percent'] ?? 101));
+        self::assertArrayHasKey('next_level_title', $summary);
         self::assertArrayHasKey('profile_badges', $summary);
         self::assertArrayHasKey('total_badges_unlocked', $summary);
 

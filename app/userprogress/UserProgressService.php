@@ -113,6 +113,7 @@ class UserProgressService
         return [
             'level' => $levelState['level'],
             'level_title' => $levelState['title'],
+            'next_level_title' => $levelState['next_level_title'],
             'total_xp' => $totalXp,
             'completion_xp' => $completionXp,
             'achievement_xp' => $achievementXp,
@@ -135,7 +136,14 @@ class UserProgressService
             $currentThreshold = $this->xpRequiredForLevel($level);
             $nextThreshold = $this->xpRequiredForLevel($level + 1);
 
-            return $this->formatLevelState($level, 'Nível ' . $level, $totalXp, $currentThreshold, $nextThreshold);
+            return $this->formatLevelState(
+                $level,
+                'Nível ' . $level,
+                'Nível ' . ($level + 1),
+                $totalXp,
+                $currentThreshold,
+                $nextThreshold
+            );
         }
 
         $current = $levels[0];
@@ -154,15 +162,25 @@ class UserProgressService
 
         $level = max(1, (int) ($current['level'] ?? 1));
         $title = (string) ($current['title'] ?? ('Nível ' . $level));
+        $nextTitle = $next !== null
+            ? (string) ($next['title'] ?? ('Nível ' . ($level + 1)))
+            : null;
         $currentThreshold = (int) ($current['xp_required_total'] ?? 0);
         $nextThreshold = $next !== null
             ? (int) ($next['xp_required_total'] ?? ($currentThreshold + 250))
             : ($currentThreshold + 250);
 
-        return $this->formatLevelState($level, $title, $totalXp, $currentThreshold, $nextThreshold);
+        return $this->formatLevelState($level, $title, $nextTitle, $totalXp, $currentThreshold, $nextThreshold);
     }
 
-    private function formatLevelState(int $level, string $title, int $totalXp, int $currentThreshold, int $nextThreshold): array
+    private function formatLevelState(
+        int $level,
+        string $title,
+        ?string $nextLevelTitle,
+        int $totalXp,
+        int $currentThreshold,
+        int $nextThreshold
+    ): array
     {
         $xpIntoLevel = max(0, $totalXp - $currentThreshold);
         $xpNeededForLevel = max(1, $nextThreshold - $currentThreshold);
@@ -171,6 +189,7 @@ class UserProgressService
         return [
             'level' => $level,
             'title' => $title,
+            'next_level_title' => $nextLevelTitle,
             'xp_into_level' => $xpIntoLevel,
             'xp_needed_for_level' => $xpNeededForLevel,
             'xp_to_next_level' => $xpToNextLevel,
