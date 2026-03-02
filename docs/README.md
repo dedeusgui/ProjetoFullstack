@@ -39,6 +39,7 @@ If a topic already has a canonical doc, summarize and link to it instead of dupl
 - Request lifecycle and runtime behavior: `docs/architecture/request-lifecycle.md`
 - Testing strategy and rollout context: `docs/architecture/testing-strategy.md`
 - Runbooks: `docs/runbooks/`
+- Docs automation workflow: `docs/runbooks/docs-automation.md`
 
 ## Documentation Rules (Short Version)
 

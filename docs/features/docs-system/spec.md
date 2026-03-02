@@ -16,10 +16,11 @@ Create a single-source documentation workspace (`docs/`) that supports developme
 - Define canonical source locations to reduce duplication
 - Add a single engineering handbook for coding quality, review, and verification standards
 - Align templates/workflow docs with verification evidence requirements
+- Add a detached docs automation entrypoint (`composer docs`) that launches a dedicated docs agent
 
 ### Out
 
-- CI/docs automation tooling
+- CI-based docs freshness enforcement beyond the local detached launcher workflow
 - Runtime code refactors
 - New static analysis tooling adoption
 
@@ -54,6 +55,9 @@ Create a single-source documentation workspace (`docs/`) that supports developme
 - `docs/README.md` becomes the engineering entrypoint
 - New canonical path: `docs/architecture/system-architecture.md`
 - New canonical path: `docs/standards/engineering-handbook.md`
+- New command: `composer docs`
+- New prompt template path: `docs/automation/docs-agent-prompt.md`
+- New docs automation run artifacts path: `docs/automation/runs/*`
 
 ## Verification Strategy
 

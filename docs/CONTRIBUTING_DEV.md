@@ -20,7 +20,7 @@ For coding quality rules, review checklists, SOLID guidance, clean architecture 
 2. Read relevant feature docs, ADRs, and handbook sections
 3. Implement work using the architecture boundaries in `docs/architecture/system-architecture.md`
 4. Run verification required by the change type
-5. Update docs:
+5. Update docs directly or launch detached docs automation (`composer docs`) when using the separate-agent workflow
    - `docs/WORKLOG.md`
    - `docs/STATUS.md` (if current state/blockers/next step changed)
    - impacted feature `progress.md`

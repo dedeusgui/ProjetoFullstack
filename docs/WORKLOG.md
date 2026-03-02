@@ -1491,3 +1491,56 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Continue UI/backend rollout work using the clarified copy policy when reviewing user-facing labels.
+
+---
+
+## 2026-03-02 - Detached Docs Automation via `composer docs`
+
+- Date / time: 2026-03-02
+- Author: Codex (AI agent)
+- Goal: Implement a Composer-triggered docs automation flow that launches a separate Codex agent in a new terminal window and keeps feature-work terminal flow unblocked.
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Added a reusable, repo-local docs automation entrypoint (`composer docs`) with deterministic run artifacts.
+  - Reduced docs handoff friction by introducing a dedicated detached docs-agent workflow with versioned prompt instructions.
+- Work completed:
+  - Added `scripts/docs_agent_launcher.php` with preflight validation (`git`, commit resolution, prompt template, `codex.cmd`) and Windows detached launch behavior.
+  - Added `composer docs` script entry in `composer.json`.
+  - Added versioned prompt template at `docs/automation/docs-agent-prompt.md` and run artifact ignore policy at `docs/automation/runs/.gitignore`.
+  - Added runbook `docs/runbooks/docs-automation.md` documenting usage, arguments, artifact layout, and troubleshooting.
+  - Updated docs-system spec/progress/status/objective references and canonical command lists to include `composer docs`.
+  - Adjusted launcher process spawning to avoid hanging by using detached launch with `NUL` stdio descriptors.
+- Files changed:
+  - `scripts/docs_agent_launcher.php`
+  - `composer.json`
+  - `docs/automation/docs-agent-prompt.md`
+  - `docs/automation/runs/.gitignore`
+  - `docs/runbooks/docs-automation.md`
+  - `docs/README.md`
+  - `docs/CONTRIBUTING_DEV.md`
+  - `docs/FUTURE_OBJECTIVES.md`
+  - `docs/STATUS.md`
+  - `docs/features/docs-system/spec.md`
+  - `docs/features/docs-system/progress.md`
+  - `docs/standards/engineering-handbook.md`
+  - `AGENTS.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Implemented docs automation as a local detached launcher (Windows-first) rather than a blocking inline command.
+  - Scoped automated docs-agent edits by prompt contract to `docs/**` (root `README.md` remains out of scope for the automated agent).
+  - No ADR added (localized workflow/tooling addition inside existing docs-system objective scope).
+- Verification performed (exact commands + key results):
+  - `php -l scripts/docs_agent_launcher.php` -> `No syntax errors detected in scripts/docs_agent_launcher.php`
+  - `php scripts/docs_agent_launcher.php --commit=invalid-commit-ref` -> expected fail-fast validation message: `Commit not found: invalid-commit-ref`
+  - `php scripts/docs_agent_launcher.php --commit=HEAD --title=debug-run-2` -> detached launch success; run folder created under `docs/automation/runs/`
+  - `composer docs -- --commit=HEAD --title="docs-automation-smoke-3"` -> detached launch success; run folder created under `docs/automation/runs/`
+  - `composer validate --strict --no-check-publish` -> `./composer.json is valid`
+  - PowerShell listing of latest run folder -> confirmed `launch.log`, `meta.json`, `prompt.runtime.md`, `run-docs-agent.ps1` exist and `launch_exit_code=0`
+- Tests/checks intentionally not run (and why):
+  - `composer test:unit`, `composer test:action`, `composer test`, `composer qa` not run (change is docs/process tooling + standalone launcher, with no domain/action behavior changes).
+- Blockers / risks:
+  - Detached run success currently confirms launcher startup, but full docs-agent execution still depends on desktop/session availability plus Codex network/auth connectivity.
+  - Prompt-constrained write boundaries are policy-based; human review remains required for docs quality and correctness.
+- Objective impact: `on-track`
+- Next objective step:
+  - Use `composer docs` at the end of upcoming feature sessions and review resulting docs-agent output quality over multiple runs.

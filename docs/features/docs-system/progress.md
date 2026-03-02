@@ -22,16 +22,25 @@
 - Audited `docs/` for stale references/redundancy and corrected remaining inconsistencies in testing planning/status documents
 - Marked `docs/features/testing-rollout/coverage-expansion-plan.md` as a historical artifact after `OBJ-003` completion to reduce confusion with active plans
 - Performed a linguistic consistency pass on public-facing PT-BR docs wording and key active docs terminology (e.g., `handler/adapter`)
+- Added a detached docs automation launcher (`composer docs`) with:
+  - preflight checks for `git`, commit availability, prompt template, and `codex.cmd`
+  - generated runtime prompt + launch metadata under `docs/automation/runs/*`
+  - Windows new-terminal detached execution so docs updates run in a separate agent session
+- Added docs automation assets:
+  - `docs/automation/docs-agent-prompt.md`
+  - `docs/runbooks/docs-automation.md`
 
 ## In Progress
 
 - Team adoption and consistent usage across future sessions
 - Ongoing refinement of runbooks/templates based on real project needs
+- Validate detached docs-agent reliability across repeated local sessions and tune prompt constraints as needed
 
 ## Open Risks / Debt
 
 - Docs value depends on consistent maintenance after each session
 - Some architecture and handbook guidance may need tightening as new modules are added
+- Detached docs automation depends on local Codex connectivity/auth and prompt quality; incorrect docs updates still require human review
 
 ## Verification Evidence
 
@@ -47,6 +56,12 @@
   - Full `docs/` markdown relative-link resolution check (all `docs/**/*.md`)
   - Targeted stale-reference audit using `rg` across roadmap/objective/testing docs
   - Targeted terminology scan (`adaptor`/`adapter`, PT-BR wording) across public-facing and active docs
+  - `php -l scripts/docs_agent_launcher.php`
+  - `php scripts/docs_agent_launcher.php --commit=invalid-commit-ref`
+  - `php scripts/docs_agent_launcher.php --commit=HEAD --title=debug-run-2`
+  - `composer docs -- --commit=HEAD --title="docs-automation-smoke-3"`
+  - `composer validate --strict --no-check-publish`
+  - PowerShell run-artifact listing for latest docs automation run directory
 - Key results:
   - `composer qa` -> OK (`23 tests`, `47 assertions`)
   - `composer test` -> OK (`32 tests`, `90 assertions`)
@@ -58,6 +73,12 @@
   - Full docs markdown links -> OK (no broken relative links found)
   - Remaining stale references identified and corrected (`testing-strategy`, `FUTURE_OBJECTIVES`, testing rollout docs)
   - Public README wording and active docs terminology consistency improved (PT-BR wording + `handler/adapter` standardization)
+  - `php -l scripts/docs_agent_launcher.php` -> `No syntax errors detected in scripts/docs_agent_launcher.php`
+  - `php scripts/docs_agent_launcher.php --commit=invalid-commit-ref` -> expected fail-fast validation message: `Commit not found: invalid-commit-ref`
+  - `php scripts/docs_agent_launcher.php --commit=HEAD --title=debug-run-2` -> launched detached docs agent and generated run artifacts directory
+  - `composer docs -- --commit=HEAD --title="docs-automation-smoke-3"` -> launched detached docs agent and generated run artifacts directory
+  - `composer validate --strict --no-check-publish` -> `./composer.json is valid`
+  - Latest run directory contains launcher/runtime artifacts (`launch.log`, `meta.json`, `prompt.runtime.md`, `run-docs-agent.ps1`) with launch exit code `0`
 
 ## Next Actions
 

@@ -120,6 +120,7 @@ Use the minimum sufficient checks for the change type, but do not under-verify.
 
 ### Available repo commands
 
+- `composer docs`
 - `composer qa`
 - `composer test`
 - `composer test:unit`

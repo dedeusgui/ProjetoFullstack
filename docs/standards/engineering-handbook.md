@@ -209,6 +209,7 @@ Recommended:
 - `composer test:unit`
 - `composer test:action`
 - `composer test:db:reset`
+- `composer docs`
 
 Use the smallest sufficient set, but do not under-verify.
 
