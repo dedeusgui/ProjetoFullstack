@@ -35,7 +35,6 @@
     "composer:validate": "composer validate --strict --no-check-publish",
     "autoload:dump": "composer dump-autoload -o",
     "autoload:check": "composer dump-autoload -o --strict-psr --strict-ambiguous",
-    "docs": "php scripts/docs_agent_launcher.php",
     "test:db:reset": "php scripts/test_db_reset.php",
     "test": "php vendor/bin/phpunit --configuration phpunit.xml",
     "test:unit": "php vendor/bin/phpunit --configuration phpunit.xml --testsuite Unit",

@@ -1,7 +1,7 @@
 # Current Status
 
 - Last updated: 2026-03-02
-- Current phase: Achievements/progression overhaul implemented with rank copy/visibility refinements plus detached docs automation (`composer docs`), pending broader manual UI QA and migration rollout validation
+- Current phase: Achievements/progression overhaul implemented with rank copy/visibility refinements, pending broader manual UI QA and migration rollout validation
 - Primary audience: Developers and AI agents
 
 ## Objective Summary
@@ -32,7 +32,6 @@
 - Manually validate the `achievements` page rework in-browser (desktop/mobile UX QA) and tune any spacing/contrast issues (`OBJ-007`)
 - Plan and sequence the next UI/UX rework page(s) (`dashboard`, `habits`, `history`) using the new `docs/features/ui-ux-rework/*` workspace (`OBJ-007`)
 - Maintain docs freshness and verification evidence discipline across sessions (`OBJ-004`)
-- Adopt and validate detached docs-agent handoff flow (`composer docs`) across upcoming feature sessions
 - Keep GitHub-facing `README.md` (PT-BR) aligned with technical docs as project capabilities evolve
 - Continue standardizing action patterns where it helps testability (`OBJ-005`)
 - Evaluate CI workflow introduction now that local test suites are broader and stable
@@ -40,8 +39,7 @@
 
 ## Recently Completed
 
-- Added `composer docs` detached automation launcher (`scripts/docs_agent_launcher.php`) to run documentation updates in a separate Codex terminal session
-- Added versioned docs-agent prompt template (`docs/automation/docs-agent-prompt.md`) and docs automation runbook (`docs/runbooks/docs-automation.md`)
+- Removed detached docs automation (`composer docs`, `scripts/docs_agent_launcher.php`, and related docs assets) after end-to-end runtime validation failures in the local environment
 - Updated achievements hero classification copy to show current rank + XP remaining to the next DB-backed rank title
 - Added current rank classification visibility in the profile modal summary card
 - Documented that rank labels now come from `progression_levels` in DB (replacing previous local rank mapping)

@@ -1544,3 +1544,55 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 - Objective impact: `on-track`
 - Next objective step:
   - Use `composer docs` at the end of upcoming feature sessions and review resulting docs-agent output quality over multiple runs.
+
+---
+
+## 2026-03-02 - Remove Detached Docs Automation (`composer docs`)
+
+- Date / time: 2026-03-02
+- Author: Codex (AI agent)
+- Goal: Patch and test detached docs automation with writable `CODEX_HOME`; remove the feature after repeated end-to-end execution failures.
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Validated that launch-only success was insufficient for reliable docs-agent completion in the current environment.
+  - Reverted docs-automation feature additions to keep project workflow stable and avoid non-functional command surfaces.
+- Work completed:
+  - Patched launcher to set a writable `CODEX_HOME` and retested docs-agent execution.
+  - Confirmed docs-agent still failed to complete end-to-end (empty `agent.output.txt`, repeated disconnect to `https://api.openai.com/v1/responses`).
+  - Removed docs automation implementation and docs references:
+    - removed `composer docs` from `composer.json`
+    - removed `scripts/docs_agent_launcher.php`
+    - removed docs automation assets/runbook references
+  - Updated docs status/spec/progress/workflow command lists to match removal.
+- Files changed:
+  - `composer.json`
+  - `AGENTS.md`
+  - `docs/CONTRIBUTING_DEV.md`
+  - `docs/FUTURE_OBJECTIVES.md`
+  - `docs/README.md`
+  - `docs/STATUS.md`
+  - `docs/WORKLOG.md`
+  - `docs/features/docs-system/spec.md`
+  - `docs/features/docs-system/progress.md`
+  - `docs/standards/engineering-handbook.md`
+  - removed `scripts/docs_agent_launcher.php`
+  - removed `docs/automation/docs-agent-prompt.md`
+  - removed `docs/automation/runs/.gitignore`
+  - removed `docs/runbooks/docs-automation.md`
+- Decisions made (link ADRs if any):
+  - Decommissioned local detached docs automation after reliability failure in practical execution paths.
+  - No ADR added (rollback of a localized tooling workflow; no new cross-cutting architecture decision introduced).
+- Verification performed (exact commands + key results):
+  - `php -l scripts/docs_agent_launcher.php` -> `No syntax errors detected in scripts/docs_agent_launcher.php` (before removal)
+  - `composer docs -- --commit=HEAD --title="codex-home-patch-test"` -> detached run folder created
+  - `powershell.exe -ExecutionPolicy Bypass -File docs/automation/runs/20260302-151104-7bc5b274-codex-home-patch-test/run-docs-agent.ps1` -> codex process failed before completion; no usable docs output
+  - Direct `codex.cmd exec` invocation with runtime prompt and writable `CODEX_HOME` -> failed with repeated reconnect/disconnect to `https://api.openai.com/v1/responses`, empty `agent.output.txt`
+  - `composer validate --strict --no-check-publish` -> `./composer.json is valid` (after removal)
+  - `rg -n "composer docs|docs-agent|docs automation|docs_agent_launcher|docs/automation|docs-automation" AGENTS.md composer.json docs scripts` -> no remaining active references outside historical worklog entries
+- Tests/checks intentionally not run (and why):
+  - `composer test:unit`, `composer test:action`, `composer test`, `composer qa` not run (no runtime/domain logic changes; workflow/docs/tooling removal only).
+- Blockers / risks:
+  - Detached docs automation remains unavailable until a reliable execution path is re-designed and validated.
+- Objective impact: `on-track`
+- Next objective step:
+  - Continue manual docs updates per `AGENTS.md` and `docs/CONTRIBUTING_DEV.md` workflow until automation is revisited with a more robust approach.
