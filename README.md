@@ -7,15 +7,7 @@
 ![Arquitetura](https://img.shields.io/badge/Arquitetura-Camadas%20%2B%20Handlers-blue)
 ![Docs](https://img.shields.io/badge/Docs-Engineering%20Hub-informational)
 
-> Aplicação web de acompanhamento de hábitos com gamificação, progresso por XP, conquistas, streaks e recomendações personalizadas.
-
-Doitly é um projeto fullstack criado para transformar metas em rotina. O sistema combina gestão de hábitos, acompanhamento de desempenho e elementos de progressão para tornar a consistência mais visível e motivadora.
-
-## Visão Geral
-
-O produto foi pensado para ajudar o usuário a criar hábitos, registrar conclusões diárias, acompanhar evolução ao longo do tempo e receber feedback sobre seu progresso em uma interface simples e direta.
-
-Hoje o projeto também funciona como peça de portfólio: além do resultado visual e funcional, ele mostra como uma aplicação PHP pode evoluir com arquitetura em camadas, refatoração incremental, testes automatizados e documentação técnica organizada.
+Aplicação web de acompanhamento de hábitos com XP, conquistas, streaks e recomendações personalizadas — construída em PHP com arquitetura em camadas, testes automatizados e documentação técnica organizada.
 
 ## Contexto do Projeto
 
@@ -32,17 +24,16 @@ Essa continuidade mudou o papel do projeto: ele deixou de ser só um exercício 
 - Recomendações personalizadas com base em padrões de comportamento
 - Perfil do usuário com preferências, fuso horário e exportação de dados em CSV
 
-## Por Que Este Projeto É Relevante No Meu Portfólio
+## O que este projeto demonstra
 
-- Mostra a evolução de um projeto acadêmico para um produto pessoal mantido no tempo livre
-- Demonstra refatoração incremental em uma base PHP sem depender de reescrita total
-- Aplica separação de responsabilidades entre interface, ações HTTP, domínio e persistência
-- Usa testes automatizados para validar fluxos relevantes e reduzir regressões
-- Mantém decisões, progresso e próximos passos documentados em `docs/`
+- Evolução real de uma base de código ao longo do tempo, sem reescrita — refatoração incremental sobre PHP legado
+- Separação de responsabilidades entre interface, ações HTTP, domínio e persistência
+- Testes automatizados cobrindo fluxos relevantes, com suítes separadas para lógica pura e banco
+- Documentação técnica organizada: decisões, progresso e próximos passos versionados em `docs/`
 
 ## Arquitetura e Qualidade Técnica
 
-O projeto segue uma organização em camadas para manter responsabilidades mais claras:
+O projeto segue uma organização em camadas:
 
 ```text
 public/          -> páginas e composição de interface
@@ -51,7 +42,7 @@ app/             -> regras de negócio, serviços e payload builders
 app/repository/  -> consultas e operações de persistência
 ```
 
-Na prática, a base vem sendo evoluída para concentrar comportamento em classes testáveis e deixar `actions/*.php` mais finas. Isso facilita manutenção, leitura e cobertura automatizada.
+Na prática, a base vem sendo evoluída para concentrar comportamento em classes testáveis e deixar `actions/*.php` mais enxutas.
 
 ### Destaques técnicos
 
