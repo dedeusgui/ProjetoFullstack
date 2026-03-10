@@ -18,6 +18,7 @@
 - Added root `AGENTS.md` to guide AI agents on task routing, boundaries, verification, and required docs updates
 - Performed documentation consistency refresh across `README.md`, `docs/STATUS.md`, and `docs/ROADMAP.md`
 - Rewrote root `README.md` in PT-BR for GitHub onboarding with technical portfolio positioning and badges
+- Refined root `README.md` to strengthen personal portfolio storytelling, clarify the academic-to-personal project evolution, and keep technical depth focused on GitHub-facing readers
 - Realigned `docs/ROADMAP.md` with completed objectives (`OBJ-001` to `OBJ-003`) and current focus (`OBJ-004`, `OBJ-005`, CI follow-through)
 - Audited `docs/` for stale references/redundancy and corrected remaining inconsistencies in testing planning/status documents
 - Marked `docs/features/testing-rollout/coverage-expansion-plan.md` as a historical artifact after `OBJ-003` completion to reduce confusion with active plans

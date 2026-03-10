@@ -1547,6 +1547,42 @@ Append-only session log. Record what happened, why it mattered, what was verifie
 
 ---
 
+## 2026-03-09 - Reposition Root README for Portfolio Storytelling
+
+- Date / time: 2026-03-09 20:55:34 -03:00
+- Author: Codex (AI agent)
+- Goal: Improve the GitHub-facing `README.md` so it presents the project more clearly as both a product and a personal portfolio piece.
+- Objectives advanced: `OBJ-004`
+- Progress toward objectives:
+  - Strengthened the public project narrative without expanding engineering duplication outside `docs/`.
+  - Kept the root `README.md` aligned with the docs-system rule of staying GitHub-facing and PT-BR-first.
+- Work completed:
+  - Rewrote the root `README.md` structure to prioritize product overview, project context, portfolio value, and a lighter technical summary.
+  - Added explicit context that the project began academically in coauthorship and later evolved into a personal side project developed in free time.
+  - Reduced README engineering density by replacing long architecture/testing sections with shorter credibility-focused summaries and links into `docs/`.
+  - Updated `docs/features/docs-system/progress.md` to record the README positioning refinement.
+- Files changed:
+  - `README.md`
+  - `docs/features/docs-system/progress.md`
+  - `docs/WORKLOG.md`
+- Decisions made (link ADRs if any):
+  - Kept the README in PT-BR and optimized it for recruiters and developers rather than end-user marketing.
+  - Kept coauthorship acknowledgment simple and avoided adding personal profile/contact links.
+  - No ADR added (documentation presentation refinement within the existing docs-system scope).
+- Verification performed (exact commands + key results):
+  - `Get-Content README.md -Encoding utf8` -> manual render/content review completed; new section order and PT-BR wording looked correct.
+  - PowerShell `Test-Path` checks for `docs/README.md`, `docs/STATUS.md`, `docs/architecture/system-architecture.md`, `docs/standards/engineering-handbook.md`, `docs/WORKLOG.md`, `config/database.php`, `sql/doitly_unified.sql` -> all returned `True`.
+  - PowerShell `composer.json` script presence checks for `test:db:reset`, `test:unit`, `test:action`, `test`, `qa` -> all returned `True`.
+- Tests/checks intentionally not run (and why):
+  - `composer test:unit`, `composer test:action`, `composer test`, and `composer qa` not run because the change is documentation-only and did not alter runtime code or documented command behavior.
+- Blockers / risks:
+  - README positioning is now more portfolio-oriented, so future changes should avoid drifting back into deep engineering-doc duplication.
+- Objective impact: `on-track`
+- Next objective step:
+  - Keep the root `README.md` synchronized with future product/UI milestones while preserving `docs/` as the canonical engineering workspace.
+
+---
+
 ## 2026-03-02 - Remove Detached Docs Automation (`composer docs`)
 
 - Date / time: 2026-03-02

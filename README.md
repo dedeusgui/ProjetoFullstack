@@ -7,133 +7,77 @@
 ![Arquitetura](https://img.shields.io/badge/Arquitetura-Camadas%20%2B%20Handlers-blue)
 ![Docs](https://img.shields.io/badge/Docs-Engineering%20Hub-informational)
 
-> Aplicação web para acompanhamento de hábitos com XP, conquistas, streaks e recomendações personalizadas — construída sobre uma arquitetura PHP em camadas com foco em testabilidade, qualidade de código e manutenibilidade a longo prazo.
+> Aplicação web de acompanhamento de hábitos com gamificação, progresso por XP, conquistas, streaks e recomendações personalizadas.
 
----
+Doitly é um projeto fullstack criado para transformar metas em rotina. O sistema combina gestão de hábitos, acompanhamento de desempenho e elementos de progressão para tornar a consistência mais visível e motivadora.
 
-## Sobre o Projeto
+## Visão Geral
 
-O Doitly nasceu como um projeto fullstack com propósito duplo: entregar uma experiência funcional de gamificação de hábitos para o usuário final e, ao mesmo tempo, servir como laboratório de boas práticas de engenharia de software.
+O produto foi pensado para ajudar o usuário a criar hábitos, registrar conclusões diárias, acompanhar evolução ao longo do tempo e receber feedback sobre seu progresso em uma interface simples e direta.
 
-A evolução da base de código foi deliberada: cada decisão de arquitetura foi documentada, cada refatoração foi justificada, e cada funcionalidade foi validada por testes automatizados — tudo registrado em um sistema de documentação de engenharia centralizado.
+Hoje o projeto também funciona como peça de portfólio: além do resultado visual e funcional, ele mostra como uma aplicação PHP pode evoluir com arquitetura em camadas, refatoração incremental, testes automatizados e documentação técnica organizada.
 
----
+## Contexto do Projeto
 
-## Funcionalidades
+O Doitly começou como um projeto acadêmico desenvolvido em coautoria. Com o tempo, a ideia deixou de ser apenas uma entrega do técnico e passou a se tornar um projeto pessoal, que sigo evoluindo no meu tempo livre.
 
-- **Gestão de hábitos** — cadastro, edição, arquivamento e exclusão com agendamento flexível
-- **Registro de conclusões** — marcação diária com validação de agendamento e datas
-- **Dashboard e histórico** — métricas de progresso, taxa de conclusão e visualização por período
-- **Gamificação** — sistema de XP, níveis, conquistas e streaks com sincronização automática
-- **Recomendações personalizadas** — análise comportamental com score e tendências
-- **Exportação de dados** — CSV com histórico de hábitos, conquistas e resumo de progresso
-- **Perfil e preferências** — edição de dados, senha, aparência e fuso horário
+Essa continuidade mudou o papel do projeto: ele deixou de ser só um exercício de implementação e passou a ser um espaço real de evolução técnica, decisões de arquitetura e amadurecimento de produto.
 
----
+## Principais Funcionalidades
 
-## Arquitetura e Decisões Técnicas
+- Gestão de hábitos com criação, edição, arquivamento e exclusão
+- Registro diário de conclusões com validação por agendamento e data
+- Dashboard e histórico com métricas de progresso e taxa de conclusão
+- Gamificação com XP, níveis, conquistas, recompensas e streaks
+- Recomendações personalizadas com base em padrões de comportamento
+- Perfil do usuário com preferências, fuso horário e exportação de dados em CSV
 
-### Arquitetura em Camadas
+## Por Que Este Projeto É Relevante No Meu Portfólio
 
-O projeto segue uma separação clara de responsabilidades entre quatro camadas principais:
+- Mostra a evolução de um projeto acadêmico para um produto pessoal mantido no tempo livre
+- Demonstra refatoração incremental em uma base PHP sem depender de reescrita total
+- Aplica separação de responsabilidades entre interface, ações HTTP, domínio e persistência
+- Usa testes automatizados para validar fluxos relevantes e reduzir regressões
+- Mantém decisões, progresso e próximos passos documentados em `docs/`
 
-```
-public/          →  Páginas e composição de interface (sem SQL, sem lógica de negócio)
-actions/         →  Adaptadores HTTP: validação, autenticação, CSRF e delegação
-app/             →  Serviços de domínio, payload builders e lógica de aplicação
-app/repository/  →  Acesso a dados via MySQLi com repositórios por agregado
-```
+## Arquitetura e Qualidade Técnica
 
-### Padrão Handler/Adaptor para Testabilidade
+O projeto segue uma organização em camadas para manter responsabilidades mais claras:
 
-As `actions/*.php` foram progressivamente refatoradas em adaptadores HTTP finos, delegando a lógica de negócio para classes handler em `app/Actions/*`. Isso permite testar o comportamento das ações via PHPUnit sem dependência de `header()` ou `exit`.
-
-```php
-// actions/habit_create_action.php — adaptador fino
-$handler = new HabitCreateActionHandler($conn);
-$response = $handler->handle($_POST, getAuthenticatedUserId());
-actionApplyResponse($response);
+```text
+public/          -> páginas e composição de interface
+actions/         -> adaptadores HTTP, validações e respostas
+app/             -> regras de negócio, serviços e payload builders
+app/repository/  -> consultas e operações de persistência
 ```
 
-### Módulos de Domínio (`app/`)
+Na prática, a base vem sendo evoluída para concentrar comportamento em classes testáveis e deixar `actions/*.php` mais finas. Isso facilita manutenção, leitura e cobertura automatizada.
 
-| Módulo | Responsabilidade |
-|---|---|
-| `App\Habits` | CRUD, conclusões, acesso e agendamento de hábitos |
-| `App\Stats` | Consultas de estatísticas e histórico |
-| `App\Achievements` | Sincronização e leitura de conquistas |
-| `App\UserProgress` | Cálculo e persistência de XP e níveis |
-| `App\Recommendation` | Análise comportamental, scoring e tendências |
-| `App\Repository` | Repositórios por agregado (User, Habit, Category, Stats) |
-| `App\Support` | Utilitários de data, fuso horário, contexto de requisição |
-| `App\Actions` | Handlers de ações e objeto de resposta (`ActionResponse`) |
-| `App\Api\Internal` | Payload builders para endpoints e páginas |
+### Destaques técnicos
 
----
+- Arquitetura em camadas com fronteiras documentadas
+- Padrão handler/adaptor para reduzir acoplamento com `header()` e `exit`
+- PHPUnit 10 com suítes separadas para lógica pura e fluxos com banco
+- Documentação de engenharia com status, worklog, feature docs e ADRs
 
-## Estratégia de Testes
-
-O projeto utiliza **PHPUnit 10** com duas suítes separadas:
-
-- **`Unit`** — testes de lógica pura, sem dependência de banco: scheduling, sanitização, scoring, formatação
-- **`Action`** — testes de handlers e serviços com banco MySQL dedicado (`doitly_test`)
-
-### Cobertura Implementada (Fases 2A–2F)
-
-| Fase | Escopo |
-|---|---|
-| 2A | Endpoints de API JSON e payload builders |
-| 2B | Serviço de autenticação e handlers de login/registro/logout |
-| 2C | Serviços de comando, conclusão e acesso a hábitos |
-| 2D | Perfil, configurações e exportação CSV |
-| 2E | Repositórios, objetos de suporte, recomendação e progresso |
-| 2F | Helpers globais de `config/*` e wrappers de integração |
-
-**Resultado local validado:** `195 testes`, `737 asserções`
-
-### Executando os Testes
+### Comandos de validação
 
 ```bash
-# Pré-requisito: MySQL rodando com banco doitly_test
-composer test:db:reset   # Recria o schema de testes
-composer test:unit       # Suíte de lógica pura
-composer test:action     # Suíte com banco de dados
-composer test            # Suíte completa
-composer qa              # Validação + suíte unitária
+composer test:db:reset
+composer test:unit
+composer test:action
+composer test
+composer qa
 ```
-
-> **Importante:** execute as suítes com banco de forma sequencial — elas compartilham e resetam o schema `doitly_test`.
-
----
 
 ## Stack
 
-| Tecnologia | Uso |
-|---|---|
-| PHP 8.2+ | Backend e lógica de aplicação |
-| MySQL / MariaDB | Persistência com stored procedures e views |
-| Bootstrap 5 | Interface responsiva |
-| JavaScript (vanilla) | Interações no cliente |
-| PHPUnit 10 | Testes automatizados (dev) |
-| Composer | Autoload PSR-4 e gerenciamento de dependências |
-
----
-
-## Documentação de Engenharia
-
-A documentação técnica canônica está em `docs/`, estruturada para suportar handoffs, decisões arquiteturais e rastreamento de objetivos estratégicos.
-
-| Documento | Conteúdo |
-|---|---|
-| [`docs/README.md`](docs/README.md) | Hub de navegação |
-| [`docs/STATUS.md`](docs/STATUS.md) | Estado atual, bloqueios e próximo passo |
-| [`docs/FUTURE_OBJECTIVES.md`](docs/FUTURE_OBJECTIVES.md) | Objetivos estratégicos com IDs rastreáveis |
-| [`docs/WORKLOG.md`](docs/WORKLOG.md) | Histórico de sessões com evidências de verificação |
-| [`docs/ADR/INDEX.md`](docs/ADR/INDEX.md) | Registro de decisões arquiteturais (ADRs) |
-| [`docs/standards/engineering-handbook.md`](docs/standards/engineering-handbook.md) | Padrões de qualidade, SOLID, revisão e gates de verificação |
-| [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) | Fronteiras de camadas e direção de refatoração |
-
----
+- PHP 8.2+
+- MySQL / MariaDB
+- Bootstrap 5
+- JavaScript (vanilla)
+- PHPUnit 10
+- Composer
 
 ## Como Executar Localmente
 
@@ -142,44 +86,41 @@ A documentação técnica canônica está em `docs/`, estruturada para suportar 
 - PHP 8.2+
 - MySQL ou MariaDB
 - Composer
-- Apache / XAMPP (recomendado para desenvolvimento local)
+- Apache / XAMPP
 
 ### Instalação
 
 ```bash
-# 1. Instalar dependências
 composer install
-
-# 2. Importar o schema do banco de dados
 mysql -u root -p < sql/doitly_unified.sql
-
-# 3. Configurar variáveis de ambiente (ou usar os valores padrão em config/database.php)
-# DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME
 ```
 
-### Executando (XAMPP)
+Configure as variáveis de ambiente do banco, se necessário, ou ajuste os valores padrão em `config/database.php`.
 
-Coloque o projeto dentro de `htdocs/` e acesse:
+### Executando no XAMPP
 
-```
+Com o projeto dentro de `htdocs/`, acesse:
+
+```text
 http://localhost/ProjetoFullstack/public/
 ```
 
----
+## Documentação Complementar
 
-## Destaques para Portfólio
+Os detalhes de engenharia ficam centralizados em `docs/`. Os pontos de entrada mais úteis são:
 
-Este projeto demonstra na prática:
+- [`docs/README.md`](docs/README.md) — hub da documentação técnica
+- [`docs/STATUS.md`](docs/STATUS.md) — estado atual, foco e próximos passos
+- [`docs/architecture/system-architecture.md`](docs/architecture/system-architecture.md) — visão de arquitetura
+- [`docs/standards/engineering-handbook.md`](docs/standards/engineering-handbook.md) — padrões de engenharia e verificação
+- [`docs/WORKLOG.md`](docs/WORKLOG.md) — histórico de sessões e validações
 
-- **Arquitetura evolutiva** — separação de camadas aplicada de forma incremental, com fronteiras documentadas e dívida técnica rastreada explicitamente
-- **Testabilidade como requisito** — padrão handler/adaptor adotado para desacoplar comportamento de efeitos colaterais HTTP, possibilitando suítes de testes realistas com MySQL
-- **Documentação como processo de engenharia** — sistema de docs com worklog vinculado a objetivos, ADRs indexados, runbooks reproduzíveis e templates padronizados
-- **Qualidade sem reescrita de framework** — refatoração incremental aplicada em codebase PHP procedural legado, sem interrupção de funcionalidades existentes
-- **Decisões explícitas e rastreáveis** — cada decisão arquitetural relevante possui um ADR com contexto, consequências e alternativas consideradas
+## Autoria
 
----
+Projeto iniciado em coautoria por:
 
-## Autores
+- Guilherme de Deus
+- Ismael Gomes (Rex)
 
-- **Ismael Gomes (Rex)**
-- **Guilherme de Deus**
+Atualmente, o Doitly segue em evolução contínua como projeto pessoal.
+
